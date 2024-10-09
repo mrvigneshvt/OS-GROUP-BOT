@@ -1,0 +1,40 @@
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const bot_1 = require("./bot");
+const apiId = 23383641;
+const apiHash = 'bc082e6638c170d35479798f8c8eaa6f';
+const botToken = '7503916985:AAG9h6PjaiVVDj2Gl7sZI-OhfG_Gpa0poXA';
+//'6843349739:AAF6Ymf-7_WsyNQ7uAgOSeN9E50Dk6lfHnE'
+const mongoUri = 'mongodb+srv://admin:admin@cluster0.8xj6euc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+let bot = new bot_1.Bot({
+    apiId,
+    apiHash,
+    mongoUri,
+    botToken
+});
+(() => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // await bot.getCurrentISTTime()
+        yield bot.start();
+        //  await bot.generateGroupPool()
+        // await bot.listener();
+        //  await bot.commands();
+        yield bot.indexEngine();
+        //await bot.fileSaver();
+        //await bot.groupManager();
+    }
+    catch (error) {
+        console.log('error in server.ts', error);
+        throw new Error('Initialization Failed..!!');
+    }
+}))();
+exports.default = bot;

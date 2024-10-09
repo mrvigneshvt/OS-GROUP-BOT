@@ -1,0 +1,1824 @@
+import { Client, ID, StorageLocalStorage, errors } from '@mtkruto/node'
+import { DataBase } from './data'
+import * as fs from 'fs'
+import { format } from 'date-fns';
+
+import { toZonedTime } from 'date-fns-tz';
+
+import { localStore } from './localStore'
+import axios from 'axios'
+import { EmailHashExpired } from '@mtkruto/node/script/3_errors'
+import { groupModel, userModel } from './model'
+import { totalmem } from 'os';
+
+
+interface botData {
+    apiId: number,
+    apiHash: string,
+    botToken: string,
+    mongoUri: string,
+}
+
+interface indexInterface {
+    datas: {
+        done: number,
+        skip: number,
+        round: number,
+    },
+    ctx: any,
+    channelId: ID,
+    msgId: number,
+    chatId: string,
+    msgToModify: number,
+    channelName: string,
+}
+
+
+export class Bot extends localStore {
+
+    private forceSub
+    private premiumBenefitsVideo: string | undefined;
+    private premiumBenefits
+    private admin: string[]
+    private fileLog: string[]
+    private apiId
+    private apiHash
+    private botToken
+    private mongoUri
+    public client: Client
+    private mongo
+    private botDetails: any
+    private msgDeleteTime
+    private planDescription
+    private planImage
+    private plansPrice
+    private planStart
+    private paymentMethod
+    private upiId
+    private paymentScreenshotId
+    private upiMarkup
+    private qrImage: string | undefined
+    private upiImage
+    private qrMarkup
+    private qrCaption
+    private groupJoinerMarkup
+    private forceSubUrl: string | undefined
+    private forceSubChatId: undefined | string
+    private indexLog;
+    private botUrl;
+    private tutorialUrl: string | undefined
+    private apiUrl;
+    private apiToken;
+    public botUname: string | undefined
+    private contactAdmin
+    private poweringGroupLog;
+    private isAdsOn;
+    private publicChannelUserName;
+    private botUserName;
+    public publicChannelUname;
+    private newMemberReplyMarkup;
+    private contactAdminReplyMarkup;
+    private forceSubReplyMarkup;
+    private myPlanReplymarkup;
+    private bannedReplyMarkup;
+    private introReplyMarkup;
+
+
+    constructor(data: botData) {
+        super()
+        this.publicChannelUserName = '@SingleMachiOffll';
+        this.publicChannelUname = 'SingleMachiOffll';
+        this.contactAdmin = 'https://t.me/MachiXsupportBot';
+        this.upiId = 'sooon'
+        this.paymentScreenshotId = 'https://t.me/MachiXsupportBot';
+
+
+        this.admin = ['1767901454', '7822087230'];
+
+        this.indexLog = '-1002473253639'// - 1002279938392';
+        this.poweringGroupLog = '--1002269051306'; //channel id of groupChat !
+        this.fileLog = ['-1002094214421']
+
+
+        this.isAdsOn = true;
+
+
+        this.botUserName = '@';
+        this.botUrl = 'https://t.me/'
+
+        this.botUname = undefined
+        this.tutorialUrl = undefined
+        this.forceSubUrl = undefined
+        this.forceSubChatId = undefined;
+        this.premiumBenefitsVideo = undefined
+        this.qrImage = undefined
+        this.upiImage = 'https://ibb.co/xm65Ghx'
+        this.planImage = 'https://ibb.co/3RynpHB'
+
+
+        this.apiUrl = 'publicearn.com';
+        this.apiToken = 'a80541b1e03491a66635e6b2a1942b5a2af15906';
+
+
+        this.premiumBenefits = `<b>ᴘʀᴇᴍɪᴜᴍ ғᴇᴀᴛᴜʀᴇs ✅\n\n📌 ɴᴏ ɴᴇᴇᴅ ᴛᴏ ᴠᴇʀɪғʏ\n📌 ᴅɪʀᴇᴄᴛ ғɪʟᴇs\n📌 ғᴀsᴛ ᴅᴏᴡɴʟᴏᴀᴅ ᴏᴘᴛɪᴏɴ\n📌 ᴡᴀᴛᴄʜ ᴏɴʟɪɴᴇ ᴏᴘᴛɪᴏɴ\n📌 ᴜɴʟɪᴍɪᴛᴇᴅ ᴍᴏᴠɪᴇs & sᴇʀɪᴇs\n\nThese Benefit You Will Get If You Purchase The Premium Membership 😉</b>${this.publicChannelUserName}\n\n`
+
+        this.apiId = data.apiId;
+        this.apiHash = data.apiHash;
+        this.botToken = data.botToken;
+        this.mongoUri = data.mongoUri
+
+
+        this.client = new Client({
+            storage: new StorageLocalStorage('Session'),
+            apiId: this.apiId,
+            apiHash: this.apiHash,
+            defaultHandlers: false,
+        })
+
+        this.mongo = new DataBase(this.mongoUri);
+        this.botDetails = undefined;
+
+
+        this.msgDeleteTime = 60000 //1 minute
+
+        this.planDescription = `Hello!!😎\nThis Is Premium Purchase Section\nOwned by: ${this.publicChannelUserName} 💨 \n\nCh}eck The Premium Plans By Click the Button Below 👇`
+
+        this.introReplyMarkup = [
+            [{ text: 'Add to Group', url: `http://t.me/${this.botUname}?startgroup=true` }],
+            [{ text: 'Update', url: `https://t.me/${this.publicChannelUname}` }, { text: 'Premium', callbackData: 'planIntro' }]
+        ]
+        this.bannedReplyMarkup = [
+            [{ text: 'Admin..', url: this.paymentScreenshotId }]
+        ]
+        this.myPlanReplymarkup = [
+            [{ text: "Get Free Trial", callbackData: 'freePlan' }],
+            [{ text: "Premium Plans", callbackData: 'showPlans' }],
+            [{ text: "Close", callbackData: "delte" }]
+
+        ]
+        this.forceSubReplyMarkup = [
+            [{ text: "JOIN HERE !", url: this.forceSubUrl }]
+        ]
+        this.contactAdminReplyMarkup = [
+            [{ text: 'MSG Admin !', url: this.contactAdmin }]
+        ]
+        this.newMemberReplyMarkup = [
+            [{ text: 'Support Group', url: `https://t.me/${this.publicChannelUname}` }, { text: 'Updates Channel', url: 'https://t.me/singlemachioffll' }],
+            [{ text: 'Bot Owner', url: `${this.paymentScreenshotId}` }]
+        ]
+        this.planStart = [
+            [{ text: ' > Premium Plans', callbackData: 'showPlans' }],
+            [{ text: ' > Check Benefits', callbackData: 'showBenefits' }],
+            [{ text: 'Close X', callbackData: `delete` }]
+        ]
+        this.paymentMethod = [
+            [{ text: ' Pay on UPI', callbackData: 'upi' }],
+            [{ text: ' Scan QR Code', callbackData: 'qr' }],
+            [{ text: 'Close X', callbackData: `delete` }]
+        ]
+        this.plansPrice = [
+            [{ text: `1 Week: 19 Rs`, callbackData: 'plans/1 week/19' }, { text: `1 Month: 59 Rs`, callbackData: 'plans/1 month/59' }],
+            [{ text: `6 Month: 399 Rs`, callbackData: 'plans/6 month/399' }, { text: `1 Year: 600 Rs`, callbackData: 'plans/1 year/600' }],
+            [{ text: 'Get Help', url: this.paymentScreenshotId }],
+            [{ text: 'Close X', callbackData: `delete` }]
+        ]
+        this.upiMarkup = [
+            [{ text: 'Send Screenshot <=', url: this.paymentScreenshotId }],
+            [{ text: '=> Get QR Code ', callbackData: 'qr' }, { text: 'Change Premium Plans', callbackData: 'showPlans' }],
+            [{ text: 'Close X', callbackData: `delete` }]
+        ]
+        this.qrCaption = `Scan The Qr Code 👆And Pay The Plan Fees\n\nIMPORTANT - After Payment Send Screenshot Here👇`
+        this.qrMarkup = [
+            [{ text: 'Send Screenshot <=', url: this.paymentScreenshotId }],
+            [{ text: '=> Get UPI Code ', callbackData: 'upi' }, { text: 'Change Premium Plans', callbackData: 'showPlans' }],
+            [{ text: 'Close X', callbackData: `delete` }]
+        ]
+        this.groupJoinerMarkup = [
+            [{ text: 'Support Group', url: this.paymentScreenshotId }, { text: 'Updates Channel', url: this.paymentScreenshotId }],
+            [{ text: 'Bot Owner', url: this.paymentScreenshotId }]
+        ]
+        this.forceSub = true
+
+
+        this.client.invoke.use(async ({ error }, next) => {
+            if (error instanceof errors.FloodWait) {
+                console.log(`Flood wait for ${error.seconds} seconds`);
+                await new Promise((r) => setTimeout(r, 1000 * error.seconds));
+                return true; // Indicates that the error was handled
+            } else {
+                return next(); // Proceed with the next middleware
+            }
+        });
+
+    }
+
+    private upiInformation(upiId: string) {
+        return `Pay On This Upi Id 👇\nUPI Handle - <code>${upiId}</code>\n\nIMPORTANT - After Payment Send Screenshot Here👇`
+    }
+
+    public async indexEngine() {
+        try {
+            this.client.command('index', async (ctx: any) => {
+                try {
+                    let editedMsg
+                    const chatId = ctx.message.chat.id
+                    const channelId = ctx.message.replyToMessage?.forwardFrom?.chat?.id || undefined
+                    const userId = String(ctx.message.from?.id)
+                    console.log(ctx.message.replyToMessage)
+                    const channelName = ctx.message.replyToMessage?.forwardFrom?.chat.title || undefined
+                    const indexMsgId = ctx.message.replyToMessage || undefined
+
+                    const INDEXmsgId = indexMsgId.forwardFrom.messageId
+
+                    console.log(INDEXmsgId, 'chaattt');
+
+
+
+                    if (!this.admin.includes(userId)) {
+                        console.log("non admin invoking index");
+                        return
+                    }
+
+                    if (!userId || !channelId || !channelName || !indexMsgId) {
+                        return await ctx.reply("<b>INVALID FORMAT !! \n\nSend a File and Reply it With /Index..</b>", {
+                            parseMode: 'HTML'
+                        })
+                    };
+
+
+
+                    const isAccessible = await this.client.getMessage(channelId, INDEXmsgId);
+
+                    console.log(isAccessible);
+
+
+                    editedMsg = await ctx.reply(`<b>Indexing Started!!\n\nChannel: <u>${channelName}</u></b>`, {
+                        parseMode: 'HTML',
+                    });
+
+                    let Datas = {
+                        done: 0,
+                        skip: 0,
+                        round: 1
+                    }
+
+                    //  while (this.index) {
+                    await this.indexRounds({
+                        datas: Datas,
+                        ctx: ctx,
+                        channelId: channelId,
+                        msgId: Number(INDEXmsgId),
+                        chatId: String(chatId),
+                        msgToModify: editedMsg.id,
+                        channelName: channelName,
+                    })
+                    //  }
+
+
+                } catch (error: any) {
+                    console.log('error in index::::::::', error);
+                    console.log('error in index::::::::', error.message);
+                    console.log('error in index::::::::', error.errorMessage)
+                    if (error.errorMessage == 'CHANNEL_PRIVATE') {
+                        return await ctx.reply("<b>Bot Has NO RIGHTS !!\n\nPlease ADD bot as Admin with All RIghts !</b>", {
+                            parseMode: "HTML",
+                        });
+                    }
+                }
+            })
+        } catch (error) {
+            console.log('error in index engine:::', error)
+        }
+    }
+
+
+    public async start() {
+        try {
+            await this.mongo.connectDB()
+            console.log(await this.mongo.adminReport(this.isAdsOn))
+            console.log('trying to connect to bot.....')
+            await this.client.start({ botToken: this.botToken })
+            console.log(' connected to bot..... getting details:')
+
+
+            const data = this.botDetails = await this.client.getMe();
+
+            this.botUname = data.username;
+            this.botUserName = this.botUserName + data.username;
+            this.botUrl = this.botUrl + data.username;
+
+            console.log(this.botDetails)
+
+
+        } catch (error) {
+            console.log('error in bot "start":', error)
+            throw new Error('crashing..')
+        }
+    }
+
+
+
+
+
+    public async getCurrentISTTime() {
+        const timeZone = 'Asia/Kolkata'; // IST timezone
+        const zonedTime = toZonedTime(new Date(), timeZone); // Convert UTC time to IST
+        const currentISTTime = format(zonedTime, 'yyyy-MM-dd HH:mm:ss');
+        return currentISTTime
+    }
+
+
+
+    public async listener() {
+
+
+        this.client.on('callbackQuery:data', async (ctx: any) => {
+
+            const userId = ctx.callbackQuery.from.id;
+            const callBackData = ctx.callbackQuery.data;
+            const callBackDataId = ctx.callbackQuery.id
+            const msgId = Number(ctx.callbackQuery.message?.id)
+            const chatId = Number(ctx.callbackQuery.message?.chat.id)
+            const chatTitle = ctx.callbackQuery.message.chat.title
+            console.log(callBackData);
+
+
+            if (callBackData.startsWith('freePlan')) {
+                try {
+                    await ctx.deleteMessage(msgId);
+                    const isIt = await this.mongo.isFreeTrialUsed(String(userId));
+
+                    if (!isIt) {
+                        await this.mongo.Unlock(String(userId), this.client, undefined, true);
+                        const del = await ctx.reply("<b>Your Premium Plan Has been Activated !\n\nTill TONIGHT!</b>", {
+                            parseMode: 'HTML'
+                        });
+
+                        setTimeout(async () => {
+                            await ctx.deleteMessage(del.id)
+                        }, 5000)
+
+
+                    } else {
+                        const del = await ctx.reply('<b>🤣 you already used free now no more free trail. please buy subscription here are our 👉 /plan </b>', {
+                            parseMode: 'HTML',
+                        })
+
+                        setTimeout(async () => {
+                            await ctx.deleteMessage(del.id)
+                        }, 5000)
+                    }
+                } catch (error) {
+                    console.log('error in free plan callBack:::: ', error)
+                }
+            }
+            if (callBackData.startsWith('Series')) {
+                try {
+
+                    let query = callBackData.split('/')
+                    query = query[1]
+                    const msgId = ctx.msg?.id || undefined;
+
+                    console.log(query, msgId)
+
+                    if (query && msgId) {
+
+                        const msgID = await ctx.editMessageText(msgId, 'Choose The Season You Need !', {
+                            replyMarkup: {
+                                inlineKeyboard: [
+                                    [{ text: 'Season 1', callbackData: `reQuery/${query} S01` }, { text: 'Season 6', callbackData: `reQuery/${query} S06` }],
+                                    [{ text: 'Season 2', callbackData: `reQuery/${query} S02` }, { text: 'Season 7', callbackData: `reQuery/${query} S07` }],
+                                    [{ text: 'Season 3', callbackData: `reQuery/${query} S03` }, { text: 'Season 8', callbackData: `reQuery/${query} S08` }],
+                                    [{ text: 'Season 4', callbackData: `reQuery/${query} S04` }, { text: 'Season 9', callbackData: `reQuery/${query} S09` }],
+                                    [{ text: 'Season 5', callbackData: `reQuery/${query} S05` }, { text: 'Season 10', callbackData: `reQuery/${query} S10` }]
+                                ]
+                            }
+                        })
+
+                        console.log(msgID.id, 'msgID')
+
+                        return
+                    }
+
+
+                } catch (error) {
+                    console.log('error in SERIES FILTER::::', error)
+                }
+            }
+
+            if (callBackData.startsWith('file')) {
+                try {
+                    let data = callBackData.split('/')
+                    data = await this.mongo.sendFile(data[1]);
+
+                    console.log(data)
+                } catch (error) {
+                    console.log('eror in sending callback file:::::::', error)
+                }
+            }
+            if (callBackData.startsWith('reQuery/')) {
+                try {
+
+
+                    const data = callBackData.split('/');
+
+                    await ctx.deleteMessage(ctx.msg.id);
+                    console.log(msgId)
+                    await this.queryManager(ctx, ctx.callbackQuery.from.id, data[1], ctx.msg.chat.id, ctx.callbackQuery.from.firstName, chatTitle)
+
+                } catch (error) {
+                    console.log('error in reQuery::::::::', error)
+                }
+            }
+            if (callBackData.startsWith('Quality')) {
+                try {
+                    const msgId = ctx.msg?.id || undefined;
+                    const data = callBackData.split('/')
+
+                    if (!msgId) {
+
+                        await ctx.answerCallbackQuery({
+                            text: 'Some ERROR CONTACT ADMIN',
+                            alert: true,
+                        });
+
+                        return
+                    }
+
+                    const modif = await ctx.editMessageText(Number(msgId), `<b>The Results for : ${data[1]}\n\nRequested by: ${ctx.callbackQuery.from.firstName}\n\nPowered By: ${ctx.chat.title}</b>`, {
+                        replyMarkup: {
+                            inlineKeyboard: [
+                                [{ text: '360p', callbackData: `reQuery/${data[1]} 360p` }, { text: '480p', callbackData: `reQuery/${data[1]} 480p` }],
+                                [{ text: '720p', callbackData: `reQuery/${data[1]} 720p` }, { text: '1080p', callbackData: `reQuery/${data[1]} 1080p` }],
+                                [{ text: '1440p', callbackData: `reQuery/${data[1]} 1440p` }, { text: '2160p', callbackData: `reQuery/${data[1]} 2160p` }]
+                            ],
+                        },
+                        parseMode: 'HTML',
+                    });
+
+
+
+                    setTimeout(async () => {
+                        await ctx.deleteMessage(modif.id)
+                    }, 59000)
+
+
+
+
+                } catch (error) {
+                    console.log('errror in Quality::::', error)
+                }
+            }
+
+
+            if (callBackData.startsWith('page')) {
+
+                try {
+                    const data = callBackData.split('/');
+                    console.log(data, 'dddat')
+
+                    if (Number(data[3]) < 0) {
+                        await ctx.answerCallbackQuery({
+                            text: `You ARE IN THE FIRST PAGE !!`,
+                            alert: true,
+                        })
+
+                        return
+                    }
+
+                    let markup = this.getResult(data[1], Number(data[2]), userId);
+
+
+                    if (data[3] > markup.length) {
+                        await ctx.answerCallbackQuery({
+                            text: `You ARE IN THE LAST PAGE!!`,
+                            alert: true,
+                        })
+
+                        return
+                    }
+
+                    console.log(await ctx.getMessage(Number(data[2])), 'msgREFF');
+
+
+                    const del = await this.client.editMessageText(data[1], Number(data[2]), `< b > RESULTS: \n\nCurrent Page: ${(Number(data[3]) + 1)}\n\nThis Message Will be Deleted Automatically in 1 Minute </b>`, {
+                        replyMarkup: {
+                            inlineKeyboard: markup[Number(data[3])]
+                        },
+                        parseMode: 'HTML',
+
+                    });
+
+                    setTimeout(async () => {
+                        await ctx.deleteMessage(del.id)
+                    }, 59000)
+
+                    markup[1]
+                } catch (error) {
+                    console.log('eror in callback pagination;;;;;;;;', error)
+                }
+            }
+
+            if (callBackData.startsWith('planIntro')) {
+                try {
+                    await this.client.deleteMessage(chatId, msgId);
+
+                    await ctx.replyPhoto(this.planImage, {
+                        caption: this.planDescription,
+                        replyMarkup: {
+                            inlineKeyboard: this.planStart
+                        }
+                    })
+
+                } catch (error) {
+                    console.log('error in callback planIntro::', error)
+
+                }
+            }
+
+            if (callBackData.startsWith("ADS")) {
+                try {
+                    const destructure = callBackData.split('/');
+                    const data = await this.mongo.adminReport(this.isAdsOn)
+
+
+                    const msgId = Number(destructure[1])
+                    const chatId = destructure[2]
+
+                    console.log(chatId, '/', msgId)
+                    if (this.isAdsOn) {
+                        console.log('turning off ads')
+                        this.isAdsOn = false
+
+                        await this.client.editMessageText(`${chatId}`, Number(msgId), data, {
+                            parseMode: "HTML",
+                            replyMarkup: {
+                                inlineKeyboard: [
+                                    [{ text: 'Turn ON ADS', callbackData: `ADS/${msgId}/${chatId}` }]
+                                ]
+                            }
+                        })
+
+                    } else {
+                        this.isAdsOn = true
+                        console.log('turning on ads')
+
+
+
+                        await this.client.editMessageText(`${chatId}`, Number(msgId), data, {
+                            parseMode: "HTML",
+                            replyMarkup: {
+                                inlineKeyboard: [
+                                    [{ text: 'Turn ON ADS', callbackData: `ADS/${msgId}` }]
+                                ]
+                            }
+                        })
+
+                    }
+                } catch (error) {
+                    console.log('error in admin callback::', error)
+                }
+            }
+
+            if (callBackData.startsWith('showBenefits')) {
+                try {
+                    await this.client.deleteMessage(chatId, msgId);
+                    if (this.premiumBenefitsVideo) {
+                        const send = await ctx.replyVideo(this.premiumBenefitsVideo, {
+                            caption: this.premiumBenefits,
+                            parseMode: 'HTML'
+                        })
+
+                        setTimeout(async () => {
+                            await this.client.deleteMessage(chatId, send.id)
+                        }, 59000)
+
+                        return
+                    }
+
+                    await ctx.reply('No Premium Benefits Video set By Admin...')
+                    return
+                } catch (error) {
+                    console.log('error in callback show BEnefits::', error)
+
+                }
+            }
+
+            if (callBackData.startsWith('qr')) {
+                try {
+                    console.log('invloking qr');
+                    if (this.qrImage) {
+                        await this.client.deleteMessage(chatId, msgId)
+
+                        const sentMsg = await ctx.replyPhoto(this.qrImage, {
+                            caption: this.qrCaption,
+                            replyMarkup: {
+                                inlineKeyboard: this.qrMarkup
+                            }
+                        });
+                    }
+
+                    console.log('comes here');
+
+                    await ctx.answerCallbackQuery({
+                        text: 'No QR has Been Set By ADMIN !',
+                        alert: true
+                    })
+
+                    return
+
+                } catch (error) {
+                    console.log('error in callback qr::', error)
+
+                }
+            }
+
+            if (callBackData.startsWith('upi')) {
+                try {
+                    const cap = this.upiInformation(this.upiId)
+                    await this.client.deleteMessage(chatId, msgId)
+                    console.log('invloking upi');
+                    await ctx.replyPhoto(this.upiImage, {
+                        caption: cap,
+                        parseMode: 'HTML',
+                        replyMarkup: {
+                            inlineKeyboard: this.upiMarkup
+                        }
+                    })
+
+                } catch (error) {
+                    console.log('error in callback upi::', error)
+
+                }
+            }
+
+            if (callBackData.startsWith('delete')) {
+                try {
+                    console.log('invloking deletes')
+                    await this.client.deleteMessage(chatId, msgId)
+
+                } catch (error) {
+                    console.log('error in callback delte::', error)
+                }
+            }
+
+            if (callBackData.startsWith('plans')) {
+                try {
+                    await this.client.deleteMessage(chatId, msgId)
+                    const data = callBackData.split('/')
+                    console.log(data);
+                    await ctx.replyPhoto(this.planImage, {
+                        caption: this.paymentCaption(data[2]),
+                        replyMarkup: {
+                            inlineKeyboard: this.paymentMethod
+                        }
+                    })
+
+                } catch (error) {
+                    console.log('error in plans:::', error)
+                }
+
+
+            }
+
+            if (callBackData.startsWith('showPlans')) {
+                await ctx.editMessageText(msgId, this.planDescription, {
+                    replyMarkup: {
+                        inlineKeyboard: this.plansPrice
+                    }
+                })
+            }
+        }
+        );
+
+
+        this.client.on(':newChatMembers', async (ctx: any) => {
+            try {
+
+                const chatId = ctx.message.chat.id;
+
+                const userName = ctx.message.from.firstName || ctx.message.from.userName;
+
+                let channelName = (ctx?.message?.chat?.title) ? ctx.message.chat.title : 'Channel';
+
+                const newMember = ctx.message.newChatMembers[0].username
+
+
+                console.log(ctx, 'newwwwwwwwwww')
+                if (newMember == this.botDetails.username) {
+                    let channelName = (ctx?.message?.chat?.title) ? ctx.message.chat.title : 'Channel';
+
+
+                    const d = await this.client.sendMessage(ctx.message.chat.id, this.groupAddCaption(channelName), {
+                        replyMarkup: {
+                            inlineKeyboard: this.newMemberReplyMarkup
+                        },
+                        parseMode: 'HTML',
+                    })
+
+                    console.log('added bot')
+
+                    const chatDetails = await ctx.getChatAdministrators(ctx.message.chat.id);
+                    const ownerdata = chatDetails.filter((d: any) => d.status == 'creator');
+                    const ownerUserId = ownerdata[0].user.id;
+
+                    console.log(chatDetails, '////');
+                    console.log(ownerUserId)
+
+                    await this.mongo.newGroup(String(ownerUserId), String(chatId))
+
+                    await this.generateGroupPool()
+                    await this.client.sendMessage(this.poweringGroupLog, `Bot ADDED to NEW Group !!\n\nUser: ${userName}\n\nGroupName: ${channelName}\n\nGroupId: ${chatId}`)
+
+                    setTimeout(async () => {
+                        await ctx.deleteMessage(d.id)
+                    }, 10000)
+                    return
+                };
+
+                const d = await ctx.reply(`<b>Hᴇʟʟᴏ ${userName} 😍, Aɴᴅ Wᴇʟᴄᴏᴍᴇ Tᴏ ${channelName} ❤️</b>\n\n<b>Just Send Any File Name ill SERCH Open Sourced Available files and <u>List YOU</u>.</b>`, {
+                    parseMode: 'HTML',
+                    replyMarkup: {
+                        inlineKeyboard: this.groupJoinerMarkup
+                    }
+                })
+
+                setTimeout(async () => {
+                    await ctx.deleteMessage(d.id)
+                }, 10000)
+                return
+
+            } catch (error) {
+                console.log('error in listener: ', error)
+            }
+        });
+    }
+
+
+    private async indexRounds(params: indexInterface) {
+        try {
+            console.log('indexing invoked');
+
+            const batchSize = 100;
+            console.log('givenMssgId:', params.msgId);
+
+            let currentTasks = params.msgId - batchSize;
+            console.log('tillNeedTO: ', currentTasks)
+
+
+            if (currentTasks < 0) {
+                console.log('about to finsih:::', currentTasks)
+                currentTasks = 0;
+            }
+
+            let fileArr = [];
+
+            for (let i = params.msgId; i > currentTasks; i--) {
+                fileArr.push(i)
+            }
+
+            const messages: any = await this.client.getMessages(params.channelId, fileArr);
+
+
+            let finalSaved
+
+            for (const message of messages) {
+                if (
+                    message.document &&
+                    message.document.fileId &&
+                    (message.document.mimeType === 'video/x-matroska' || message.document.mimeType === 'video/mp4' || message.document.mimeType == 'video/x-msvideo')
+                ) {
+
+                    finalSaved = message.id
+                    await this.mongo.addFile(message.document, params.datas, params.channelId, params.channelName)
+                    //await db.addFile(message.document, buttonNum, Datas);
+                } else if (
+                    message.video &&
+                    message.video.fileId &&
+                    (message.video.mimeType === 'video/x-matroska' || message.video.mimeType === 'video/mp4' || message.video.mimeType == 'video/x-msvideo')
+                ) {
+                    finalSaved = message.id
+
+
+                    await this.mongo.addFile(message.video, params.datas, params.channelId, params.channelName)
+
+                    //await db.addFile(message.video, buttonNum, Datas);
+                } else {
+                    params.datas.skip++
+                    console.log('Ignoring non-file messages...', message, 'ingoreeeeeeeeeeeeeeee');
+                }
+            }
+
+            const lastBatchTime = await this.getCurrentISTTime()
+
+            console.log('going again for', params.datas.round++)
+
+            console.log(finalSaved, 'finalsabeeed')
+            if (finalSaved) {
+                await this.client.forwardMessage(params.channelId, this.indexLog, finalSaved)
+
+            }
+
+            const modified = await params.ctx.editMessageText(params.msgToModify, `<b>Total Rounds: ${params.datas.round}\n\nSaved: ${params.datas.done}\n\nSkipped: ${params.datas.skip}\n\nLast Indexed Batch Time: ${lastBatchTime}\n<spoiler>If You Believe Your Current Time is Past Than this Atleast 5 Mins Send the Last File From the Index Log and /Index Again<spoiler></b>`, {
+                parseMode: 'HTML',
+            });
+
+            if (currentTasks > 0) {
+
+                setTimeout(async () => {
+
+                    await this.indexRounds({
+                        datas: {
+                            done: params.datas.done,
+                            skip: params.datas.skip,
+                            round: params.datas.round++
+                        },
+                        ctx: params.ctx,
+                        channelId: params.channelId,
+                        msgId: currentTasks,
+                        chatId: params.chatId,
+                        msgToModify: params.msgToModify,
+                        channelName: params.channelName,
+                    });
+
+                }, 59000); //
+
+            } else {
+                console.log(`Indexing Finished !!\n\nSaved: ${params.datas.done}\n\nDuplicated: ${params.datas.skip}\n\nTotal Rounds: ${params.datas.round}`);
+                return await params.ctx.reply(`<b>Indexing Finished !!\n\nSaved: ${params.datas.done}\n\nDuplicated: ${params.datas.skip}\n\nTotal Rounds: ${params.datas.round}</b>`);
+
+            }
+
+
+
+
+
+        } catch (error) {
+
+            console.log('errorr in indexRounds::::', error)
+        }
+    }
+
+    private async shortenUrlText(apiUrl: string, apiToken: string, dest: string): Promise<[String] | []> {
+        try {
+            const url = `https://${apiUrl}/api?api=${apiToken}&url=${encodeURIComponent(dest)}`
+            // const url = `${apiUrl}${apiToken}&url=${encodeURIComponent(dest)}`;
+            const response = await axios.get(url);
+
+            if (response.status !== 200) {
+                console.error('Error:', `Status code: ${response.status}`);
+                console.log(response.headers);
+                console.log(response.statusText);
+                return [];
+            }
+
+            const data = response.data;
+            console.log(data)
+            if (data.status !== 'success') {
+                console.error('Error:', data.message); // Access error message from JSON response
+                return [];
+            }
+
+            console.log('Shortened URL:', data.shortenedUrl);
+            return [data.shortenedUrl];
+        } catch (error: any) {
+            console.error('Error:', error.message);
+            return [];
+        }
+    }
+
+    public async commands() {
+
+        this.client.command('upi', async (ctx: any) => {
+            try {
+
+                const text = ctx.msg.text || undefined
+
+                console.log(text)
+
+                if (this.admin.includes(String(ctx.message.from?.id)) && text) {
+
+                    if (text == '/upi') {
+                        await ctx.reply('Send in This format /upi/yourUPIid@som');
+                        return
+                    }
+
+                    const data = text.split('/');
+
+                    this.upiId = data[2];
+
+                    await ctx.reply(`UPI ID SET!: ${this.upiId}`)
+
+                }
+            } catch (error) {
+                console.log('error in upi:::', error)
+            }
+        })
+
+        this.client.command('commands', async (ctx) => {
+            try {
+                const commandListAdmin = `<b><u>COMMAND LIST (ADMIN only) !!</u>\n\n\n<u>QR image:</u>\n  '/set_qr' Usage:(send an Image and Reply with /set_qr)\n\n<u>Premium Benefit Video:</u>\n  '/set_benefitvideo' Usage:(send an Video and Reply with /set_benefitvideo)\n\n<u>BroadCast:</u>\n  '/bcast' Usage:(send an Text and Reply with /bcast {Coming SOoon..})\n\n<u>ForceSUB:</u>\n  '/forceSub' Usage:(send an Message from any Channel with Bot Admin and Reply with /forceSub)\n\n<u>Default Tutorial Video:</u>\n  '/tutorial' Usage:(send an Video and Reply with /tutorial)\n\n<u>Ban / UBan User:</u>\n  '/ban/NuMeRiCuSeRiD' '/uban/NuMeRiCuSeRiD'' Usage:(/ban/1585451545)\n\n<u>Index Files:</u>\n  '/index' Usage:(Forward a File from The Channel and Reply with /index)\n\n<u>Premium An USER:</u>\n  '/prime' Usage:(/prime/NuMeRiCuSERiD)\n\n</b>`;
+                const commandListUser = `<b>COMMAND LIST !!\n\n<u>1) Set Shortner:</u>\n\n"<i>Create a Group and Add me Admin. and then use this Command in the Group"</i>\n\n<u>Command:</u> /set_shortner/yourShortner.com/yOuRsHoRtNeRTokeNHer651255241520\n\n<u>2) Set Tutorial:</u>\n\n"<i>Create a Group and Add me Admin. and send a Video for the Group Tutorial Video then use this Command by Replying to the Video in the Group"</i>\n\n<u>Command:</u> /set_tutorial\n\n<u>3) Plan:</u>\n\n"<i>come @${this.botUname} use this Command to <u>Check Available Plans</u>"</i>\n\n<u>Command:</u> /plan\n\n<u>4) My Plan:</u>\n\n"<i>come @${this.botUname} use this Command to <u>Check Your Current Plan</u></i>\n\n<u>Command:</u> /myPlan`
+
+                /* if (this.admin.includes(String(ctx.message.from?.id))) {
+                     await ctx.reply(commandListAdmin, {
+                         parseMode: 'HTML'
+                     });
+                 }*/
+
+                await ctx.reply(commandListUser, {
+                    parseMode: "HTML",
+                })
+
+            } catch (error) {
+                console.log(error)
+            }
+        })
+        this.client.command('set_qr', async (ctx: any) => {
+            try {
+
+                const userId = String(ctx.message.from?.id)
+                const chatType = String(ctx.message.chat.type);
+                const isReplied = ctx.message.replyToMessage?.photo || undefined
+
+                if (this.admin.includes(String(userId)) && isReplied) {
+
+                    this.qrImage = isReplied.fileId
+                    await ctx.replyPhoto(this.qrImage, {
+                        caption: 'Your Current QRImage',
+                    });
+
+                    return
+                }
+
+            } catch (error) {
+                console.log('error in QR....', error)
+            }
+        })
+        this.client.command('set_benefitvideo', async (ctx: any) => {
+            try {
+
+                const userId = String(ctx.message.from?.id)
+                const chatType = String(ctx.message.chat.type);
+                const isReplied = ctx.message.replyToMessage?.video || undefined
+
+                if (this.admin.includes(String(userId)) && isReplied) {
+                    this.premiumBenefitsVideo = isReplied.fileId
+                    await ctx.replyVideo(this.premiumBenefitsVideo, {
+                        caption: 'Your Current Video',
+                    });
+                }
+
+            } catch (error) {
+                console.log('error in benefit Video..', error)
+            }
+        })
+
+        this.client.command('admin', async (ctx) => {
+            try {
+
+                const modify = await ctx.reply('<i>Fetching Details</i>')
+                const data = await this.mongo.adminReport(this.isAdsOn)
+                const chatId = String(ctx.message.chat?.id)
+
+                if (data) {
+                    if (this.isAdsOn) {
+                        const msg = await ctx.editMessageText(modify.id, data, {
+                            parseMode: "HTML",
+                            replyMarkup: {
+                                inlineKeyboard: [
+                                    [{ text: 'Switch ADS', callbackData: `ADS/${modify.id}/${chatId} ` }]
+                                ]
+                            }
+                        })
+
+                        console.log(msg.id, 'og')
+                        return
+                    } else {
+                        const msg = await ctx.editMessageText(modify.id, data, {
+                            parseMode: "HTML",
+                            replyMarkup: {
+                                inlineKeyboard: [
+                                    [{
+                                        text: 'Switch ADS', callbackData: `ADS / ${modify.id}/${chatId}`
+                                    }]
+                                ]
+                            }
+                        })
+                        console.log(msg.id, 'og')
+
+                    }
+
+                }
+            } catch (error) {
+                console.log('error in Admin::;', error)
+            }
+        })
+
+
+
+        this.client.command('bcast', async (ctx: any) => {
+            try {
+                const userId = String(ctx.message.from?.id)
+                const chatType = String(ctx.message.chat.type);
+                const isReplied = ctx.message.replyToMessage || undefined
+
+                if (this.admin.includes(userId)) {
+                    if (chatType !== 'private') {
+                        return await ctx.reply('Only used in PrivateChat')
+                    }
+
+                    if (!isReplied) {
+                        return await ctx.reply('Reply to Any Message with /bcast\n\nTO BROADCAST the MESSAGE to ALL USERS!')
+                    }
+
+                    await ctx.reply('wait bro next update!!...')
+
+                    return
+
+                    /*
+                    console.log(isReplied);
+
+                    const caption = isReplied.caption ?? undefined;
+
+                    const text = isReplied.text ?? undefined
+
+                    if (text) {
+                        const total = await userModel.find({});
+
+                        const users = total.map((m) => m.userId);
+
+                        console.log(users)
+
+                        const totalUsers = users.length
+
+                        if (totalUsers > 100) {
+
+                        }
+
+
+                    }
+*/
+
+
+
+                }
+
+
+
+
+            } catch (error) {
+
+                console.log('error in BCAST:::: ', error)
+            }
+        })
+
+        this.client.command('forceSub', async (ctx) => {
+            try {
+                const userId = ctx.message.from?.id
+                const chatId = String(ctx.message.chat.id)
+                const isReplied = ctx.message.replyToMessage || undefined
+
+                if (this.admin.includes(String(userId)) && isReplied && isReplied.forwardFrom?.type == 'channel') {
+                    const forceSubId = isReplied.forwardFrom.chat.id
+
+                    this.forceSubChatId = String(forceSubId);
+
+                    const createInviteLink = await this.client.createInviteLink(forceSubId)
+
+                    console.log(createInviteLink);
+
+                    this.forceSubUrl = createInviteLink.inviteLink
+
+                    return
+                }
+
+                return
+
+            } catch (error: any) {
+                if (error.errorMessage === 'CHANNEL_PRIVATE') {
+                    return ctx.reply('Add Bot as Admin With All Rights !\n\nAnd Try Again')
+                }
+                console.log('error in forceSub:::', error)
+            }
+        })
+
+        this.client.command('tutorial', async (ctx: any) => {
+            try {
+                const userId = ctx.message.from?.id
+                const chatId = String(ctx.message.chat.id)
+
+
+
+                if (this.admin.includes(String(userId))) {
+
+                    const isRepliedVideo = ctx.message.replyToMessage?.video || undefined
+
+                    if (!isRepliedVideo) {
+                        await ctx.reply('Send to Video File and reply it with \n\n/tutorial \n\nto set Universal tutorial');
+                        return
+                    }
+
+
+                    this.tutorialUrl = isRepliedVideo.fileId
+
+                    await ctx.replyVideo(this.tutorialUrl)
+                }
+                const groupDetails = await this.paramsGroupPool(chatId, 'userTutorial')
+
+                if (!groupDetails) {
+                    if (!this.tutorialUrl) {
+                        await ctx.reply('No Tutorial Video From Admin')
+                    } else {
+                        await ctx.replyVideo(this.tutorialUrl, {
+                            caption: '<b>This Group Doenst Have an Tutorial Video..\n\nSo Sent u an Default Tutorial Video From Bot Owner Side!</b>',
+                            parseMode: 'HTML',
+                        })
+                    }
+
+
+                    return
+                }
+
+                console.log(groupDetails, '/////')
+
+                await ctx.replyVideo(groupDetails)
+
+                return
+
+            } catch (error) {
+                console.log('error in tutorial;;;;', error)
+            }
+
+        })
+
+        this.client.command('set_shortner', async (ctx) => {
+            try {
+                const senderId = ctx.message.from?.id
+                const chatId = ctx.message.chat.id
+                const msgFrom = ctx.message.chat.type
+                const msgId = ctx.message.id
+                const text = ctx.message.text
+
+
+                if (msgFrom == 'private') {
+                    const del = await ctx.reply('ADD Me to Your Group and Use the Command there');
+
+                    setTimeout(async () => {
+                        await ctx.deleteMessage(del.id)
+                    })
+
+                    return
+                }
+
+                if (text == '/set_shortner') {
+                    const del = await ctx.reply(`<b>Command Incomplete :(\n\nGive me a shortener website link and api along with the command !\n\nFormat:</b> /set_shortner/website.com/1f1da5c9df9a58058672ac8d8134e203b03426a1`, {
+                        parseMode: 'HTML',
+                    });
+
+                    setTimeout(async () => {
+                        await ctx.deleteMessage(del.id)
+                    }, 10000)
+
+                    return
+
+                }
+
+                if ((msgFrom == 'group' || 'supergroup')) {
+                    const groupDetails = await ctx.getChatAdministrators()
+                    console.log(groupDetails)
+                    const ownerId = groupDetails.filter((m: any) => m.status == 'creator')
+                    const ownerUserId = ownerId[0].user.id
+
+                    console.log(ownerUserId, '/', senderId)
+
+                    if (ownerUserId !== senderId) {
+                        const del = await ctx.reply("unAuth only group owner can set!");
+
+                        setTimeout(async () => {
+                            await ctx.deleteMessage(del.id)
+                        }, 5000)
+
+                        return
+                    }
+
+                    const data = text.split('/')
+
+                    const isValidUrl = await this.shortenUrlText(data[2], data[3], 'www.instagram.com');
+
+
+                    if (isValidUrl.length < 1) {
+
+                        await ctx.deleteMessage(msgId)
+                        await ctx.reply('<b>Invalid Url or TOKEN / CONTACT ADMIN !!</b>', {
+                            replyMarkup: {
+                                inlineKeyboard: this.contactAdminReplyMarkup,
+                            },
+                            parseMode: 'HTML',
+                            protectContent: true,
+                        })
+
+                        return
+                    }
+
+                    await this.mongo.setShortner(String(ownerUserId), String(chatId), String(data[2]), String(data[3]));
+                    await this.generateGroupPool()
+                    await ctx.reply("Congrats Your API has been ADDED!\n\nFrom now On this Group will generate Links from Your Account\n\nHappy EARNING 💵 ")
+                    await ctx.deleteMessage(msgId);
+
+                    return
+
+
+
+
+
+                }
+
+                return
+
+
+            } catch (error) {
+                console.log('error in setShortner:::', error)
+            }
+        })
+        this.client.command('set_tutorial', async (ctx: any) => {
+            try {
+                const senderId = ctx.message.from.id
+                const chatId = ctx.message.chat.id
+                const msgFrom = ctx.message.chat.type
+                const isRepied = ctx.message.replyToMessage || undefined;
+                const fileAvailable = ctx.message.replyToMessage?.video?.fileId || undefined
+                console.log(ctx.message.replyToMessage, 'filleee')
+
+
+                if (msgFrom == 'private') {
+                    await ctx.reply('ADD Me to Your Group and Use the Command there \n\nBy Replying to Any Video');
+                    return
+                }
+
+                if ((msgFrom == 'supergroup' || 'group') && fileAvailable) {
+
+                    const groupDetails = await ctx.getChatAdministrators(ctx.message.chat.id);
+                    const ownerId = groupDetails.filter((m: any) => m.status == 'creator');
+                    const ownerUserId = String(ownerId[0].user.id);
+
+
+
+                    if (parseInt(ownerUserId) !== parseInt(senderId)) {
+
+                        let del = await ctx.reply('UnAuth. Command only for Owner of the Group!');
+
+                        setTimeout(async () => {
+                            await ctx.deleteMessage(del.id);
+                        }, 5000);
+
+                        return;
+                    };
+
+                    console.log(fileAvailable, 'filllllll')
+                    await this.mongo.setTutorial(String(ownerUserId), String(chatId), fileAvailable)
+
+                    await this.generateGroupPool();
+                    let del = await ctx.reply('Tutorial has Been Set!..\n\nUse /tutorial')
+
+                    setTimeout(async () => {
+                        await ctx.deleteMessage(del.id)
+                    }, 50000)
+
+                    return
+
+                }
+
+            } catch (error) {
+                console.log('errror in setTutorial:::', error)
+            }
+        })
+
+        this.client.command('myPlan', async (ctx) => {
+            try {
+                const isPremiumExpired = await this.mongo.isVerified(String(ctx.message.from?.id))
+
+                if (!isPremiumExpired) {
+                    await ctx.reply(`Hey ${ctx.message.from?.firstName || 'user'},\n\nʏᴏᴜ ᴅᴏ ɴᴏᴛ ʜᴀᴠᴇ ᴀɴʏ ᴀᴄᴛɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴs, ɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴛᴀᴋᴇ ᴘʀᴇᴍɪᴜᴍ ᴛʜᴇɴ ᴄʟɪᴄᴋ ᴏɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ 👇`, {
+                        replyMarkup: {
+                            inlineKeyboard: this.myPlanReplymarkup
+                        }
+                    });
+                    return
+                }
+
+                const data: any = await userModel.findOne({ userId: String(ctx.message.from?.id) })
+
+                console.log(data)
+
+
+                const del = await ctx.reply(`You Have an Active PLAN..\n\nExpiring On: ${data.verifiedTill}`)
+
+                setTimeout(async () => {
+                    await ctx.deleteMessage(del.id)
+                }, 10000)
+
+
+
+                return
+
+            } catch (error) {
+                console.log('error in myPlan::::', error)
+            }
+        })
+        this.client.command('ban', async (ctx) => {
+            try {
+                console.log('triggering ban')
+                const text = ctx.message.text;
+
+                if (this.admin.includes(String(ctx.message.from?.id))) {
+                    if (text == '/ban') {
+                        const d = await ctx.reply('send in this format\n\n/ban/uSeRiD');
+
+                        setTimeout(async () => {
+                            await ctx.deleteMessage(d.id)
+                        }, 10000)
+                        return
+                    }
+                    const data = text.replace('/ban/', '');
+
+                    await this.mongo.changeValid(data, false);
+
+                    await ctx.reply(`!! Banned USER !!\n\nUserID: ${data}\n\nStaus: BANNED.`)
+                } else {
+                    const k = await ctx.reply('unAuth')
+
+                    setTimeout(async () => {
+                        await ctx.deleteMessage(k.id)
+                    })
+                }
+            } catch (error) {
+                console.log('error in ban::::::', error);
+            }
+        })
+
+        this.client.command('uban', async (ctx) => {
+            try {
+                const text = ctx.message.text;
+
+                if (this.admin.includes(String(ctx.message.from?.id))) {
+
+
+                    if (text == '/unban') {
+                        const d = await ctx.reply('send in this format\n\n/uban/uSeRiD');
+
+                        setTimeout(async () => {
+                            await ctx.deleteMessage(d.id)
+                        }, 10000)
+                        return
+                    }
+                    const data = text.replace('/uban/', '')
+                    await this.mongo.changeValid(data, true)
+
+                    await ctx.reply(`!! UnBanned USER !!\n\nUserID: ${data}\n\nStaus: UNBANNED.`)
+                }
+                else {
+                    const k = await ctx.reply('unAuth')
+
+                    setTimeout(async () => {
+                        await ctx.deleteMessage(k.id)
+                    })
+                }
+
+            } catch (error) {
+                console.log('error in ban::::::', error)
+            }
+        })
+
+
+
+
+        this.client.command('send', async (ctx: any) => {
+            try {
+                const data = ctx.message.text;
+                const val = data.split(' ');
+                await this.client.sendVideo(ctx.message.from.id, val[1]);
+            } catch (error) {
+                console.log('in bug send::', error)
+            }
+        })
+
+
+        this.client.command('prime', async (ctx) => {
+            try {
+                const userId = String(ctx.message.from?.id)
+
+                const vals = ctx.message.text
+
+                if (this.admin.includes(userId)) {
+
+                    if (vals == '/prime') {
+                        const del = await ctx.reply('Invalid FORMAT !! \n\nUse this Format\n\n/prime/uSeRiDoFtHeUsEr');
+
+                        setTimeout(async () => {
+                            await ctx.deleteMessage(del.id);
+                        }, 5000)
+
+                        return
+                    }
+                    const data = vals.split('/')
+
+                    console.log(data)
+
+                    await this.mongo.Unlock(userId, Number(data[2]))
+                }
+
+                const del = await ctx.reply('unAuth')
+
+                setTimeout(async () => {
+                    await ctx.deleteMessage(del.id)
+                })
+
+                return
+
+
+
+            } catch (error) {
+                console.log('error in making PRIME:::', error)
+            }
+        })
+        this.client.command('start', async (ctx, next) => {
+
+            try {
+                const userId = String(ctx.message.from?.id)
+                const chatId = String(ctx.message.chat.id)
+                const isExist = await this.mongo.isExist(userId);
+                const vals = ctx.message.text;
+                console.log(ctx.message.text)
+
+
+                if (vals.startsWith(`/start@${this.botUname}`)) {
+                    console.log("Added to Group");
+                    next()
+                }
+
+                if (vals.startsWith('/start hash_')) {
+                    let data = vals.split('_');
+
+                    const hash = data[1];
+
+                    const pool = this.poolExist(hash);
+
+                    if (!pool) {
+                        await ctx.reply("DONT TRY TO SMART AND BYPASS !");
+
+                        return
+                    }
+
+                    await this.mongo.Unlock(userId);
+
+                    const del = await ctx.reply('<b>You are Unlocked Till Today ENJOY</b>', {
+                        parseMode: 'HTML',
+                    })
+
+                    const del1 = await ctx.replyDocument(pool.fileId, {
+                        caption: '<3'
+                    })
+
+                    setTimeout(async () => {
+                        await ctx.deleteMessage(del.id)
+                    }, 4000)
+
+                    setTimeout(async () => {
+                        await ctx.deleteMessage(del1.id)
+                    }, 59000)
+
+                    return
+                }
+
+
+                if (vals.startsWith('/start file_')) {
+
+
+                    console.log('comes here')
+
+
+                    const match = vals.match(/^\/start file_(.*)_(.*)$/);
+
+
+                    if (match) {
+                        console.log('matcbed')
+                        const fileId = match[1]; // Contains the file ID part
+                        const chatId = match[2]; // Contains the chat ID part
+                        console.log('File ID:', fileId);
+                        console.log('Chat ID:', chatId);
+
+                        const uniqueId = fileId
+                        let fileData: any = await this.mongo.sendFile(uniqueId);
+                        const fileType = fileData.fileMimeType
+
+                        console.log(fileData, 'fillleleleleelel')
+
+                        const user = await this.mongo.isExist(userId)
+
+                        const isVerified = await this.mongo.isVerified(userId)
+
+                        if (!user.valid) {
+                            await ctx.reply('YOU ARE BANNED BY OUR TEAM !!\n\nContact: Admin', {
+                                replyMarkup: {
+                                    inlineKeyboard: this.bannedReplyMarkup
+                                }
+                            })
+
+                            return
+                        }
+
+                        const hash = crypto.randomUUID()
+
+                        const endPoint = `https://t.me/${this.botUname}?start=hash_${hash}`
+                        console.log('vals for:::', chatId)
+
+                        const isPower = await this.paramsGroupPool(String(chatId), 'userPowering', true)
+                        const tutorial = (isPower.userTutorial) ? isPower.userTutorial : this.tutorialUrl || 'https://telegram.com/SingleMachiOffl'
+
+
+                        console.log(isPower, 'issssssssssssspower')
+                        let shortenedUrl;
+                        if (!isPower) {
+                            shortenedUrl = await this.shortenUrlText(this.apiUrl, this.apiToken, endPoint)
+
+                        } else {
+                            shortenedUrl = await this.shortenUrlText(isPower.userApi, isPower.userApiToken, endPoint)
+                        }
+
+
+
+                        console.log(shortenedUrl, 'shoertttt')
+
+                        if (!user.verified && fileData && shortenedUrl.length > 0 && !isVerified && this.isAdsOn) {
+                            const shortUrl = String(shortenedUrl[0])
+                            let pool = this.addPool(String(ctx.message.from?.id), hash, endPoint, shortUrl, fileData.fileId);
+
+                            console.log(pool, 'pool')
+                            await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                replyMarkup: {
+                                    inlineKeyboard: [
+                                        [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
+                                        //           [{ text: 'Bypassed URL', url: pool.url }],
+                                        // [{ text: 'Tutorial Video!', url: tutorial }],
+                                        [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
+
+                                    ]
+                                }
+                            })
+
+                            return
+                        }
+                        else if ((!this.isAdsOn || user.verified) && fileData && shortenedUrl.length > 0) {
+
+                            console.log(fileData);
+
+                            let del: any
+                            del = (fileType == 'video/x-matroska') ? await ctx.replyVideo(fileData.fileId, {
+                                caption: "<3\n\nThis File will be Automatically DELETED in 1 MIN, Forward the File To SOMEONE to keep it Permanent"
+                            }) : await ctx.replyDocument(fileData.fileId, {
+                                caption: "<3\n\nThis File will be Automatically DELETED in 1 MIN, Forward the File To SOMEONE to keep it Permanent"
+                            })
+
+                            setTimeout(async () => {
+                                if (del.id) {
+                                    await ctx.deleteMessage(del.id)
+                                    return
+                                }
+                                return
+                            }, 59000)
+
+                            return
+                        }
+
+                        console.log('enane therla user')
+
+
+
+
+                    } else {
+                        console.log('Invalid input format');
+                    }
+
+
+
+                }
+
+
+                const name = ctx.message.from?.firstName || 'User'
+                console.log('comes under start')
+                await ctx.reply(this.startCaption(name), {
+                    parseMode: 'HTML',
+                    replyMarkup: {
+                        inlineKeyboard: this.introReplyMarkup
+                    }
+                })
+            } catch (error) {
+                console.log(error)
+            }
+        })
+
+
+
+        this.client.command('plan', async (ctx) => {
+
+            await ctx.replyPhoto(this.planImage, {
+                caption: this.planDescription,
+                replyMarkup: {
+                    inlineKeyboard: this.planStart
+                }
+            })
+
+        })
+    }
+
+
+    public async fileSaver() {
+
+        this.client.on('message', async (ctx: any, next) => {
+
+            try {
+                const chatType = ctx.message.chat.type;
+                console.log(chatType)
+
+                console.log('getting')
+                if (this.fileLog.includes(String(ctx.message.chat.id))) {
+                    if (
+                        ctx.message && (
+                            (ctx.message.document &&
+                                (ctx.message.document.mimeType === 'video/x-matroska' || ctx.message.document.mimeType === 'video/mp4')) ||
+                            (ctx.message.video &&
+                                (ctx.message.video.mimeType === 'video/x-matroska' || ctx.message.video.mimeType === 'video/mp4'))
+
+                        )
+                    ) {
+                        const data = ctx.message.document || ctx.message.video
+
+                        console.log(data, 'dataaaaa');
+
+                        await this.mongo.addFile(data);
+
+                        return
+                    }
+                }
+
+                else if (ctx.message.chat.type == 'private') {
+                    console.log('spamming private')
+                    return
+                }
+
+                console.log('some Query initiating next')
+                next()
+
+
+
+            } catch (error) {
+                console.log('error in fileSave...', error)
+            }
+
+        })
+    }
+
+    public async groupManager() {
+        this.client.on('message:text', async (ctx) => {
+
+            try {
+                const firstName = ctx.message.from?.firstName || 'user'
+                const msgId = ctx.message.id;
+                const userId = ctx.message.from?.id
+                const chatId = ctx.message.chat.id
+                const typeMedium = ctx.message.chat.type;
+                const text = ctx.message.text
+                if ((typeMedium == 'group' || typeMedium == 'supergroup') && !text.startsWith('/')) {
+
+                    await this.queryManager(ctx, Number(userId), text, chatId, firstName, ctx.message.chat.title)
+
+                    return
+                }
+                return
+
+            } catch (error) {
+                console.log(error)
+            }
+
+
+        })
+    }
+
+    private async queryManager(ctx: any, userId: number, query: string, chatId: number, firstName: string, chatTitle: string) {
+        try {
+
+            let exist
+            if (this.forceSubChatId) {
+                exist = await this.isForceSub(this.forceSubChatId, userId);
+
+            }
+
+            let editedMsg: any | undefined
+
+            if (exist && this.forceSubUrl) {
+                editedMsg = await ctx.reply('<b>WoohooOooo You are So fast Naughtyy 😜\n\n Join My Channel to Use ME! and Type Again .</b>', {
+                    parseMode: 'HTML',
+                    replyMarkup: {
+                        inlineKeyboard: this.forceSubReplyMarkup,
+                    }
+                })
+
+
+                return setTimeout(async () => {
+                    await ctx.deleteMessage(editedMsg.id);
+                }, 59000)
+            }
+
+            editedMsg = await ctx.reply(`<b>Searching for "${query}"... </b>`, {
+                parseMode: 'HTML',
+                protectContent: 'true',
+            })
+
+            const file = await this.mongo.isFileExist(query);
+
+
+            if (file.length > 0) {
+
+                const fileAsReplyMarkup = this.savingReplyMarkup(query, file, 5, String(chatId), editedMsg.id, userId);
+
+                editedMsg = await ctx.editMessageText(editedMsg.id, `𝙏𝙝𝙚 𝙍𝙚𝙨𝙪𝙡𝙩 𝙛𝙤𝙧 >>${query}\n\nTotal: ${fileAsReplyMarkup.length}\n\n𝙍𝙚𝙦𝙪𝙚𝙨𝙩 𝘽𝙮: ${firstName}\n\n𝙋𝙤𝙬𝙚𝙧𝙚𝙙 𝘽𝙮: ${chatTitle}\n\n<b>!! This Message will be Deleted in 1 Min !!</b>`, {
+                    parseMode: "HTML",
+                    replyMarkup: {
+                        inlineKeyboard: fileAsReplyMarkup[0],
+                    }
+                })
+
+
+            }
+            else if (file.length == 0) {
+                editedMsg = await ctx.editMessageText(editedMsg.id, `𝙎𝙤𝙧𝙧𝙮 𝙉𝙤 𝙁𝙞𝙡𝙚𝙨 𝙒𝙚𝙧𝙚 𝙁𝙤𝙪𝙣𝙙 : ${query}\n\n𝘾𝙝𝙚𝙘𝙠 𝙔𝙤𝙪𝙧 𝙎𝙥𝙚𝙡𝙡𝙞𝙣𝙜 𝙞𝙣 𝙂𝙤𝙤𝙜𝙡𝙚 𝙖𝙣𝙙 𝙏𝙧𝙮 𝘼𝙜𝙖𝙞𝙣 !!`, {
+                    replyMarkup: {
+                        inlineKeyboard: [
+                            [{ text: '🔎 𝗤𝘂𝗶𝗰𝗸 𝗚𝗼𝗼𝗴𝗹𝗲 𝗦𝗲𝗮𝗿𝗰𝗵 🔍', url: `https://www.google.com/search?q=${encodeURIComponent(query)}` }]
+                        ]
+                    }
+                });
+            }
+
+            setTimeout(async () => {
+                await ctx.deleteMessage(editedMsg.id);
+                this.deleteResponse(String(chatId), userId, editedMsg.id)
+            }, 59000 + 59000);
+
+
+        } catch (error) {
+            console.log('errorr in query manager:::::::::::::', error)
+        }
+
+
+
+    }
+
+
+    private async isForceSub(chatId: string | number, userId: string | number) {
+        try {
+            if (!chatId) {
+                return
+            }
+            return await this.client.getChatMember(chatId, userId)
+        } catch (error: any) {
+            if (error.message === '400: CHANNEL_INVALID (channels.getChannels)') {
+                throw new Error("ADd button to Force SUb channel... reason: channel private")
+
+            }
+            console.log('errror on isForceSub:::', error.message)
+        }
+    }
+
+    // private userplanCaption(name: string,)
+
+    private startCaption(name: string) {
+        return `👋 Hey ${name} , <b>GOOD DAY</b>  ⚡️\n🤗 Welcome to  movie search bot.\n🤖 I can give you direct movies\n📁 Type & Send Me Any Movie Name`
+    }
+    private paymentCaption(ammount: number | string) {
+        return `Wow!!🤯\nYou Have Choosen Weekly Bot Membership Of Price ₹${ammount}\nChoose Payment Method 👇`
+    }
+    private groupAddCaption(name: string) {
+        return `<b>Thankyou For Adding Me In ${name} ❣️\n\nCheck My Commands using /Commands\n\nIf you have any questions & doubts about using me contact support.</b>`
+    }
+
+
+
+    private async captureCtx(ctx: any, name: string) {
+        try {
+            const ctxJson = JSON.stringify(ctx, (key, value) => {
+                // Handle circular references and functions if needed
+                if (typeof value === 'function') return undefined;
+                return value;
+            }, 2); // Pretty-print with 2 spaces
+
+            // Write the JSON string to a file
+            fs.writeFileSync(`${name}.json`, ctxJson, 'utf8'); // Corrected quote here
+            console.log('Context saved to', `${name}.json`);
+        } catch (error) {
+            console.log('Error in captureCtx', error);
+        }
+    }
+
+}
