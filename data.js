@@ -263,18 +263,12 @@ class DataBase {
     isFileExist(query) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const queryWords = query.split(' ');
-                // Initial regex to match the full query case-sensitively
-                let pattern = `^${queryWords.join(' ')}`;
-                // Progressively reduce the regex to match all but the last word(s)
-                for (let i = queryWords.length - 1; i > 0; i--) {
-                    pattern += `|^${queryWords.slice(0, i).join(' ')}`;
-                }
-                // Create the regex without the 'i' flag to keep it case-sensitive
-                const regex = new RegExp(pattern, 'i');
-                // Perform the search with the case-sensitive regex
-                const files = yield model_1.fileModel.find({ fileName: { $regex: regex } })
-                    .sort({ _id: -1 });
+                // Build the raw pattern to handle spaces and special characters
+                const raw_pattern = query.replace(/ /g, '.*[\\s\\.\\+\\-_\\(\\)\\[\\]]');
+                // Compile the regex, making it case-insensitive with 'i' flag
+                const regex = new RegExp(raw_pattern, 'i');
+                // Perform the search with the compiled regex
+                const files = yield model_1.fileModel.find({ fileName: { $regex: regex } }).limit(50);
                 console.log(files.length);
                 return files;
             }
@@ -284,6 +278,35 @@ class DataBase {
             }
         });
     }
+    /*
+    public async isFileExist(query: string): Promise<any[]> {
+        try {
+
+            const queryWords = query.split(' ');
+
+            // Initial regex to match the full query case-sensitively
+            let pattern = `^${queryWords.join(' ')}`;
+
+            // Progressively reduce the regex to match all but the last word(s)
+            for (let i = queryWords.length - 1; i > 0; i--) {
+                pattern += `|^${queryWords.slice(0, i).join(' ')}`;
+            }
+
+            // Create the regex without the 'i' flag to keep it case-sensitive
+            const regex = new RegExp(pattern, 'i');
+
+            // Perform the search with the case-sensitive regex
+            const files = await fileModel.find({ fileName: { $regex: regex } })
+
+
+
+            console.log(files.length);
+            return files;
+        } catch (error) {
+            console.log(error);
+            return [];
+        }
+    }*/
     changeValid(id, val) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

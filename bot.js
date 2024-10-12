@@ -250,7 +250,7 @@ class Bot extends localStore_1.localStore {
                 const msgId = Number((_a = ctx.callbackQuery.message) === null || _a === void 0 ? void 0 : _a.id);
                 const chatId = Number((_b = ctx.callbackQuery.message) === null || _b === void 0 ? void 0 : _b.chat.id);
                 const chatTitle = ctx.callbackQuery.message.chat.title;
-                console.log(callBackData);
+                console.log(ctx);
                 if (callBackData.startsWith('freePlan')) {
                     try {
                         yield ctx.deleteMessage(msgId);
@@ -355,8 +355,19 @@ class Bot extends localStore_1.localStore {
                 }
                 if (callBackData.startsWith('page')) {
                     try {
+                        const senderId = ctx.callbackQuery.from.id;
+                        console.log(ctx);
                         const data = callBackData.split('/');
                         console.log(data, 'dddat');
+                        console.log('/iddddddd');
+                        console.log(ctx.msg.replyToMessage.from.id, 'bydddddddd');
+                        if (ctx.callbackQuery.from.id !== ctx.msg.replyToMessage.from.id) {
+                            yield ctx.answerCallbackQuery({
+                                text: 'Search for YOUrself Dont Distrub others Chat',
+                                alert: true
+                            });
+                            return;
+                        }
                         if (Number(data[3]) < 0) {
                             yield ctx.answerCallbackQuery({
                                 text: `You ARE IN THE FIRST PAGE !!`,
@@ -447,6 +458,13 @@ class Bot extends localStore_1.localStore {
                             return;
                         }
                         else {
+                            if (!this.tutorialUrl) {
+                                const temp = yield ctx.reply('No Tutorial Video exist');
+                                setTimeout(() => __awaiter(this, void 0, void 0, function* () {
+                                    yield ctx.deleteMessage(temp.id);
+                                }), 5000);
+                                return;
+                            }
                             yield ctx.replyVideo(this.tutorialUrl, {
                                 caption: '<b>This is a Default Video set FROM OWNER SIDE</b>'
                             });
@@ -931,27 +949,27 @@ class Bot extends localStore_1.localStore {
                         return;
                         /*
                         console.log(isReplied);
-    
+        
                         const caption = isReplied.caption ?? undefined;
-    
+        
                         const text = isReplied.text ?? undefined
-    
+        
                         if (text) {
                             const total = await userModel.find({});
-    
+        
                             const users = total.map((m) => m.userId);
-    
+        
                             console.log(users)
-    
+        
                             const totalUsers = users.length
-    
+        
                             if (totalUsers > 100) {
-    
+        
                             }
-    
-    
+        
+        
                         }
-    */
+        */
                     }
                 }
                 catch (error) {
@@ -1012,6 +1030,7 @@ class Bot extends localStore_1.localStore {
                             setTimeout(() => __awaiter(this, void 0, void 0, function* () {
                                 yield ctx.deleteMessage(temp.id);
                             }), 5000);
+                            return;
                         }
                     }
                     if (chatType == 'private') {
@@ -1023,15 +1042,21 @@ class Bot extends localStore_1.localStore {
                         if (!groupDetails) {
                             if (!this.tutorialUrl) {
                                 yield ctx.reply('No Tutorial Video From Admin');
+                                return;
                             }
                             else {
                                 yield ctx.replyVideo(this.tutorialUrl, {
                                     caption: '<b>This Group Doenst Have an Tutorial Video..\n\nSo Sent u an Default Tutorial Video From Bot Owner Side!</b>',
                                     parseMode: 'HTML',
                                 });
+                                return;
                             }
-                            return;
                         }
+                        yield ctx.replyVideo(groupDetails, {
+                            caption: '<b>Tutorial Video of this GROUP <3</b>',
+                            parseMode: 'HTML'
+                        });
+                        return;
                     }
                     return;
                 }
@@ -1091,7 +1116,9 @@ class Bot extends localStore_1.localStore {
                         }
                         yield this.mongo.setShortner(String(ownerUserId), String(chatId), String(data[2]), String(data[3]));
                         yield this.generateGroupPool();
-                        yield ctx.reply("Congrats Your API has been ADDED!\n\nFrom now On this Group will generate Links from Your Account\n\nHappy EARNING 💵 ");
+                        yield ctx.reply("<b>Congrats Your API has been ADDED!\n\nFrom now On this Group will generate Links from Your Account and Keep in Mind that a 5% ADS will be From our Side as a Part of <u>Hosting FEE of Bot</u> and As a Contribution to Open Source Application\n\n</u>Happy EARNING 💵 </u></b>\n\nuse /commands to check ur Commands (in Group)", {
+                            parseMode: 'HTML',
+                        });
                         yield ctx.deleteMessage(msgId);
                         return;
                     }
@@ -1359,8 +1386,8 @@ class Bot extends localStore_1.localStore {
                                 console.log(fileData);
                                 console.log('fileID:', fileData.fileId, '\n\nFileType: ', fileData.fileMimeType);
                                 let del;
-                                if (fileData.fileMimeType === 'video/x-matroska') {
-                                    del = yield ctx.replyDocument(fileData.fileId, {
+                                try {
+                                    const sendDoc = yield yield ctx.replyVideo(fileData.fileId, {
                                         caption,
                                         parseMode: 'HTML',
                                     });
@@ -1369,40 +1396,21 @@ class Bot extends localStore_1.localStore {
                                     }), 59000);
                                     return;
                                 }
-                                else if (fileData.startsWith('video/mp4')) {
-                                    del = yield ctx.replyVideo(fileData.fileId, {
+                                catch (error) {
+                                    console.log('error when sendinf as video');
+                                    const sendDoc = yield yield ctx.replyDocument(fileData.fileId, {
                                         caption,
                                         parseMode: 'HTML',
                                     });
                                     setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-                                        yield ctx.deleteMessage(del.id);
+                                        yield ctx.deleteMessage(sendDoc.id);
                                     }), 59000);
                                     return;
                                 }
-                                else if (fileData.startsWith('video/x-msvideo')) {
-                                    del = yield ctx.replyDocument(fileData.fileId, {
-                                        caption,
-                                        parseMode: 'HTML',
-                                    });
-                                    setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-                                        yield ctx.deleteMessage(del.id);
-                                    }), 59000);
-                                    return;
-                                }
-                                else {
-                                    yield this.client.sendMessage(this.admin[0], `${caption}\n\nFileID: ${fileData.fileId}\n\nMimeType: ${fileData.fileMimeType}`);
-                                    console.log('invalid file');
-                                }
-                                setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-                                    if (del.id) {
-                                        yield ctx.deleteMessage(del.id);
-                                        return;
-                                    }
-                                    return;
-                                }), 59000);
-                                return;
                             }
-                            console.log('enane therla user');
+                            else {
+                                console.log('un behabioured user....');
+                            }
                         }
                     }
                     if (vals == '/start') {
@@ -1518,8 +1526,8 @@ class Bot extends localStore_1.localStore {
                 });
                 const file = yield this.mongo.isFileExist(query);
                 if (file.length > 0) {
-                    const fileAsReplyMarkup = this.savingReplyMarkup(query, file, 5, String(chatId), editedMsg.id, userId);
-                    editedMsg = yield ctx.editMessageText(editedMsg.id, `𝙏𝙝𝙚 𝙍𝙚𝙨𝙪𝙡𝙩 𝙛𝙤𝙧 >>${query}\n\nTotal: ${fileAsReplyMarkup.length}\n\n𝙍𝙚𝙦𝙪𝙚𝙨𝙩 𝘽𝙮: ${firstName}\n\n𝙋𝙤𝙬𝙚𝙧𝙚𝙙 𝘽𝙮: ${chatTitle}\n\n<b>!! This Message will be Deleted in 1 Min !!</b>`, {
+                    const fileAsReplyMarkup = this.savingReplyMarkup(query, file, 8, String(chatId), editedMsg.id, userId);
+                    editedMsg = yield ctx.editMessageText(editedMsg.id, `𝙏𝙝𝙚 𝙍𝙚𝙨𝙪𝙡𝙩 𝙛𝙤𝙧: ${query}\n\nTotal: ${fileAsReplyMarkup.length}\n\n𝙍𝙚𝙦𝙪𝙚𝙨𝙩 𝘽𝙮: ${firstName}\n\n𝙋𝙤𝙬𝙚𝙧𝙚𝙙 𝘽𝙮: ${chatTitle}\n\n<b>!! This Message will be Deleted in 1 Min !!</b>`, {
                         parseMode: "HTML",
                         replyMarkup: {
                             inlineKeyboard: fileAsReplyMarkup[0],

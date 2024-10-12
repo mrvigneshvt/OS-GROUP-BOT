@@ -285,6 +285,27 @@ export class DataBase {
         }
     }
 
+
+    public async isFileExist(query: string): Promise<any[]> {
+        try {
+            // Build the raw pattern to handle spaces and special characters
+            const raw_pattern = query.replace(/ /g, '.*[\\s\\.\\+\\-_\\(\\)\\[\\]]');
+
+            // Compile the regex, making it case-insensitive with 'i' flag
+            const regex = new RegExp(raw_pattern, 'i');
+
+            // Perform the search with the compiled regex
+            const files = await fileModel.find({ fileName: { $regex: regex } }).limit(50);
+
+            console.log(files.length);
+            return files;
+        } catch (error) {
+            console.log(error);
+            return [];
+        }
+    }
+
+    /*
     public async isFileExist(query: string): Promise<any[]> {
         try {
 
@@ -303,7 +324,7 @@ export class DataBase {
 
             // Perform the search with the case-sensitive regex
             const files = await fileModel.find({ fileName: { $regex: regex } })
-                .sort({ _id: -1 });
+
 
 
             console.log(files.length);
@@ -312,7 +333,7 @@ export class DataBase {
             console.log(error);
             return [];
         }
-    }
+    }*/
 
 
 

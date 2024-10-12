@@ -1,19 +1,22 @@
+interface FileCaption {
+    id: any
+    fileName: string
+    fileId: string,
+    fileUniqueId: string,
+    fileMimeType: string,
+    fileSize: string,
+    fileChannelName: string,
+    fileChannelId: string,
+    __v: any
+}
 class markup {
     constructor() {
     }
 
-    public FileCaption(file: {
-        _id: any
-        fileName: string
-        fileId: string,
-        fileUniqueId: string,
-        fileMimeType: string,
-        fileSize: string,
-        fileChannelName: string,
-        fileChannelId: string,
-        __v: any
-    }) {
-        return `<b>File Name: ${file.fileName}\n\nFile Size: ${file.fileSize}\n\nThese File WIll be deleted in 1 Min to keep it Permanent forward to Any Other Chat !</b>`
+
+
+    public FileCaption(file: FileCaption) {
+        return `<b><u>File Name:</u> ${file.fileName}\n\n<u>File Size:</u> ${file.fileSize}\n\n<u>These File WIll be deleted in 1 Min to keep it Permanent forward to Any Other Chat !</u></b>`
     }
 
     public introReplyMarkup(botName: string, publicChannelName: string) {

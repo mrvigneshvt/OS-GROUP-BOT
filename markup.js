@@ -5,7 +5,7 @@ class markup {
     constructor() {
     }
     FileCaption(file) {
-        return `<b>File Name: ${file.fileName}\n\nFile Size: ${file.fileSize}\n\nThese File WIll be deleted in 1 Min to keep it Permanent forward to Any Other Chat !</b>`;
+        return `<b><u>File Name:</u> ${file.fileName}\n\n<u>File Size:</u> ${file.fileSize}\n\n<u>These File WIll be deleted in 1 Min to keep it Permanent forward to Any Other Chat !</u></b>`;
     }
     introReplyMarkup(botName, publicChannelName) {
         return [

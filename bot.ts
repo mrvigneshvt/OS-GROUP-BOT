@@ -11,6 +11,8 @@ import { EmailHashExpired } from '@mtkruto/node/script/3_errors'
 import { groupModel, userModel } from './model'
 import { totalmem } from 'os';
 import { Markup } from './markup';
+import { text } from 'stream/consumers';
+import { send } from 'process';
 
 
 interface botData {
@@ -341,7 +343,7 @@ export class Bot extends localStore {
             const msgId = Number(ctx.callbackQuery.message?.id)
             const chatId = Number(ctx.callbackQuery.message?.chat.id)
             const chatTitle = ctx.callbackQuery.message.chat.title
-            console.log(callBackData);
+            console.log(ctx);
 
 
             if (callBackData.startsWith('freePlan')) {
@@ -475,9 +477,21 @@ export class Bot extends localStore {
             if (callBackData.startsWith('page')) {
 
                 try {
+                    const senderId = ctx.callbackQuery.from.id;
+                    console.log(ctx)
                     const data = callBackData.split('/');
                     console.log(data, 'dddat')
 
+                    console.log('/iddddddd')
+                    console.log(ctx.msg.replyToMessage.from.id, 'bydddddddd')
+                    if (ctx.callbackQuery.from.id !== ctx.msg.replyToMessage.from.id) {
+                        await ctx.answerCallbackQuery({
+                            text: 'Search for YOUrself Dont Distrub others Chat',
+                            alert: true
+                        })
+
+                        return
+                    }
                     if (Number(data[3]) < 0) {
                         await ctx.answerCallbackQuery({
                             text: `You ARE IN THE FIRST PAGE !!`,
@@ -593,6 +607,15 @@ export class Bot extends localStore {
                         return
 
                     } else {
+                        if (!this.tutorialUrl) {
+                            const temp = await ctx.reply('No Tutorial Video exist')
+
+                            setTimeout(async () => {
+                                await ctx.deleteMessage(temp.id)
+                            }, 5000);
+
+                            return
+                        }
                         await ctx.replyVideo(this.tutorialUrl, {
                             caption: '<b>This is a Default Video set FROM OWNER SIDE</b>'
                         })
@@ -837,19 +860,20 @@ export class Bot extends localStore {
                 }
             }
 
-            const lastBatchTime = await this.getCurrentISTTime()
+            const lastBatchTime = await this.getCurrentISTTime();
 
             console.log('going again for', params.datas.round++)
 
-            console.log(finalSaved, 'finalsabeeed')
+            console.log(finalSaved, 'finalsabeeed');
+
             if (finalSaved) {
                 await this.client.forwardMessage(params.channelId, this.indexLog, finalSaved)
-
             }
 
             const modified = await params.ctx.editMessageText(params.msgToModify, `<b>Total Rounds: ${params.datas.round}\n\nSaved: ${params.datas.done}\n\nSkipped: ${params.datas.skip}\n\nLast Indexed Batch Time: ${lastBatchTime}\n<spoiler>If You Believe Your Current Time is Past Than this Atleast 5 Mins Send the Last File From the Index Log and /Index Again<spoiler></b>`, {
                 parseMode: 'HTML',
             });
+
 
             if (currentTasks > 0) {
 
@@ -1177,27 +1201,27 @@ export class Bot extends localStore {
 
                     /*
                     console.log(isReplied);
-
+    
                     const caption = isReplied.caption ?? undefined;
-
+    
                     const text = isReplied.text ?? undefined
-
+    
                     if (text) {
                         const total = await userModel.find({});
-
+    
                         const users = total.map((m) => m.userId);
-
+    
                         console.log(users)
-
+    
                         const totalUsers = users.length
-
+    
                         if (totalUsers > 100) {
-
+    
                         }
-
-
+    
+    
                     }
-*/
+    */
 
 
 
@@ -1284,7 +1308,9 @@ export class Bot extends localStore {
 
                         setTimeout(async () => {
                             await ctx.deleteMessage(temp.id)
-                        }, 5000)
+                        }, 5000);
+
+                        return
                     }
 
 
@@ -1299,16 +1325,24 @@ export class Bot extends localStore {
                     if (!groupDetails) {
                         if (!this.tutorialUrl) {
                             await ctx.reply('No Tutorial Video From Admin')
+                            return
                         } else {
                             await ctx.replyVideo(this.tutorialUrl, {
                                 caption: '<b>This Group Doenst Have an Tutorial Video..\n\nSo Sent u an Default Tutorial Video From Bot Owner Side!</b>',
                                 parseMode: 'HTML',
                             })
+
+                            return
                         }
-
-
-                        return
                     }
+
+
+                    await ctx.replyVideo(groupDetails, {
+                        caption: '<b>Tutorial Video of this GROUP <3</b>',
+                        parseMode: 'HTML'
+                    });
+
+                    return
                 }
 
                 return
@@ -1390,7 +1424,9 @@ export class Bot extends localStore {
 
                     await this.mongo.setShortner(String(ownerUserId), String(chatId), String(data[2]), String(data[3]));
                     await this.generateGroupPool()
-                    await ctx.reply("Congrats Your API has been ADDED!\n\nFrom now On this Group will generate Links from Your Account\n\nHappy EARNING 💵 ")
+                    await ctx.reply("<b>Congrats Your API has been ADDED!\n\nFrom now On this Group will generate Links from Your Account and Keep in Mind that a 5% ADS will be From our Side as a Part of <u>Hosting FEE of Bot</u> and As a Contribution to Open Source Application\n\n</u>Happy EARNING 💵 </u></b>\n\nuse /commands to check ur Commands (in Group)", {
+                        parseMode: 'HTML',
+                    })
                     await ctx.deleteMessage(msgId);
 
                     return
@@ -1661,12 +1697,9 @@ export class Bot extends localStore {
 
                 if (vals.startsWith('/start file_')) {
 
-
                     console.log('comes here')
 
-
                     const match = vals.match(/^\/start file_(.*)_(.*)$/);
-
 
                     if (match) {
                         console.log('matcbed')
@@ -1768,9 +1801,9 @@ export class Bot extends localStore {
 
                             let del: any
 
-                            if (fileData.fileMimeType === 'video/x-matroska') {
 
-                                del = await ctx.replyDocument(fileData.fileId, {
+                            try {
+                                const sendDoc = await await ctx.replyVideo(fileData.fileId, {
                                     caption,
                                     parseMode: 'HTML',
                                 });
@@ -1780,49 +1813,31 @@ export class Bot extends localStore {
                                 }, 59000);
 
                                 return
+                            } catch (error: any) {
+                                console.log('error when sendinf as video')
+                                if (error.message.startsWith('Unreachable')) {
+                                    const sendDoc = await ctx.replyDocument(fileData.fileId, {
+                                        caption,
+                                        parseMode: 'HTML',
+                                    });
 
-                            } else if (fileData.startsWith('video/mp4')) {
+                                    setTimeout(async () => {
+                                        await ctx.deleteMessage(sendDoc.id)
+                                    }, 59000);
 
-                                del = await ctx.replyVideo(fileData.fileId, {
-                                    caption,
-                                    parseMode: 'HTML',
-                                });
+                                    return
+                                }
 
-                                setTimeout(async () => {
-                                    await ctx.deleteMessage(del.id)
-                                }, 59000)
 
-                                return
-
-                            } else if (fileData.startsWith('video/x-msvideo')) {
-                                del = await ctx.replyDocument(fileData.fileId, {
-                                    caption,
-                                    parseMode: 'HTML',
-                                })
-
-                                setTimeout(async () => {
-                                    await ctx.deleteMessage(del.id)
-                                }, 59000)
-
-                                return
-                            } else {
-                                await this.client.sendMessage(this.admin[0], `${caption}\n\nFileID: ${fileData.fileId}\n\nMimeType: ${fileData.fileMimeType}`,);
-                                console.log('invalid file');
                             }
 
 
-                            setTimeout(async () => {
-                                if (del.id) {
-                                    await ctx.deleteMessage(del.id)
-                                    return
-                                }
-                                return
-                            }, 59000)
-
-                            return
+                        } else {
+                            console.log('un behabioured user....')
                         }
-                        console.log('enane therla user')
+
                     }
+
                 } if (vals == '/start') {
                     const name = ctx.message.from?.firstName || 'User'
                     console.log('comes under start')
@@ -1833,8 +1848,9 @@ export class Bot extends localStore {
                         }
                     })
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.log(error)
+
             }
         })
 
@@ -1978,9 +1994,9 @@ export class Bot extends localStore {
 
             if (file.length > 0) {
 
-                const fileAsReplyMarkup = this.savingReplyMarkup(query, file, 5, String(chatId), editedMsg.id, userId);
+                const fileAsReplyMarkup = this.savingReplyMarkup(query, file, 8, String(chatId), editedMsg.id, userId);
 
-                editedMsg = await ctx.editMessageText(editedMsg.id, `𝙏𝙝𝙚 𝙍𝙚𝙨𝙪𝙡𝙩 𝙛𝙤𝙧 >>${query}\n\nTotal: ${fileAsReplyMarkup.length}\n\n𝙍𝙚𝙦𝙪𝙚𝙨𝙩 𝘽𝙮: ${firstName}\n\n𝙋𝙤𝙬𝙚𝙧𝙚𝙙 𝘽𝙮: ${chatTitle}\n\n<b>!! This Message will be Deleted in 1 Min !!</b>`, {
+                editedMsg = await ctx.editMessageText(editedMsg.id, `𝙏𝙝𝙚 𝙍𝙚𝙨𝙪𝙡𝙩 𝙛𝙤𝙧: ${query}\n\nTotal: ${fileAsReplyMarkup.length}\n\n𝙍𝙚𝙦𝙪𝙚𝙨𝙩 𝘽𝙮: ${firstName}\n\n𝙋𝙤𝙬𝙚𝙧𝙚𝙙 𝘽𝙮: ${chatTitle}\n\n<b>!! This Message will be Deleted in 1 Min !!</b>`, {
                     parseMode: "HTML",
                     replyMarkup: {
                         inlineKeyboard: fileAsReplyMarkup[0],
