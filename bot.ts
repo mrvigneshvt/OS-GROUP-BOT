@@ -10,6 +10,7 @@ import axios from 'axios'
 import { EmailHashExpired } from '@mtkruto/node/script/3_errors'
 import { groupModel, userModel } from './model'
 import { totalmem } from 'os';
+import { Markup } from './markup';
 
 
 interface botData {
@@ -51,17 +52,11 @@ export class Bot extends localStore {
     private msgDeleteTime
     private planDescription
     private planImage
-    private plansPrice
-    private planStart
-    private paymentMethod
     private upiId
     private paymentScreenshotId
-    private upiMarkup
     private qrImage: string | undefined
     private upiImage
-    private qrMarkup
     private qrCaption
-    private groupJoinerMarkup
     private forceSubUrl: string | undefined
     private forceSubChatId: undefined | string
     private indexLog;
@@ -76,27 +71,26 @@ export class Bot extends localStore {
     private publicChannelUserName;
     private botUserName;
     public publicChannelUname;
-    private newMemberReplyMarkup;
-    private contactAdminReplyMarkup;
-    private forceSubReplyMarkup;
-    private myPlanReplymarkup;
-    private bannedReplyMarkup;
-    private introReplyMarkup;
+    private percentageAds
+
 
 
     constructor(data: botData) {
         super()
-        this.publicChannelUserName = '@SingleMachiOffll';
+        this.botUrl = 'https://t.me/'
+        this.percentageAds = 10;
         this.publicChannelUname = 'SingleMachiOffll';
-        this.contactAdmin = 'https://t.me/MachiXsupportBot';
+        this.publicChannelUserName = `@${this.publicChannelUname}`;
+
+        this.contactAdmin = `${this.botUrl}MachiXsupportBot`;
         this.upiId = 'sooon'
-        this.paymentScreenshotId = 'https://t.me/MachiXsupportBot';
+        this.paymentScreenshotId = `${this.botUrl}MachiXsupportBot`;
 
 
         this.admin = ['1767901454', '7822087230'];
 
         this.indexLog = '-1002473253639'// - 1002279938392';
-        this.poweringGroupLog = '--1002269051306'; //channel id of groupChat !
+        this.poweringGroupLog = '-1002269051306'; //channel id of groupChat !
         this.fileLog = ['-1002094214421']
 
 
@@ -104,7 +98,6 @@ export class Bot extends localStore {
 
 
         this.botUserName = '@';
-        this.botUrl = 'https://t.me/'
 
         this.botUname = undefined
         this.tutorialUrl = undefined
@@ -143,60 +136,9 @@ export class Bot extends localStore {
 
         this.planDescription = `Hello!!😎\nThis Is Premium Purchase Section\nOwned by: ${this.publicChannelUserName} 💨 \n\nCh}eck The Premium Plans By Click the Button Below 👇`
 
-        this.introReplyMarkup = [
-            [{ text: 'Add to Group', url: `http://t.me/${this.botUname}?startgroup=true` }],
-            [{ text: 'Update', url: `https://t.me/${this.publicChannelUname}` }, { text: 'Premium', callbackData: 'planIntro' }]
-        ]
-        this.bannedReplyMarkup = [
-            [{ text: 'Admin..', url: this.paymentScreenshotId }]
-        ]
-        this.myPlanReplymarkup = [
-            [{ text: "Get Free Trial", callbackData: 'freePlan' }],
-            [{ text: "Premium Plans", callbackData: 'showPlans' }],
-            [{ text: "Close", callbackData: "delte" }]
-
-        ]
-        this.forceSubReplyMarkup = [
-            [{ text: "JOIN HERE !", url: this.forceSubUrl }]
-        ]
-        this.contactAdminReplyMarkup = [
-            [{ text: 'MSG Admin !', url: this.contactAdmin }]
-        ]
-        this.newMemberReplyMarkup = [
-            [{ text: 'Support Group', url: `https://t.me/${this.publicChannelUname}` }, { text: 'Updates Channel', url: 'https://t.me/singlemachioffll' }],
-            [{ text: 'Bot Owner', url: `${this.paymentScreenshotId}` }]
-        ]
-        this.planStart = [
-            [{ text: ' > Premium Plans', callbackData: 'showPlans' }],
-            [{ text: ' > Check Benefits', callbackData: 'showBenefits' }],
-            [{ text: 'Close X', callbackData: `delete` }]
-        ]
-        this.paymentMethod = [
-            [{ text: ' Pay on UPI', callbackData: 'upi' }],
-            [{ text: ' Scan QR Code', callbackData: 'qr' }],
-            [{ text: 'Close X', callbackData: `delete` }]
-        ]
-        this.plansPrice = [
-            [{ text: `1 Week: 19 Rs`, callbackData: 'plans/1 week/19' }, { text: `1 Month: 59 Rs`, callbackData: 'plans/1 month/59' }],
-            [{ text: `6 Month: 399 Rs`, callbackData: 'plans/6 month/399' }, { text: `1 Year: 600 Rs`, callbackData: 'plans/1 year/600' }],
-            [{ text: 'Get Help', url: this.paymentScreenshotId }],
-            [{ text: 'Close X', callbackData: `delete` }]
-        ]
-        this.upiMarkup = [
-            [{ text: 'Send Screenshot <=', url: this.paymentScreenshotId }],
-            [{ text: '=> Get QR Code ', callbackData: 'qr' }, { text: 'Change Premium Plans', callbackData: 'showPlans' }],
-            [{ text: 'Close X', callbackData: `delete` }]
-        ]
         this.qrCaption = `Scan The Qr Code 👆And Pay The Plan Fees\n\nIMPORTANT - After Payment Send Screenshot Here👇`
-        this.qrMarkup = [
-            [{ text: 'Send Screenshot <=', url: this.paymentScreenshotId }],
-            [{ text: '=> Get UPI Code ', callbackData: 'upi' }, { text: 'Change Premium Plans', callbackData: 'showPlans' }],
-            [{ text: 'Close X', callbackData: `delete` }]
-        ]
-        this.groupJoinerMarkup = [
-            [{ text: 'Support Group', url: this.paymentScreenshotId }, { text: 'Updates Channel', url: this.paymentScreenshotId }],
-            [{ text: 'Bot Owner', url: this.paymentScreenshotId }]
-        ]
+
+
         this.forceSub = true
 
 
@@ -214,6 +156,14 @@ export class Bot extends localStore {
 
     private upiInformation(upiId: string) {
         return `Pay On This Upi Id 👇\nUPI Handle - <code>${upiId}</code>\n\nIMPORTANT - After Payment Send Screenshot Here👇`
+    }
+
+    private percentagePartition() {
+        // Generate a random number between 0 and 100
+        const randomValue = Math.random() * 100;
+
+        // Return true if the random value is less than or equal to the percentage chance
+        return randomValue <= this.percentageAds;
     }
 
     public async indexEngine() {
@@ -294,7 +244,8 @@ export class Bot extends localStore {
 
     public async start() {
         try {
-            await this.mongo.connectDB()
+            await this.mongo.connectDB();
+            console.log('making admin rep')
             console.log(await this.mongo.adminReport(this.isAdsOn))
             console.log('trying to connect to bot.....')
             await this.client.start({ botToken: this.botToken })
@@ -306,13 +257,52 @@ export class Bot extends localStore {
             this.botUname = data.username;
             this.botUserName = this.botUserName + data.username;
             this.botUrl = this.botUrl + data.username;
+            console.log(this.botDetails);
 
-            console.log(this.botDetails)
+            const conclude = await this.startEngine();
+
 
 
         } catch (error) {
             console.log('error in bot "start":', error)
             throw new Error('crashing..')
+        }
+    }
+
+    private async startEngine() {
+        try {
+            let botData = await this.mongo.botModel(this.botToken);
+            console.log(botData, 'botDataaaaaaaa');
+            if (!botData) {
+                throw new Error('cant find Your BotModel or Datas..!')
+            }
+            botData = botData[0]
+            this.publicChannelUname = `${this.botUrl}${botData.publicChannelUName}`;
+            this.contactAdmin = `${this.botUrl}${botData.contactAdmin}`;
+            this.poweringGroupLog = botData.poweringGroupLog;
+            this.fileLog = botData.fileLog;
+            this.upiId = botData.upiId;
+
+            if (botData.qrFileId) {
+                this.qrImage = botData.qrCaption;
+            }
+
+            console.log('setupped everything')
+            console.log('publicchannelname:   ', this.publicChannelUname)
+            console.log('contact:   ', this.contactAdmin);
+            console.log('powering group:   ', this.poweringGroupLog);
+            console.log('fileLOG:   ', this.fileLog);
+            console.log('upiId:   ', this.upiId);
+
+            console.log('DONEEEEEEEEEEEEEEEEEE')
+
+
+
+
+
+        } catch (error) {
+            console.log('error in startEngine..')
+            throw new Error('crashing due to error in startENGINE')
         }
     }
 
@@ -526,7 +516,7 @@ export class Bot extends localStore {
                     await ctx.replyPhoto(this.planImage, {
                         caption: this.planDescription,
                         replyMarkup: {
-                            inlineKeyboard: this.planStart
+                            inlineKeyboard: Markup.planStartReplyMarkup(),
                         }
                     })
 
@@ -613,7 +603,7 @@ export class Bot extends localStore {
                         const sentMsg = await ctx.replyPhoto(this.qrImage, {
                             caption: this.qrCaption,
                             replyMarkup: {
-                                inlineKeyboard: this.qrMarkup
+                                inlineKeyboard: Markup.qrReplyMarkup(this.paymentScreenshotId)
                             }
                         });
                     }
@@ -642,7 +632,7 @@ export class Bot extends localStore {
                         caption: cap,
                         parseMode: 'HTML',
                         replyMarkup: {
-                            inlineKeyboard: this.upiMarkup
+                            inlineKeyboard: Markup.upiReplyMarkup(this.paymentScreenshotId)
                         }
                     })
 
@@ -670,7 +660,7 @@ export class Bot extends localStore {
                     await ctx.replyPhoto(this.planImage, {
                         caption: this.paymentCaption(data[2]),
                         replyMarkup: {
-                            inlineKeyboard: this.paymentMethod
+                            inlineKeyboard: Markup.paymentMethodReplyMarkup()
                         }
                     })
 
@@ -684,7 +674,7 @@ export class Bot extends localStore {
             if (callBackData.startsWith('showPlans')) {
                 await ctx.editMessageText(msgId, this.planDescription, {
                     replyMarkup: {
-                        inlineKeyboard: this.plansPrice
+                        inlineKeyboard: Markup.planPriceReplyMarkup(this.paymentScreenshotId)
                     }
                 })
             }
@@ -711,7 +701,7 @@ export class Bot extends localStore {
 
                     const d = await this.client.sendMessage(ctx.message.chat.id, this.groupAddCaption(channelName), {
                         replyMarkup: {
-                            inlineKeyboard: this.newMemberReplyMarkup
+                            inlineKeyboard: Markup.newMemberReplyMarkup(this.publicChannelUname, this.paymentScreenshotId,)
                         },
                         parseMode: 'HTML',
                     })
@@ -739,7 +729,7 @@ export class Bot extends localStore {
                 const d = await ctx.reply(`<b>Hᴇʟʟᴏ ${userName} 😍, Aɴᴅ Wᴇʟᴄᴏᴍᴇ Tᴏ ${channelName} ❤️</b>\n\n<b>Just Send Any File Name ill SERCH Open Sourced Available files and <u>List YOU</u>.</b>`, {
                     parseMode: 'HTML',
                     replyMarkup: {
-                        inlineKeyboard: this.groupJoinerMarkup
+                        inlineKeyboard: Markup.groupJoinerReplyMarkup(this.paymentScreenshotId)
                     }
                 })
 
@@ -845,13 +835,10 @@ export class Bot extends localStore {
 
             } else {
                 console.log(`Indexing Finished !!\n\nSaved: ${params.datas.done}\n\nDuplicated: ${params.datas.skip}\n\nTotal Rounds: ${params.datas.round}`);
-                return await params.ctx.reply(`<b>Indexing Finished !!\n\nSaved: ${params.datas.done}\n\nDuplicated: ${params.datas.skip}\n\nTotal Rounds: ${params.datas.round}</b>`);
-
+                return await params.ctx.editMessageText(params.msgToModify, `<b>Indexing Finished !!\n\nSaved: ${params.datas.done}\n\nDuplicated: ${params.datas.skip}\n\nTotal Rounds: ${params.datas.round}</b>`, {
+                    parseMode: 'HTML',
+                });
             }
-
-
-
-
 
         } catch (error) {
 
@@ -889,6 +876,112 @@ export class Bot extends localStore {
 
     public async commands() {
 
+        this.client.command('set_admin', async (ctx) => {
+            try {
+
+                const text = ctx.message.text
+                const userID = ctx.message.from?.id;
+
+                if (!this.admin.includes(String(userID))) {
+                    return
+                };
+
+                if (text == '/set_admin') {
+                    await ctx.reply('INVALID FORMAT \n\nSend in this Format: /set_admin aDMinPubLicUsErNaMe')
+                }
+
+                const split = text.split(' ');
+
+                if (split.length == 2) {
+                    await this.mongo.editBotModel(this.botToken, split[1], 'contactAdmin')
+                    await this.startEngine()
+                    return
+                }
+
+            } catch (error) {
+                console.log('error in set fileLOG::', error)
+            }
+        })
+
+        this.client.command('filelog', async (ctx) => {
+            try {
+
+                const userID = ctx.message.from?.id;
+
+                if (!this.admin.includes(String(userID))) {
+                    return
+                };
+
+                const isRepied = ctx.message.replyToMessage;
+
+                if (!isRepied) {
+                    await ctx.reply('forward A message from fileLog channel and Reply it with fileLog !');
+                    return
+                }
+                const isChatId = isRepied.chat.id
+                const chatType = isRepied.chat.type
+
+                if (chatType !== 'channel') {
+                    await ctx.reply('Only works for Channnel');
+                    return
+                } else {
+                    await this.mongo.editBotModel(this.botToken, String(isChatId), 'fileLog')
+                    await this.startEngine()
+                }
+            } catch (error) {
+                console.log('error in set fileLOG::', error)
+            }
+        })
+
+        this.client.command('qr', async (ctx: any) => {
+            try {
+                const userID = ctx.message.from?.id;
+
+                if (!this.admin.includes(String(userID))) {
+                    return
+                };
+
+                const isRepied = ctx.message.replyToMessage;
+
+                if (!isRepied) {
+                    await ctx.reply('Send AN Image and Reply it with QR !');
+                    return
+                }
+
+                const fileId = isRepied.photo?.fileId || undefined
+
+                if (!fileId) {
+                    await ctx.reply('Cant file FILEID..');
+                    console.log(fileId, 'missing fileeee iDDDD');
+                    return
+                }
+
+                const change = await this.mongo.editBotModel(this.botToken, fileId, 'qrFileId');
+
+                if (!change) {
+                    await ctx.reply(`Failed to set QR ID !}`);
+                    if (this.qrImage) {
+                        await ctx.replyPhoto(this.qrImage, {
+                            caption: 'Your Current QR IMAGE..0'
+                        })
+                    }
+                    return
+                } else {
+                    await ctx.reply(`QR ID SET!`);
+                    await this.startEngine();
+                    await ctx.replyPhoto(String(this.qrImage), {
+                        caption: 'Your Current QR Image..'
+                    })
+                    return
+                }
+
+
+            } catch (error) {
+                console.log('error in set QR::', error)
+            }
+
+        })
+
         this.client.command('upi', async (ctx: any) => {
             try {
 
@@ -903,11 +996,19 @@ export class Bot extends localStore {
                         return
                     }
 
-                    const data = text.split('/');
+                    const data = text.split(' ');
 
-                    this.upiId = data[2];
 
-                    await ctx.reply(`UPI ID SET!: ${this.upiId}`)
+                    const changeBotModel = await this.mongo.editBotModel(this.botToken, data[1], 'upiId')
+
+                    if (changeBotModel) {
+                        this.upiId = data[1];
+                        await ctx.reply(`UPI ID SET!: ${this.upiId}`)
+                        await this.startEngine();
+                        return
+                    } else {
+                        await ctx.reply(`Failed to set UPI ID !: ${this.upiId}`)
+                    }
 
                 }
             } catch (error) {
@@ -1212,7 +1313,7 @@ export class Bot extends localStore {
                         await ctx.deleteMessage(msgId)
                         await ctx.reply('<b>Invalid Url or TOKEN / CONTACT ADMIN !!</b>', {
                             replyMarkup: {
-                                inlineKeyboard: this.contactAdminReplyMarkup,
+                                inlineKeyboard: Markup.contactAdminReplyMarkup(this.contactAdmin),
                             },
                             parseMode: 'HTML',
                             protectContent: true,
@@ -1301,7 +1402,7 @@ export class Bot extends localStore {
                 if (!isPremiumExpired) {
                     await ctx.reply(`Hey ${ctx.message.from?.firstName || 'user'},\n\nʏᴏᴜ ᴅᴏ ɴᴏᴛ ʜᴀᴠᴇ ᴀɴʏ ᴀᴄᴛɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴs, ɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴛᴀᴋᴇ ᴘʀᴇᴍɪᴜᴍ ᴛʜᴇɴ ᴄʟɪᴄᴋ ᴏɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ 👇`, {
                         replyMarkup: {
-                            inlineKeyboard: this.myPlanReplymarkup
+                            inlineKeyboard: Markup.myPlanReplyMarkup()
                         }
                     });
                     return
@@ -1521,7 +1622,7 @@ export class Bot extends localStore {
                         if (!user.valid) {
                             await ctx.reply('YOU ARE BANNED BY OUR TEAM !!\n\nContact: Admin', {
                                 replyMarkup: {
-                                    inlineKeyboard: this.bannedReplyMarkup
+                                    inlineKeyboard: Markup.bannedReplyMarkup(this.paymentScreenshotId)
                                 }
                             })
 
@@ -1540,79 +1641,86 @@ export class Bot extends localStore {
                         console.log(isPower, 'issssssssssssspower')
                         let shortenedUrl;
                         if (!isPower) {
-                            shortenedUrl = await this.shortenUrlText(this.apiUrl, this.apiToken, endPoint)
 
                         } else {
-                            shortenedUrl = await this.shortenUrlText(isPower.userApi, isPower.userApiToken, endPoint)
-                        }
+                            const underTax = await this.percentagePartition()
+
+                            if (!underTax) {
+                                shortenedUrl = await this.shortenUrlText(isPower.userApi, isPower.userApiToken, endPoint);
+
+                            } else {
+                                shortenedUrl = await this.shortenUrlText(this.apiUrl, this.apiToken, endPoint)
+
+                            }
 
 
 
-                        console.log(shortenedUrl, 'shoertttt')
+                            console.log(shortenedUrl, 'shoertttt')
 
-                        if (!user.verified && fileData && shortenedUrl.length > 0 && !isVerified && this.isAdsOn) {
-                            const shortUrl = String(shortenedUrl[0])
-                            let pool = this.addPool(String(ctx.message.from?.id), hash, endPoint, shortUrl, fileData.fileId);
+                            if (!user.verified && fileData && shortenedUrl.length > 0 && !isVerified && this.isAdsOn) {
+                                const shortUrl = String(shortenedUrl[0])
+                                let pool = this.addPool(String(ctx.message.from?.id), hash, endPoint, shortUrl, fileData.fileId);
 
-                            console.log(pool, 'pool')
-                            await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
-                                replyMarkup: {
-                                    inlineKeyboard: [
-                                        [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
-                                        //           [{ text: 'Bypassed URL', url: pool.url }],
-                                        // [{ text: 'Tutorial Video!', url: tutorial }],
-                                        [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
+                                console.log(pool, 'pool')
 
-                                    ]
-                                }
-                            })
 
-                            return
-                        }
-                        else if ((!this.isAdsOn || user.verified) && fileData && shortenedUrl.length > 0) {
+                                await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                    replyMarkup: {
+                                        inlineKeyboard: [
+                                            [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
+                                            [{ text: 'Bypassed URL', url: pool.url }],
+                                            [{ text: 'Tutorial Video!', url: tutorial }],
+                                            [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
 
-                            console.log(fileData);
+                                        ]
+                                    }
+                                })
 
-                            let del: any
-                            del = (fileType == 'video/x-matroska') ? await ctx.replyVideo(fileData.fileId, {
-                                caption: "<3\n\nThis File will be Automatically DELETED in 1 MIN, Forward the File To SOMEONE to keep it Permanent"
-                            }) : await ctx.replyDocument(fileData.fileId, {
-                                caption: "<3\n\nThis File will be Automatically DELETED in 1 MIN, Forward the File To SOMEONE to keep it Permanent"
-                            })
-
-                            setTimeout(async () => {
-                                if (del.id) {
-                                    await ctx.deleteMessage(del.id)
-                                    return
-                                }
                                 return
-                            }, 59000)
+                            }
+                            else if ((!this.isAdsOn || user.verified) && fileData && shortenedUrl.length > 0) {
 
-                            return
+                                console.log(fileData);
+
+                                let del: any
+                                del = (fileType == 'video/x-matroska') ? await ctx.replyVideo(fileData.fileId, {
+                                    caption: "<3\n\nThis File will be Automatically DELETED in 1 MIN, Forward the File To SOMEONE to keep it Permanent"
+                                }) : await ctx.replyDocument(fileData.fileId, {
+                                    caption: "<3\n\nThis File will be Automatically DELETED in 1 MIN, Forward the File To SOMEONE to keep it Permanent"
+                                })
+
+                                setTimeout(async () => {
+                                    if (del.id) {
+                                        await ctx.deleteMessage(del.id)
+                                        return
+                                    }
+                                    return
+                                }, 59000)
+
+                                return
+                            }
+
+                            console.log('enane therla user')
+
+
+
+
                         }
 
-                        console.log('enane therla user')
 
 
-
-
-                    } else {
-                        console.log('Invalid input format');
                     }
 
 
-
+                    const name = ctx.message.from?.firstName || 'User'
+                    console.log('comes under start')
+                    await ctx.reply(this.startCaption(name), {
+                        parseMode: 'HTML',
+                        replyMarkup: {
+                            inlineKeyboard: Markup.introReplyMarkup(String(this.botUname), this.publicChannelUname)
+                        }
+                    })
                 }
-
-
-                const name = ctx.message.from?.firstName || 'User'
-                console.log('comes under start')
-                await ctx.reply(this.startCaption(name), {
-                    parseMode: 'HTML',
-                    replyMarkup: {
-                        inlineKeyboard: this.introReplyMarkup
-                    }
-                })
             } catch (error) {
                 console.log(error)
             }
@@ -1625,7 +1733,7 @@ export class Bot extends localStore {
             await ctx.replyPhoto(this.planImage, {
                 caption: this.planDescription,
                 replyMarkup: {
-                    inlineKeyboard: this.planStart
+                    inlineKeyboard: Markup.planStartReplyMarkup()
                 }
             })
 
@@ -1663,10 +1771,15 @@ export class Bot extends localStore {
                 }
 
                 else if (ctx.message.chat.type == 'private') {
-                    console.log('spamming private')
+                    console.log('spamming private');
+                    await ctx.reply(this.startCaption(ctx.message.from.firstName || 'USER'), {
+                        parseMode: "HTML",
+                        replyMarkup: {
+                            inlineKeyboard: Markup.introReplyMarkup(String(this.botUname), this.publicChannelUname)
+                        }
+                    })
                     return
                 }
-
                 console.log('some Query initiating next')
                 next()
 
@@ -1683,6 +1796,7 @@ export class Bot extends localStore {
         this.client.on('message:text', async (ctx) => {
 
             try {
+                console.log('msg comes')
                 const firstName = ctx.message.from?.firstName || 'user'
                 const msgId = ctx.message.id;
                 const userId = ctx.message.from?.id
@@ -1720,8 +1834,9 @@ export class Bot extends localStore {
                 editedMsg = await ctx.reply('<b>WoohooOooo You are So fast Naughtyy 😜\n\n Join My Channel to Use ME! and Type Again .</b>', {
                     parseMode: 'HTML',
                     replyMarkup: {
-                        inlineKeyboard: this.forceSubReplyMarkup,
+                        inlineKeyboard: Markup.forceSubReplyMarkup(this.forceSubUrl),
                     }
+
                 })
 
 
@@ -1794,7 +1909,7 @@ export class Bot extends localStore {
     // private userplanCaption(name: string,)
 
     private startCaption(name: string) {
-        return `👋 Hey ${name} , <b>GOOD DAY</b>  ⚡️\n🤗 Welcome to  movie search bot.\n🤖 I can give you direct movies\n📁 Type & Send Me Any Movie Name`
+        return `👋 Hey ${name} , <b>GOOD DAY</b>  ⚡️\n🤗 Welcome to  Open Source Advance Filter bot.\n🤖 I Can Send you Direct Files by searching OpenLy Available Datas. \n📁 Type & Send Me Any File Name`
     }
     private paymentCaption(ammount: number | string) {
         return `Wow!!🤯\nYou Have Choosen Weekly Bot Membership Of Price ₹${ammount}\nChoose Payment Method 👇`

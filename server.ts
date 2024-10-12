@@ -19,12 +19,12 @@ let bot = new Bot({
     try {
         // await bot.getCurrentISTTime()
         await bot.start();
-        //  await bot.generateGroupPool()
-        // await bot.listener();
-        //  await bot.commands();
+        await bot.generateGroupPool()
+        await bot.listener();
+        await bot.groupManager();
+        await bot.commands();
         await bot.indexEngine()
-        //await bot.fileSaver();
-        //await bot.groupManager();
+        await bot.fileSaver();
 
     } catch (error) {
         console.log('error in server.ts', error)

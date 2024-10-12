@@ -44,21 +44,23 @@ const date_fns_tz_1 = require("date-fns-tz");
 const localStore_1 = require("./localStore");
 const axios_1 = __importDefault(require("axios"));
 const model_1 = require("./model");
+const markup_1 = require("./markup");
 class Bot extends localStore_1.localStore {
     constructor(data) {
         super();
-        this.publicChannelUserName = '@SingleMachiOffll';
+        this.botUrl = 'https://t.me/';
+        this.percentageAds = 10;
         this.publicChannelUname = 'SingleMachiOffll';
-        this.contactAdmin = 'https://t.me/MachiXsupportBot';
+        this.publicChannelUserName = `@${this.publicChannelUname}`;
+        this.contactAdmin = `${this.botUrl}MachiXsupportBot`;
         this.upiId = 'sooon';
-        this.paymentScreenshotId = 'https://t.me/MachiXsupportBot';
+        this.paymentScreenshotId = `${this.botUrl}MachiXsupportBot`;
         this.admin = ['1767901454', '7822087230'];
         this.indexLog = '-1002473253639'; // - 1002279938392';
-        this.poweringGroupLog = '--1002269051306'; //channel id of groupChat !
+        this.poweringGroupLog = '-1002269051306'; //channel id of groupChat !
         this.fileLog = ['-1002094214421'];
         this.isAdsOn = true;
         this.botUserName = '@';
-        this.botUrl = 'https://t.me/';
         this.botUname = undefined;
         this.tutorialUrl = undefined;
         this.forceSubUrl = undefined;
@@ -84,59 +86,7 @@ class Bot extends localStore_1.localStore {
         this.botDetails = undefined;
         this.msgDeleteTime = 60000; //1 minute
         this.planDescription = `Hello!!😎\nThis Is Premium Purchase Section\nOwned by: ${this.publicChannelUserName} 💨 \n\nCh}eck The Premium Plans By Click the Button Below 👇`;
-        this.introReplyMarkup = [
-            [{ text: 'Add to Group', url: `http://t.me/${this.botUname}?startgroup=true` }],
-            [{ text: 'Update', url: `https://t.me/${this.publicChannelUname}` }, { text: 'Premium', callbackData: 'planIntro' }]
-        ];
-        this.bannedReplyMarkup = [
-            [{ text: 'Admin..', url: this.paymentScreenshotId }]
-        ];
-        this.myPlanReplymarkup = [
-            [{ text: "Get Free Trial", callbackData: 'freePlan' }],
-            [{ text: "Premium Plans", callbackData: 'showPlans' }],
-            [{ text: "Close", callbackData: "delte" }]
-        ];
-        this.forceSubReplyMarkup = [
-            [{ text: "JOIN HERE !", url: this.forceSubUrl }]
-        ];
-        this.contactAdminReplyMarkup = [
-            [{ text: 'MSG Admin !', url: this.contactAdmin }]
-        ];
-        this.newMemberReplyMarkup = [
-            [{ text: 'Support Group', url: `https://t.me/${this.publicChannelUname}` }, { text: 'Updates Channel', url: 'https://t.me/singlemachioffll' }],
-            [{ text: 'Bot Owner', url: `${this.paymentScreenshotId}` }]
-        ];
-        this.planStart = [
-            [{ text: ' > Premium Plans', callbackData: 'showPlans' }],
-            [{ text: ' > Check Benefits', callbackData: 'showBenefits' }],
-            [{ text: 'Close X', callbackData: `delete` }]
-        ];
-        this.paymentMethod = [
-            [{ text: ' Pay on UPI', callbackData: 'upi' }],
-            [{ text: ' Scan QR Code', callbackData: 'qr' }],
-            [{ text: 'Close X', callbackData: `delete` }]
-        ];
-        this.plansPrice = [
-            [{ text: `1 Week: 19 Rs`, callbackData: 'plans/1 week/19' }, { text: `1 Month: 59 Rs`, callbackData: 'plans/1 month/59' }],
-            [{ text: `6 Month: 399 Rs`, callbackData: 'plans/6 month/399' }, { text: `1 Year: 600 Rs`, callbackData: 'plans/1 year/600' }],
-            [{ text: 'Get Help', url: this.paymentScreenshotId }],
-            [{ text: 'Close X', callbackData: `delete` }]
-        ];
-        this.upiMarkup = [
-            [{ text: 'Send Screenshot <=', url: this.paymentScreenshotId }],
-            [{ text: '=> Get QR Code ', callbackData: 'qr' }, { text: 'Change Premium Plans', callbackData: 'showPlans' }],
-            [{ text: 'Close X', callbackData: `delete` }]
-        ];
         this.qrCaption = `Scan The Qr Code 👆And Pay The Plan Fees\n\nIMPORTANT - After Payment Send Screenshot Here👇`;
-        this.qrMarkup = [
-            [{ text: 'Send Screenshot <=', url: this.paymentScreenshotId }],
-            [{ text: '=> Get UPI Code ', callbackData: 'upi' }, { text: 'Change Premium Plans', callbackData: 'showPlans' }],
-            [{ text: 'Close X', callbackData: `delete` }]
-        ];
-        this.groupJoinerMarkup = [
-            [{ text: 'Support Group', url: this.paymentScreenshotId }, { text: 'Updates Channel', url: this.paymentScreenshotId }],
-            [{ text: 'Bot Owner', url: this.paymentScreenshotId }]
-        ];
         this.forceSub = true;
         this.client.invoke.use(({ error }, next) => __awaiter(this, void 0, void 0, function* () {
             if (error instanceof node_1.errors.FloodWait) {
@@ -151,6 +101,12 @@ class Bot extends localStore_1.localStore {
     }
     upiInformation(upiId) {
         return `Pay On This Upi Id 👇\nUPI Handle - <code>${upiId}</code>\n\nIMPORTANT - After Payment Send Screenshot Here👇`;
+    }
+    percentagePartition() {
+        // Generate a random number between 0 and 100
+        const randomValue = Math.random() * 100;
+        // Return true if the random value is less than or equal to the percentage chance
+        return randomValue <= this.percentageAds;
     }
     indexEngine() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -220,6 +176,7 @@ class Bot extends localStore_1.localStore {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield this.mongo.connectDB();
+                console.log('making admin rep');
                 console.log(yield this.mongo.adminReport(this.isAdsOn));
                 console.log('trying to connect to bot.....');
                 yield this.client.start({ botToken: this.botToken });
@@ -229,10 +186,42 @@ class Bot extends localStore_1.localStore {
                 this.botUserName = this.botUserName + data.username;
                 this.botUrl = this.botUrl + data.username;
                 console.log(this.botDetails);
+                const conclude = yield this.startEngine();
             }
             catch (error) {
                 console.log('error in bot "start":', error);
                 throw new Error('crashing..');
+            }
+        });
+    }
+    startEngine() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let botData = yield this.mongo.botModel(this.botToken);
+                console.log(botData, 'botDataaaaaaaa');
+                if (!botData) {
+                    throw new Error('cant find Your BotModel or Datas..!');
+                }
+                botData = botData[0];
+                this.publicChannelUname = `${this.botUrl}${botData.publicChannelUName}`;
+                this.contactAdmin = `${this.botUrl}${botData.contactAdmin}`;
+                this.poweringGroupLog = botData.poweringGroupLog;
+                this.fileLog = botData.fileLog;
+                this.upiId = botData.upiId;
+                if (botData.qrFileId) {
+                    this.qrImage = botData.qrCaption;
+                }
+                console.log('setupped everything');
+                console.log('publicchannelname:   ', this.publicChannelUname);
+                console.log('contact:   ', this.contactAdmin);
+                console.log('powering group:   ', this.poweringGroupLog);
+                console.log('fileLOG:   ', this.fileLog);
+                console.log('upiId:   ', this.upiId);
+                console.log('DONEEEEEEEEEEEEEEEEEE');
+            }
+            catch (error) {
+                console.log('error in startEngine..');
+                throw new Error('crashing due to error in startENGINE');
             }
         });
     }
@@ -398,7 +387,7 @@ class Bot extends localStore_1.localStore {
                         yield ctx.replyPhoto(this.planImage, {
                             caption: this.planDescription,
                             replyMarkup: {
-                                inlineKeyboard: this.planStart
+                                inlineKeyboard: markup_1.Markup.planStartReplyMarkup(),
                             }
                         });
                     }
@@ -470,7 +459,7 @@ class Bot extends localStore_1.localStore {
                             const sentMsg = yield ctx.replyPhoto(this.qrImage, {
                                 caption: this.qrCaption,
                                 replyMarkup: {
-                                    inlineKeyboard: this.qrMarkup
+                                    inlineKeyboard: markup_1.Markup.qrReplyMarkup(this.paymentScreenshotId)
                                 }
                             });
                         }
@@ -494,7 +483,7 @@ class Bot extends localStore_1.localStore {
                             caption: cap,
                             parseMode: 'HTML',
                             replyMarkup: {
-                                inlineKeyboard: this.upiMarkup
+                                inlineKeyboard: markup_1.Markup.upiReplyMarkup(this.paymentScreenshotId)
                             }
                         });
                     }
@@ -519,7 +508,7 @@ class Bot extends localStore_1.localStore {
                         yield ctx.replyPhoto(this.planImage, {
                             caption: this.paymentCaption(data[2]),
                             replyMarkup: {
-                                inlineKeyboard: this.paymentMethod
+                                inlineKeyboard: markup_1.Markup.paymentMethodReplyMarkup()
                             }
                         });
                     }
@@ -530,7 +519,7 @@ class Bot extends localStore_1.localStore {
                 if (callBackData.startsWith('showPlans')) {
                     yield ctx.editMessageText(msgId, this.planDescription, {
                         replyMarkup: {
-                            inlineKeyboard: this.plansPrice
+                            inlineKeyboard: markup_1.Markup.planPriceReplyMarkup(this.paymentScreenshotId)
                         }
                     });
                 }
@@ -547,7 +536,7 @@ class Bot extends localStore_1.localStore {
                         let channelName = ((_h = (_g = ctx === null || ctx === void 0 ? void 0 : ctx.message) === null || _g === void 0 ? void 0 : _g.chat) === null || _h === void 0 ? void 0 : _h.title) ? ctx.message.chat.title : 'Channel';
                         const d = yield this.client.sendMessage(ctx.message.chat.id, this.groupAddCaption(channelName), {
                             replyMarkup: {
-                                inlineKeyboard: this.newMemberReplyMarkup
+                                inlineKeyboard: markup_1.Markup.newMemberReplyMarkup(this.publicChannelUname, this.paymentScreenshotId)
                             },
                             parseMode: 'HTML',
                         });
@@ -569,7 +558,7 @@ class Bot extends localStore_1.localStore {
                     const d = yield ctx.reply(`<b>Hᴇʟʟᴏ ${userName} 😍, Aɴᴅ Wᴇʟᴄᴏᴍᴇ Tᴏ ${channelName} ❤️</b>\n\n<b>Just Send Any File Name ill SERCH Open Sourced Available files and <u>List YOU</u>.</b>`, {
                         parseMode: 'HTML',
                         replyMarkup: {
-                            inlineKeyboard: this.groupJoinerMarkup
+                            inlineKeyboard: markup_1.Markup.groupJoinerReplyMarkup(this.paymentScreenshotId)
                         }
                     });
                     setTimeout(() => __awaiter(this, void 0, void 0, function* () {
@@ -649,7 +638,9 @@ class Bot extends localStore_1.localStore {
                 }
                 else {
                     console.log(`Indexing Finished !!\n\nSaved: ${params.datas.done}\n\nDuplicated: ${params.datas.skip}\n\nTotal Rounds: ${params.datas.round}`);
-                    return yield params.ctx.reply(`<b>Indexing Finished !!\n\nSaved: ${params.datas.done}\n\nDuplicated: ${params.datas.skip}\n\nTotal Rounds: ${params.datas.round}</b>`);
+                    return yield params.ctx.editMessageText(params.msgToModify, `<b>Indexing Finished !!\n\nSaved: ${params.datas.done}\n\nDuplicated: ${params.datas.skip}\n\nTotal Rounds: ${params.datas.round}</b>`, {
+                        parseMode: 'HTML',
+                    });
                 }
             }
             catch (error) {
@@ -686,19 +677,120 @@ class Bot extends localStore_1.localStore {
     }
     commands() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.client.command('upi', (ctx) => __awaiter(this, void 0, void 0, function* () {
+            this.client.command('set_admin', (ctx) => __awaiter(this, void 0, void 0, function* () {
                 var _a;
+                try {
+                    const text = ctx.message.text;
+                    const userID = (_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id;
+                    if (!this.admin.includes(String(userID))) {
+                        return;
+                    }
+                    ;
+                    if (text == '/set_admin') {
+                        yield ctx.reply('INVALID FORMAT \n\nSend in this Format: /set_admin aDMinPubLicUsErNaMe');
+                    }
+                    const split = text.split(' ');
+                    if (split.length == 2) {
+                        yield this.mongo.editBotModel(this.botToken, split[1], 'contactAdmin');
+                        yield this.startEngine();
+                        return;
+                    }
+                }
+                catch (error) {
+                    console.log('error in set fileLOG::', error);
+                }
+            }));
+            this.client.command('filelog', (ctx) => __awaiter(this, void 0, void 0, function* () {
+                var _b;
+                try {
+                    const userID = (_b = ctx.message.from) === null || _b === void 0 ? void 0 : _b.id;
+                    if (!this.admin.includes(String(userID))) {
+                        return;
+                    }
+                    ;
+                    const isRepied = ctx.message.replyToMessage;
+                    if (!isRepied) {
+                        yield ctx.reply('forward A message from fileLog channel and Reply it with fileLog !');
+                        return;
+                    }
+                    const isChatId = isRepied.chat.id;
+                    const chatType = isRepied.chat.type;
+                    if (chatType !== 'channel') {
+                        yield ctx.reply('Only works for Channnel');
+                        return;
+                    }
+                    else {
+                        yield this.mongo.editBotModel(this.botToken, String(isChatId), 'fileLog');
+                        yield this.startEngine();
+                    }
+                }
+                catch (error) {
+                    console.log('error in set fileLOG::', error);
+                }
+            }));
+            this.client.command('qr', (ctx) => __awaiter(this, void 0, void 0, function* () {
+                var _c, _d;
+                try {
+                    const userID = (_c = ctx.message.from) === null || _c === void 0 ? void 0 : _c.id;
+                    if (!this.admin.includes(String(userID))) {
+                        return;
+                    }
+                    ;
+                    const isRepied = ctx.message.replyToMessage;
+                    if (!isRepied) {
+                        yield ctx.reply('Send AN Image and Reply it with QR !');
+                        return;
+                    }
+                    const fileId = ((_d = isRepied.photo) === null || _d === void 0 ? void 0 : _d.fileId) || undefined;
+                    if (!fileId) {
+                        yield ctx.reply('Cant file FILEID..');
+                        console.log(fileId, 'missing fileeee iDDDD');
+                        return;
+                    }
+                    const change = yield this.mongo.editBotModel(this.botToken, fileId, 'qrFileId');
+                    if (!change) {
+                        yield ctx.reply(`Failed to set QR ID !}`);
+                        if (this.qrImage) {
+                            yield ctx.replyPhoto(this.qrImage, {
+                                caption: 'Your Current QR IMAGE..0'
+                            });
+                        }
+                        return;
+                    }
+                    else {
+                        yield ctx.reply(`QR ID SET!`);
+                        yield this.startEngine();
+                        yield ctx.replyPhoto(String(this.qrImage), {
+                            caption: 'Your Current QR Image..'
+                        });
+                        return;
+                    }
+                }
+                catch (error) {
+                    console.log('error in set QR::', error);
+                }
+            }));
+            this.client.command('upi', (ctx) => __awaiter(this, void 0, void 0, function* () {
+                var _e;
                 try {
                     const text = ctx.msg.text || undefined;
                     console.log(text);
-                    if (this.admin.includes(String((_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id)) && text) {
+                    if (this.admin.includes(String((_e = ctx.message.from) === null || _e === void 0 ? void 0 : _e.id)) && text) {
                         if (text == '/upi') {
                             yield ctx.reply('Send in This format /upi/yourUPIid@som');
                             return;
                         }
-                        const data = text.split('/');
-                        this.upiId = data[2];
-                        yield ctx.reply(`UPI ID SET!: ${this.upiId}`);
+                        const data = text.split(' ');
+                        const changeBotModel = yield this.mongo.editBotModel(this.botToken, data[1], 'upiId');
+                        if (changeBotModel) {
+                            this.upiId = data[1];
+                            yield ctx.reply(`UPI ID SET!: ${this.upiId}`);
+                            yield this.startEngine();
+                            return;
+                        }
+                        else {
+                            yield ctx.reply(`Failed to set UPI ID !: ${this.upiId}`);
+                        }
                     }
                 }
                 catch (error) {
@@ -723,11 +815,11 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('set_qr', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _b, _c;
+                var _f, _g;
                 try {
-                    const userId = String((_b = ctx.message.from) === null || _b === void 0 ? void 0 : _b.id);
+                    const userId = String((_f = ctx.message.from) === null || _f === void 0 ? void 0 : _f.id);
                     const chatType = String(ctx.message.chat.type);
-                    const isReplied = ((_c = ctx.message.replyToMessage) === null || _c === void 0 ? void 0 : _c.photo) || undefined;
+                    const isReplied = ((_g = ctx.message.replyToMessage) === null || _g === void 0 ? void 0 : _g.photo) || undefined;
                     if (this.admin.includes(String(userId)) && isReplied) {
                         this.qrImage = isReplied.fileId;
                         yield ctx.replyPhoto(this.qrImage, {
@@ -741,11 +833,11 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('set_benefitvideo', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _d, _e;
+                var _h, _j;
                 try {
-                    const userId = String((_d = ctx.message.from) === null || _d === void 0 ? void 0 : _d.id);
+                    const userId = String((_h = ctx.message.from) === null || _h === void 0 ? void 0 : _h.id);
                     const chatType = String(ctx.message.chat.type);
-                    const isReplied = ((_e = ctx.message.replyToMessage) === null || _e === void 0 ? void 0 : _e.video) || undefined;
+                    const isReplied = ((_j = ctx.message.replyToMessage) === null || _j === void 0 ? void 0 : _j.video) || undefined;
                     if (this.admin.includes(String(userId)) && isReplied) {
                         this.premiumBenefitsVideo = isReplied.fileId;
                         yield ctx.replyVideo(this.premiumBenefitsVideo, {
@@ -758,11 +850,11 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('admin', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _f;
+                var _k;
                 try {
                     const modify = yield ctx.reply('<i>Fetching Details</i>');
                     const data = yield this.mongo.adminReport(this.isAdsOn);
-                    const chatId = String((_f = ctx.message.chat) === null || _f === void 0 ? void 0 : _f.id);
+                    const chatId = String((_k = ctx.message.chat) === null || _k === void 0 ? void 0 : _k.id);
                     if (data) {
                         if (this.isAdsOn) {
                             const msg = yield ctx.editMessageText(modify.id, data, {
@@ -796,9 +888,9 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('bcast', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _g;
+                var _l;
                 try {
-                    const userId = String((_g = ctx.message.from) === null || _g === void 0 ? void 0 : _g.id);
+                    const userId = String((_l = ctx.message.from) === null || _l === void 0 ? void 0 : _l.id);
                     const chatType = String(ctx.message.chat.type);
                     const isReplied = ctx.message.replyToMessage || undefined;
                     if (this.admin.includes(userId)) {
@@ -840,12 +932,12 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('forceSub', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _h, _j;
+                var _m, _o;
                 try {
-                    const userId = (_h = ctx.message.from) === null || _h === void 0 ? void 0 : _h.id;
+                    const userId = (_m = ctx.message.from) === null || _m === void 0 ? void 0 : _m.id;
                     const chatId = String(ctx.message.chat.id);
                     const isReplied = ctx.message.replyToMessage || undefined;
-                    if (this.admin.includes(String(userId)) && isReplied && ((_j = isReplied.forwardFrom) === null || _j === void 0 ? void 0 : _j.type) == 'channel') {
+                    if (this.admin.includes(String(userId)) && isReplied && ((_o = isReplied.forwardFrom) === null || _o === void 0 ? void 0 : _o.type) == 'channel') {
                         const forceSubId = isReplied.forwardFrom.chat.id;
                         this.forceSubChatId = String(forceSubId);
                         const createInviteLink = yield this.client.createInviteLink(forceSubId);
@@ -863,12 +955,12 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('tutorial', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _k, _l;
+                var _p, _q;
                 try {
-                    const userId = (_k = ctx.message.from) === null || _k === void 0 ? void 0 : _k.id;
+                    const userId = (_p = ctx.message.from) === null || _p === void 0 ? void 0 : _p.id;
                     const chatId = String(ctx.message.chat.id);
                     if (this.admin.includes(String(userId))) {
-                        const isRepliedVideo = ((_l = ctx.message.replyToMessage) === null || _l === void 0 ? void 0 : _l.video) || undefined;
+                        const isRepliedVideo = ((_q = ctx.message.replyToMessage) === null || _q === void 0 ? void 0 : _q.video) || undefined;
                         if (!isRepliedVideo) {
                             yield ctx.reply('Send to Video File and reply it with \n\n/tutorial \n\nto set Universal tutorial');
                             return;
@@ -898,9 +990,9 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('set_shortner', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _m;
+                var _r;
                 try {
-                    const senderId = (_m = ctx.message.from) === null || _m === void 0 ? void 0 : _m.id;
+                    const senderId = (_r = ctx.message.from) === null || _r === void 0 ? void 0 : _r.id;
                     const chatId = ctx.message.chat.id;
                     const msgFrom = ctx.message.chat.type;
                     const msgId = ctx.message.id;
@@ -940,7 +1032,7 @@ class Bot extends localStore_1.localStore {
                             yield ctx.deleteMessage(msgId);
                             yield ctx.reply('<b>Invalid Url or TOKEN / CONTACT ADMIN !!</b>', {
                                 replyMarkup: {
-                                    inlineKeyboard: this.contactAdminReplyMarkup,
+                                    inlineKeyboard: markup_1.Markup.contactAdminReplyMarkup(this.contactAdmin),
                                 },
                                 parseMode: 'HTML',
                                 protectContent: true,
@@ -960,13 +1052,13 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('set_tutorial', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _o, _p;
+                var _s, _t;
                 try {
                     const senderId = ctx.message.from.id;
                     const chatId = ctx.message.chat.id;
                     const msgFrom = ctx.message.chat.type;
                     const isRepied = ctx.message.replyToMessage || undefined;
-                    const fileAvailable = ((_p = (_o = ctx.message.replyToMessage) === null || _o === void 0 ? void 0 : _o.video) === null || _p === void 0 ? void 0 : _p.fileId) || undefined;
+                    const fileAvailable = ((_t = (_s = ctx.message.replyToMessage) === null || _s === void 0 ? void 0 : _s.video) === null || _t === void 0 ? void 0 : _t.fileId) || undefined;
                     console.log(ctx.message.replyToMessage, 'filleee');
                     if (msgFrom == 'private') {
                         yield ctx.reply('ADD Me to Your Group and Use the Command there \n\nBy Replying to Any Video');
@@ -999,18 +1091,18 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('myPlan', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _q, _r, _s;
+                var _u, _v, _w;
                 try {
-                    const isPremiumExpired = yield this.mongo.isVerified(String((_q = ctx.message.from) === null || _q === void 0 ? void 0 : _q.id));
+                    const isPremiumExpired = yield this.mongo.isVerified(String((_u = ctx.message.from) === null || _u === void 0 ? void 0 : _u.id));
                     if (!isPremiumExpired) {
-                        yield ctx.reply(`Hey ${((_r = ctx.message.from) === null || _r === void 0 ? void 0 : _r.firstName) || 'user'},\n\nʏᴏᴜ ᴅᴏ ɴᴏᴛ ʜᴀᴠᴇ ᴀɴʏ ᴀᴄᴛɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴs, ɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴛᴀᴋᴇ ᴘʀᴇᴍɪᴜᴍ ᴛʜᴇɴ ᴄʟɪᴄᴋ ᴏɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ 👇`, {
+                        yield ctx.reply(`Hey ${((_v = ctx.message.from) === null || _v === void 0 ? void 0 : _v.firstName) || 'user'},\n\nʏᴏᴜ ᴅᴏ ɴᴏᴛ ʜᴀᴠᴇ ᴀɴʏ ᴀᴄᴛɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴs, ɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴛᴀᴋᴇ ᴘʀᴇᴍɪᴜᴍ ᴛʜᴇɴ ᴄʟɪᴄᴋ ᴏɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ 👇`, {
                             replyMarkup: {
-                                inlineKeyboard: this.myPlanReplymarkup
+                                inlineKeyboard: markup_1.Markup.myPlanReplyMarkup()
                             }
                         });
                         return;
                     }
-                    const data = yield model_1.userModel.findOne({ userId: String((_s = ctx.message.from) === null || _s === void 0 ? void 0 : _s.id) });
+                    const data = yield model_1.userModel.findOne({ userId: String((_w = ctx.message.from) === null || _w === void 0 ? void 0 : _w.id) });
                     console.log(data);
                     const del = yield ctx.reply(`You Have an Active PLAN..\n\nExpiring On: ${data.verifiedTill}`);
                     setTimeout(() => __awaiter(this, void 0, void 0, function* () {
@@ -1023,11 +1115,11 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('ban', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _t;
+                var _x;
                 try {
                     console.log('triggering ban');
                     const text = ctx.message.text;
-                    if (this.admin.includes(String((_t = ctx.message.from) === null || _t === void 0 ? void 0 : _t.id))) {
+                    if (this.admin.includes(String((_x = ctx.message.from) === null || _x === void 0 ? void 0 : _x.id))) {
                         if (text == '/ban') {
                             const d = yield ctx.reply('send in this format\n\n/ban/uSeRiD');
                             setTimeout(() => __awaiter(this, void 0, void 0, function* () {
@@ -1051,10 +1143,10 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('uban', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _u;
+                var _y;
                 try {
                     const text = ctx.message.text;
-                    if (this.admin.includes(String((_u = ctx.message.from) === null || _u === void 0 ? void 0 : _u.id))) {
+                    if (this.admin.includes(String((_y = ctx.message.from) === null || _y === void 0 ? void 0 : _y.id))) {
                         if (text == '/unban') {
                             const d = yield ctx.reply('send in this format\n\n/uban/uSeRiD');
                             setTimeout(() => __awaiter(this, void 0, void 0, function* () {
@@ -1088,9 +1180,9 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('prime', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _v;
+                var _z;
                 try {
-                    const userId = String((_v = ctx.message.from) === null || _v === void 0 ? void 0 : _v.id);
+                    const userId = String((_z = ctx.message.from) === null || _z === void 0 ? void 0 : _z.id);
                     const vals = ctx.message.text;
                     if (this.admin.includes(userId)) {
                         if (vals == '/prime') {
@@ -1115,9 +1207,9 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('start', (ctx, next) => __awaiter(this, void 0, void 0, function* () {
-                var _w, _x, _y, _z;
+                var _0, _1, _2, _3;
                 try {
-                    const userId = String((_w = ctx.message.from) === null || _w === void 0 ? void 0 : _w.id);
+                    const userId = String((_0 = ctx.message.from) === null || _0 === void 0 ? void 0 : _0.id);
                     const chatId = String(ctx.message.chat.id);
                     const isExist = yield this.mongo.isExist(userId);
                     const vals = ctx.message.text;
@@ -1167,7 +1259,7 @@ class Bot extends localStore_1.localStore {
                             if (!user.valid) {
                                 yield ctx.reply('YOU ARE BANNED BY OUR TEAM !!\n\nContact: Admin', {
                                     replyMarkup: {
-                                        inlineKeyboard: this.bannedReplyMarkup
+                                        inlineKeyboard: markup_1.Markup.bannedReplyMarkup(this.paymentScreenshotId)
                                     }
                                 });
                                 return;
@@ -1180,59 +1272,61 @@ class Bot extends localStore_1.localStore {
                             console.log(isPower, 'issssssssssssspower');
                             let shortenedUrl;
                             if (!isPower) {
-                                shortenedUrl = yield this.shortenUrlText(this.apiUrl, this.apiToken, endPoint);
                             }
                             else {
-                                shortenedUrl = yield this.shortenUrlText(isPower.userApi, isPower.userApiToken, endPoint);
-                            }
-                            console.log(shortenedUrl, 'shoertttt');
-                            if (!user.verified && fileData && shortenedUrl.length > 0 && !isVerified && this.isAdsOn) {
-                                const shortUrl = String(shortenedUrl[0]);
-                                let pool = this.addPool(String((_x = ctx.message.from) === null || _x === void 0 ? void 0 : _x.id), hash, endPoint, shortUrl, fileData.fileId);
-                                console.log(pool, 'pool');
-                                yield ctx.reply(`🫂 ʜᴇʏ.. ${((_y = ctx.message.from) === null || _y === void 0 ? void 0 : _y.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
-                                    replyMarkup: {
-                                        inlineKeyboard: [
-                                            [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
-                                            //           [{ text: 'Bypassed URL', url: pool.url }],
-                                            // [{ text: 'Tutorial Video!', url: tutorial }],
-                                            [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
-                                        ]
-                                    }
-                                });
-                                return;
-                            }
-                            else if ((!this.isAdsOn || user.verified) && fileData && shortenedUrl.length > 0) {
-                                console.log(fileData);
-                                let del;
-                                del = (fileType == 'video/x-matroska') ? yield ctx.replyVideo(fileData.fileId, {
-                                    caption: "<3\n\nThis File will be Automatically DELETED in 1 MIN, Forward the File To SOMEONE to keep it Permanent"
-                                }) : yield ctx.replyDocument(fileData.fileId, {
-                                    caption: "<3\n\nThis File will be Automatically DELETED in 1 MIN, Forward the File To SOMEONE to keep it Permanent"
-                                });
-                                setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-                                    if (del.id) {
-                                        yield ctx.deleteMessage(del.id);
-                                        return;
-                                    }
+                                const underTax = yield this.percentagePartition();
+                                if (!underTax) {
+                                    shortenedUrl = yield this.shortenUrlText(isPower.userApi, isPower.userApiToken, endPoint);
+                                }
+                                else {
+                                    shortenedUrl = yield this.shortenUrlText(this.apiUrl, this.apiToken, endPoint);
+                                }
+                                console.log(shortenedUrl, 'shoertttt');
+                                if (!user.verified && fileData && shortenedUrl.length > 0 && !isVerified && this.isAdsOn) {
+                                    const shortUrl = String(shortenedUrl[0]);
+                                    let pool = this.addPool(String((_1 = ctx.message.from) === null || _1 === void 0 ? void 0 : _1.id), hash, endPoint, shortUrl, fileData.fileId);
+                                    console.log(pool, 'pool');
+                                    yield ctx.reply(`🫂 ʜᴇʏ.. ${((_2 = ctx.message.from) === null || _2 === void 0 ? void 0 : _2.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                        replyMarkup: {
+                                            inlineKeyboard: [
+                                                [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
+                                                [{ text: 'Bypassed URL', url: pool.url }],
+                                                [{ text: 'Tutorial Video!', url: tutorial }],
+                                                [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
+                                            ]
+                                        }
+                                    });
                                     return;
-                                }), 59000);
-                                return;
+                                }
+                                else if ((!this.isAdsOn || user.verified) && fileData && shortenedUrl.length > 0) {
+                                    console.log(fileData);
+                                    let del;
+                                    del = (fileType == 'video/x-matroska') ? yield ctx.replyVideo(fileData.fileId, {
+                                        caption: "<3\n\nThis File will be Automatically DELETED in 1 MIN, Forward the File To SOMEONE to keep it Permanent"
+                                    }) : yield ctx.replyDocument(fileData.fileId, {
+                                        caption: "<3\n\nThis File will be Automatically DELETED in 1 MIN, Forward the File To SOMEONE to keep it Permanent"
+                                    });
+                                    setTimeout(() => __awaiter(this, void 0, void 0, function* () {
+                                        if (del.id) {
+                                            yield ctx.deleteMessage(del.id);
+                                            return;
+                                        }
+                                        return;
+                                    }), 59000);
+                                    return;
+                                }
+                                console.log('enane therla user');
                             }
-                            console.log('enane therla user');
                         }
-                        else {
-                            console.log('Invalid input format');
-                        }
+                        const name = ((_3 = ctx.message.from) === null || _3 === void 0 ? void 0 : _3.firstName) || 'User';
+                        console.log('comes under start');
+                        yield ctx.reply(this.startCaption(name), {
+                            parseMode: 'HTML',
+                            replyMarkup: {
+                                inlineKeyboard: markup_1.Markup.introReplyMarkup(String(this.botUname), this.publicChannelUname)
+                            }
+                        });
                     }
-                    const name = ((_z = ctx.message.from) === null || _z === void 0 ? void 0 : _z.firstName) || 'User';
-                    console.log('comes under start');
-                    yield ctx.reply(this.startCaption(name), {
-                        parseMode: 'HTML',
-                        replyMarkup: {
-                            inlineKeyboard: this.introReplyMarkup
-                        }
-                    });
                 }
                 catch (error) {
                     console.log(error);
@@ -1242,7 +1336,7 @@ class Bot extends localStore_1.localStore {
                 yield ctx.replyPhoto(this.planImage, {
                     caption: this.planDescription,
                     replyMarkup: {
-                        inlineKeyboard: this.planStart
+                        inlineKeyboard: markup_1.Markup.planStartReplyMarkup()
                     }
                 });
             }));
@@ -1268,6 +1362,12 @@ class Bot extends localStore_1.localStore {
                     }
                     else if (ctx.message.chat.type == 'private') {
                         console.log('spamming private');
+                        yield ctx.reply(this.startCaption(ctx.message.from.firstName || 'USER'), {
+                            parseMode: "HTML",
+                            replyMarkup: {
+                                inlineKeyboard: markup_1.Markup.introReplyMarkup(String(this.botUname), this.publicChannelUname)
+                            }
+                        });
                         return;
                     }
                     console.log('some Query initiating next');
@@ -1284,6 +1384,7 @@ class Bot extends localStore_1.localStore {
             this.client.on('message:text', (ctx) => __awaiter(this, void 0, void 0, function* () {
                 var _a, _b;
                 try {
+                    console.log('msg comes');
                     const firstName = ((_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.firstName) || 'user';
                     const msgId = ctx.message.id;
                     const userId = (_b = ctx.message.from) === null || _b === void 0 ? void 0 : _b.id;
@@ -1314,7 +1415,7 @@ class Bot extends localStore_1.localStore {
                     editedMsg = yield ctx.reply('<b>WoohooOooo You are So fast Naughtyy 😜\n\n Join My Channel to Use ME! and Type Again .</b>', {
                         parseMode: 'HTML',
                         replyMarkup: {
-                            inlineKeyboard: this.forceSubReplyMarkup,
+                            inlineKeyboard: markup_1.Markup.forceSubReplyMarkup(this.forceSubUrl),
                         }
                     });
                     return setTimeout(() => __awaiter(this, void 0, void 0, function* () {
@@ -1372,7 +1473,7 @@ class Bot extends localStore_1.localStore {
     }
     // private userplanCaption(name: string,)
     startCaption(name) {
-        return `👋 Hey ${name} , <b>GOOD DAY</b>  ⚡️\n🤗 Welcome to  movie search bot.\n🤖 I can give you direct movies\n📁 Type & Send Me Any Movie Name`;
+        return `👋 Hey ${name} , <b>GOOD DAY</b>  ⚡️\n🤗 Welcome to  Open Source Advance Filter bot.\n🤖 I Can Send you Direct Files by searching OpenLy Available Datas. \n📁 Type & Send Me Any File Name`;
     }
     paymentCaption(ammount) {
         return `Wow!!🤯\nYou Have Choosen Weekly Bot Membership Of Price ₹${ammount}\nChoose Payment Method 👇`;

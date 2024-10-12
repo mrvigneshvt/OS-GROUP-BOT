@@ -1,37 +1,81 @@
-import mongoose, { connection } from 'mongoose'
+import mongoose, { Collection, connection, mongo } from 'mongoose'
 import { fileModel, groupModel, IUser, userModel } from './model';
 import { formatBytes } from './plugins';
-import { startOfToday, endOfDay, format, addDays, isPast, parseISO, closestIndexTo } from 'date-fns';
+import { startOfToday, endOfDay, format, addDays, isPast, parseISO, closestIndexTo, isThisSecond } from 'date-fns';
 import { ID, is } from '@mtkruto/node';
 import { group } from 'console';
 
 export class DataBase {
     private mongoUri
+    private db: undefined | any
+    private botModels: undefined | any
 
     constructor(mongoUri: string) {
         this.mongoUri = mongoUri
+        this.botModels = undefined
+        this.db = undefined
+
     }
 
 
+    public async botModel(query: string) {
+        try {
+            if (!this.db) {
+                throw new Error('CORRUPT when CHECKING MODELS!');
+            }
 
+            this.botModels = this.db.collection('botmodels');
+
+            const result = await this.botModels.find({ botToken: query }).toArray(); // Convert cursor to array
+            return result;
+
+        } catch (error) {
+            console.log('error in botModel::::', error);
+            return null;
+        }
+    }
+
+    public async editBotModel(token: string, query: string, key: string) {
+        try {
+            if (!this.botModels) {
+                throw new Error('No Bot Model Assigned Can be FOUND!');
+            }
+
+            if (key === 'fileLog') {
+                await this.botModels.findOneAndUpdate(
+                    { botToken: token },
+                    { $push: { [key]: query } }
+                );
+            } else {
+                await this.botModels.findOneAndUpdate(
+                    { botToken: token },
+                    { $set: { [key]: query } }
+                );
+            }
+
+            return true;
+
+        } catch (error) {
+            console.log('error in editBotModel:::', error);
+            return false;
+        }
+    }
 
     public async connectDB() {
-        let connection;
         try {
             console.log('Connecting to the DB........');
-            connection = await mongoose.connect(this.mongoUri);
-            console.log('connected......')
+            await mongoose.connect(this.mongoUri);
+
+            this.db = mongoose.connection.db;
+            console.log('connected......');
         } catch (error) {
             console.error('Error while connecting to DB:', error);
-            throw new Error('Crashing due to DB connection failure'); // Rethrow the error to crash the app
-        }
-
-        if (!connection) {
-            throw new Error('Crashing due to no connection object'); // Crash if no connection
+            throw new Error('Crashing due to DB connection failure');
         }
 
         console.log('Connected to the DB successfully!');
     }
+
 
     public async sendFile(uniqueId?: string, uniqueIds?: string[]) {
         try {
@@ -206,6 +250,7 @@ export class DataBase {
 
     public async adminReport(ads: boolean): Promise<string> {
         try {
+            console.log('admi')
 
             const Ads = ads ? '✅' : '❎'
             const todayFormatted = format(startOfToday(), 'yyyy-MM-dd');

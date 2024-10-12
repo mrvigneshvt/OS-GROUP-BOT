@@ -27,21 +27,56 @@ class DataBase {
                 .replace(/^_+|_+$/g, ''); // Remove leading or trailing underscores
         };
         this.mongoUri = mongoUri;
+        this.botModels = undefined;
+        this.db = undefined;
+    }
+    botModel(query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                if (!this.db) {
+                    throw new Error('CORRUPT when CHECKING MODELS!');
+                }
+                this.botModels = this.db.collection('botmodels');
+                const result = yield this.botModels.find({ botToken: query }).toArray(); // Convert cursor to array
+                return result;
+            }
+            catch (error) {
+                console.log('error in botModel::::', error);
+                return null;
+            }
+        });
+    }
+    editBotModel(token, query, key) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                if (!this.botModels) {
+                    throw new Error('No Bot Model Assigned Can be FOUND!');
+                }
+                if (key === 'fileLog') {
+                    yield this.botModels.findOneAndUpdate({ botToken: token }, { $push: { [key]: query } });
+                }
+                else {
+                    yield this.botModels.findOneAndUpdate({ botToken: token }, { $set: { [key]: query } });
+                }
+                return true;
+            }
+            catch (error) {
+                console.log('error in editBotModel:::', error);
+                return false;
+            }
+        });
     }
     connectDB() {
         return __awaiter(this, void 0, void 0, function* () {
-            let connection;
             try {
                 console.log('Connecting to the DB........');
-                connection = yield mongoose_1.default.connect(this.mongoUri);
+                yield mongoose_1.default.connect(this.mongoUri);
+                this.db = mongoose_1.default.connection.db;
                 console.log('connected......');
             }
             catch (error) {
                 console.error('Error while connecting to DB:', error);
-                throw new Error('Crashing due to DB connection failure'); // Rethrow the error to crash the app
-            }
-            if (!connection) {
-                throw new Error('Crashing due to no connection object'); // Crash if no connection
+                throw new Error('Crashing due to DB connection failure');
             }
             console.log('Connected to the DB successfully!');
         });
@@ -200,6 +235,7 @@ class DataBase {
     adminReport(ads) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                console.log('admi');
                 const Ads = ads ? '✅' : '❎';
                 const todayFormatted = (0, date_fns_1.format)((0, date_fns_1.startOfToday)(), 'yyyy-MM-dd');
                 const [userDetails, primeUserCount, bannedUserCount, totalFiles, totalGroup, todayUnlockCount] = yield Promise.all([
