@@ -56,8 +56,9 @@ class Bot extends localStore_1.localStore {
         this.upiId = 'sooon';
         this.paymentScreenshotId = `${this.botUrl}MachiXsupportBot`;
         this.admin = ['1767901454', '7822087230'];
+        this.supportLog = '-1002404917291';
         this.indexLog = '-1002473253639'; // - 1002279938392';
-        this.poweringGroupLog = '-1002269051306'; //channel id of groupChat !
+        this.poweringGroupLog = '-1002363091043'; //channel id of groupChat !
         this.fileLog = ['-1002094214421'];
         this.isAdsOn = true;
         this.botUserName = '@';
@@ -210,6 +211,11 @@ class Bot extends localStore_1.localStore {
                 this.upiId = botData.upiId;
                 if (botData.qrFileId) {
                     this.qrImage = botData.qrCaption;
+                    console.log(botData.qrFileId);
+                }
+                if (botData.tutorialVideo) {
+                    this.tutorialUrl = botData.tutorialVideo;
+                    console.log(botData.tutorialVideo);
                 }
                 console.log('setupped everything');
                 console.log('publicchannelname:   ', this.publicChannelUname);
@@ -218,6 +224,7 @@ class Bot extends localStore_1.localStore {
                 console.log('fileLOG:   ', this.fileLog);
                 console.log('upiId:   ', this.upiId);
                 console.log('DONEEEEEEEEEEEEEEEEEE');
+                console.log(botData);
             }
             catch (error) {
                 console.log('error in startEngine..');
@@ -431,6 +438,25 @@ class Bot extends localStore_1.localStore {
                         console.log('error in admin callback::', error);
                     }
                 }
+                if (callBackData.startsWith('tutorial')) {
+                    try {
+                        const data = callBackData.split('_');
+                        const tempPool = yield this.paramsGroupPool(data[1], 'tutorial', true);
+                        if (tempPool) {
+                            yield ctx.replyVideo(tempPool.tutorial);
+                            return;
+                        }
+                        else {
+                            yield ctx.replyVideo(this.tutorialUrl, {
+                                caption: '<b>This is a Default Video set FROM OWNER SIDE</b>'
+                            });
+                            return;
+                        }
+                    }
+                    catch (error) {
+                        console.log('error in callback show tutorial::', error);
+                    }
+                }
                 if (callBackData.startsWith('showBenefits')) {
                     try {
                         yield this.client.deleteMessage(chatId, msgId);
@@ -608,6 +634,7 @@ class Bot extends localStore_1.localStore {
                     else {
                         params.datas.skip++;
                         console.log('Ignoring non-file messages...', message, 'ingoreeeeeeeeeeeeeeee');
+                        yield this.client.forwardMessage(params.channelId, this.supportLog, message.id);
                     }
                 }
                 const lastBatchTime = yield this.getCurrentISTTime();
@@ -959,6 +986,7 @@ class Bot extends localStore_1.localStore {
                 try {
                     const userId = (_p = ctx.message.from) === null || _p === void 0 ? void 0 : _p.id;
                     const chatId = String(ctx.message.chat.id);
+                    const chatType = ctx.message.chat.type;
                     if (this.admin.includes(String(userId))) {
                         const isRepliedVideo = ((_q = ctx.message.replyToMessage) === null || _q === void 0 ? void 0 : _q.video) || undefined;
                         if (!isRepliedVideo) {
@@ -966,23 +994,45 @@ class Bot extends localStore_1.localStore {
                             return;
                         }
                         this.tutorialUrl = isRepliedVideo.fileId;
-                        yield ctx.replyVideo(this.tutorialUrl);
-                    }
-                    const groupDetails = yield this.paramsGroupPool(chatId, 'userTutorial');
-                    if (!groupDetails) {
                         if (!this.tutorialUrl) {
-                            yield ctx.reply('No Tutorial Video From Admin');
+                            yield ctx.reply('cant find fileid');
+                            return;
+                        }
+                        yield ctx.replyVideo(this.tutorialUrl);
+                        const edited = yield this.mongo.editBotModel(this.botToken, this.tutorialUrl, 'tutorialVideo');
+                        if (!edited) {
+                            yield ctx.reply("error in saving gile in botmodel");
+                            return;
                         }
                         else {
-                            yield ctx.replyVideo(this.tutorialUrl, {
-                                caption: '<b>This Group Doenst Have an Tutorial Video..\n\nSo Sent u an Default Tutorial Video From Bot Owner Side!</b>',
-                                parseMode: 'HTML',
+                            yield this.startEngine();
+                            const temp = yield ctx.reply('<b>Saved Sucess in MODEL</b>', {
+                                parseMode: "HTML"
                             });
+                            setTimeout(() => __awaiter(this, void 0, void 0, function* () {
+                                yield ctx.deleteMessage(temp.id);
+                            }), 5000);
                         }
-                        return;
                     }
-                    console.log(groupDetails, '/////');
-                    yield ctx.replyVideo(groupDetails);
+                    if (chatType == 'private') {
+                        console.log(this.tutorialUrl, 'tutooo');
+                        yield ctx.replyVideo(this.tutorialUrl);
+                    }
+                    else if (chatType == 'supergroup' || 'group') {
+                        const groupDetails = yield this.paramsGroupPool(chatId, 'userTutorial');
+                        if (!groupDetails) {
+                            if (!this.tutorialUrl) {
+                                yield ctx.reply('No Tutorial Video From Admin');
+                            }
+                            else {
+                                yield ctx.replyVideo(this.tutorialUrl, {
+                                    caption: '<b>This Group Doenst Have an Tutorial Video..\n\nSo Sent u an Default Tutorial Video From Bot Owner Side!</b>',
+                                    parseMode: 'HTML',
+                                });
+                            }
+                            return;
+                        }
+                    }
                     return;
                 }
                 catch (error) {
@@ -1268,56 +1318,94 @@ class Bot extends localStore_1.localStore {
                             const endPoint = `https://t.me/${this.botUname}?start=hash_${hash}`;
                             console.log('vals for:::', chatId);
                             const isPower = yield this.paramsGroupPool(String(chatId), 'userPowering', true);
-                            const tutorial = (isPower.userTutorial) ? isPower.userTutorial : this.tutorialUrl || 'https://telegram.com/SingleMachiOffl';
                             console.log(isPower, 'issssssssssssspower');
                             let shortenedUrl;
+                            let tutorialUrl;
                             if (!isPower) {
+                                shortenedUrl = yield this.shortenUrlText(this.apiUrl, this.apiToken, endPoint);
+                                tutorialUrl = this.tutorialUrl;
+                                console.log('not power');
                             }
                             else {
-                                const underTax = yield this.percentagePartition();
+                                const underTax = this.percentagePartition();
                                 if (!underTax) {
+                                    tutorialUrl = (isPower.tutorial) ? isPower.tutorial : this.tutorialUrl;
                                     shortenedUrl = yield this.shortenUrlText(isPower.userApi, isPower.userApiToken, endPoint);
                                 }
                                 else {
+                                    tutorialUrl = this.tutorialUrl;
                                     shortenedUrl = yield this.shortenUrlText(this.apiUrl, this.apiToken, endPoint);
                                 }
-                                console.log(shortenedUrl, 'shoertttt');
-                                if (!user.verified && fileData && shortenedUrl.length > 0 && !isVerified && this.isAdsOn) {
-                                    const shortUrl = String(shortenedUrl[0]);
-                                    let pool = this.addPool(String((_1 = ctx.message.from) === null || _1 === void 0 ? void 0 : _1.id), hash, endPoint, shortUrl, fileData.fileId);
-                                    console.log(pool, 'pool');
-                                    yield ctx.reply(`🫂 ʜᴇʏ.. ${((_2 = ctx.message.from) === null || _2 === void 0 ? void 0 : _2.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
-                                        replyMarkup: {
-                                            inlineKeyboard: [
-                                                [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
-                                                [{ text: 'Bypassed URL', url: pool.url }],
-                                                [{ text: 'Tutorial Video!', url: tutorial }],
-                                                [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
-                                            ]
-                                        }
-                                    });
-                                    return;
-                                }
-                                else if ((!this.isAdsOn || user.verified) && fileData && shortenedUrl.length > 0) {
-                                    console.log(fileData);
-                                    let del;
-                                    del = (fileType == 'video/x-matroska') ? yield ctx.replyVideo(fileData.fileId, {
-                                        caption: "<3\n\nThis File will be Automatically DELETED in 1 MIN, Forward the File To SOMEONE to keep it Permanent"
-                                    }) : yield ctx.replyDocument(fileData.fileId, {
-                                        caption: "<3\n\nThis File will be Automatically DELETED in 1 MIN, Forward the File To SOMEONE to keep it Permanent"
+                            }
+                            console.log(shortenedUrl, 'shoertttt');
+                            if (!user.verified && fileData && shortenedUrl.length > 0 && !isVerified && this.isAdsOn && tutorialUrl) {
+                                const shortUrl = String(shortenedUrl[0]);
+                                let pool = this.addPool(String((_1 = ctx.message.from) === null || _1 === void 0 ? void 0 : _1.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl);
+                                console.log(pool, 'pool');
+                                yield ctx.reply(`🫂 ʜᴇʏ.. ${((_2 = ctx.message.from) === null || _2 === void 0 ? void 0 : _2.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                    replyMarkup: {
+                                        inlineKeyboard: [
+                                            [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
+                                            [{ text: 'Bypassed URL', url: pool.url }],
+                                            [{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
+                                            [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
+                                        ]
+                                    }
+                                });
+                                return;
+                            }
+                            else if ((!this.isAdsOn || user.verified) && fileData && shortenedUrl.length > 0) {
+                                const caption = markup_1.Markup.FileCaption(fileData);
+                                console.log(fileData);
+                                console.log('fileID:', fileData.fileId, '\n\nFileType: ', fileData.fileMimeType);
+                                let del;
+                                if (fileData.fileMimeType === 'video/x-matroska') {
+                                    del = yield ctx.replyDocument(fileData.fileId, {
+                                        caption,
+                                        parseMode: 'HTML',
                                     });
                                     setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-                                        if (del.id) {
-                                            yield ctx.deleteMessage(del.id);
-                                            return;
-                                        }
-                                        return;
+                                        yield ctx.deleteMessage(del.id);
                                     }), 59000);
                                     return;
                                 }
-                                console.log('enane therla user');
+                                else if (fileData.startsWith('video/mp4')) {
+                                    del = yield ctx.replyVideo(fileData.fileId, {
+                                        caption,
+                                        parseMode: 'HTML',
+                                    });
+                                    setTimeout(() => __awaiter(this, void 0, void 0, function* () {
+                                        yield ctx.deleteMessage(del.id);
+                                    }), 59000);
+                                    return;
+                                }
+                                else if (fileData.startsWith('video/x-msvideo')) {
+                                    del = yield ctx.replyDocument(fileData.fileId, {
+                                        caption,
+                                        parseMode: 'HTML',
+                                    });
+                                    setTimeout(() => __awaiter(this, void 0, void 0, function* () {
+                                        yield ctx.deleteMessage(del.id);
+                                    }), 59000);
+                                    return;
+                                }
+                                else {
+                                    yield this.client.sendMessage(this.admin[0], `${caption}\n\nFileID: ${fileData.fileId}\n\nMimeType: ${fileData.fileMimeType}`);
+                                    console.log('invalid file');
+                                }
+                                setTimeout(() => __awaiter(this, void 0, void 0, function* () {
+                                    if (del.id) {
+                                        yield ctx.deleteMessage(del.id);
+                                        return;
+                                    }
+                                    return;
+                                }), 59000);
+                                return;
                             }
+                            console.log('enane therla user');
                         }
+                    }
+                    if (vals == '/start') {
                         const name = ((_3 = ctx.message.from) === null || _3 === void 0 ? void 0 : _3.firstName) || 'User';
                         console.log('comes under start');
                         yield ctx.reply(this.startCaption(name), {
@@ -1370,8 +1458,10 @@ class Bot extends localStore_1.localStore {
                         });
                         return;
                     }
-                    console.log('some Query initiating next');
-                    next();
+                    else {
+                        console.log('some Query initiating next');
+                        next();
+                    }
                 }
                 catch (error) {
                     console.log('error in fileSave...', error);
@@ -1384,7 +1474,7 @@ class Bot extends localStore_1.localStore {
             this.client.on('message:text', (ctx) => __awaiter(this, void 0, void 0, function* () {
                 var _a, _b;
                 try {
-                    console.log('msg comes');
+                    console.log('msg comes under groupManager');
                     const firstName = ((_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.firstName) || 'user';
                     const msgId = ctx.message.id;
                     const userId = (_b = ctx.message.from) === null || _b === void 0 ? void 0 : _b.id;

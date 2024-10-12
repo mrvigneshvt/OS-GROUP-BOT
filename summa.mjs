@@ -36,6 +36,9 @@ const schema = new mongoose.Schema({
     qrFileId: {
         type: String,
     },
+    tutorialVideo: {
+        type: String,
+    }
 
 });
 
@@ -51,10 +54,13 @@ const data = {
     upiId: 'TeamMachiX@apl',
 }
 
-/*
+
 const start = async () => {
     const k = await mongoose.connect(uri)
     console.log('connected')
+
+
+
     const is = await botModel.create({
         botToken: '7503916985:AAG9h6PjaiVVDj2Gl7sZI-OhfG_Gpa0poXA',
         botUsername: 'MachiXhubBot',
@@ -65,8 +71,7 @@ const start = async () => {
         upiId: 'TeamMachiX@apl',
     })
 
-    console.log(is)
-}*/
+}
 
 start()
 

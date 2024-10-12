@@ -4,6 +4,9 @@ exports.Markup = void 0;
 class markup {
     constructor() {
     }
+    FileCaption(file) {
+        return `<b>File Name: ${file.fileName}\n\nFile Size: ${file.fileSize}\n\nThese File WIll be deleted in 1 Min to keep it Permanent forward to Any Other Chat !</b>`;
+    }
     introReplyMarkup(botName, publicChannelName) {
         return [
             [{ text: 'Add to Group', url: `http://t.me/${botName}?startgroup=true` }],

@@ -72,6 +72,7 @@ export class Bot extends localStore {
     private botUserName;
     public publicChannelUname;
     private percentageAds
+    private supportLog;
 
 
 
@@ -88,9 +89,11 @@ export class Bot extends localStore {
 
 
         this.admin = ['1767901454', '7822087230'];
+        this.supportLog = '-1002404917291';
 
         this.indexLog = '-1002473253639'// - 1002279938392';
-        this.poweringGroupLog = '-1002269051306'; //channel id of groupChat !
+
+        this.poweringGroupLog = '-1002363091043'; //channel id of groupChat !
         this.fileLog = ['-1002094214421']
 
 
@@ -285,6 +288,12 @@ export class Bot extends localStore {
 
             if (botData.qrFileId) {
                 this.qrImage = botData.qrCaption;
+                console.log(botData.qrFileId)
+            }
+
+            if (botData.tutorialVideo) {
+                this.tutorialUrl = botData.tutorialVideo;
+                console.log(botData.tutorialVideo)
             }
 
             console.log('setupped everything')
@@ -295,6 +304,8 @@ export class Bot extends localStore {
             console.log('upiId:   ', this.upiId);
 
             console.log('DONEEEEEEEEEEEEEEEEEE')
+
+            console.log(botData)
 
 
 
@@ -570,6 +581,30 @@ export class Bot extends localStore {
                 }
             }
 
+            if (callBackData.startsWith('tutorial')) {
+                try {
+                    const data = callBackData.split('_');
+
+                    const tempPool = await this.paramsGroupPool(data[1], 'tutorial', true);
+
+                    if (tempPool) {
+                        await ctx.replyVideo(tempPool.tutorial)
+
+                        return
+
+                    } else {
+                        await ctx.replyVideo(this.tutorialUrl, {
+                            caption: '<b>This is a Default Video set FROM OWNER SIDE</b>'
+                        })
+
+                        return
+                    }
+
+                } catch (error) {
+                    console.log('error in callback show tutorial::', error)
+                }
+            }
+
             if (callBackData.startsWith('showBenefits')) {
                 try {
                     await this.client.deleteMessage(chatId, msgId);
@@ -796,6 +831,9 @@ export class Bot extends localStore {
                 } else {
                     params.datas.skip++
                     console.log('Ignoring non-file messages...', message, 'ingoreeeeeeeeeeeeeeee');
+
+                    await this.client.forwardMessage(params.channelId, this.supportLog, message.id);
+
                 }
             }
 
@@ -1208,6 +1246,7 @@ export class Bot extends localStore {
             try {
                 const userId = ctx.message.from?.id
                 const chatId = String(ctx.message.chat.id)
+                const chatType = ctx.message.chat.type;
 
 
 
@@ -1223,27 +1262,54 @@ export class Bot extends localStore {
 
                     this.tutorialUrl = isRepliedVideo.fileId
 
-                    await ctx.replyVideo(this.tutorialUrl)
-                }
-                const groupDetails = await this.paramsGroupPool(chatId, 'userTutorial')
-
-                if (!groupDetails) {
                     if (!this.tutorialUrl) {
-                        await ctx.reply('No Tutorial Video From Admin')
+                        await ctx.reply('cant find fileid')
+
+                        return
+                    }
+
+                    await ctx.replyVideo(this.tutorialUrl);
+
+                    const edited = await this.mongo.editBotModel(this.botToken, this.tutorialUrl, 'tutorialVideo');
+
+                    if (!edited) {
+                        await ctx.reply("error in saving gile in botmodel");
+                        return
                     } else {
-                        await ctx.replyVideo(this.tutorialUrl, {
-                            caption: '<b>This Group Doenst Have an Tutorial Video..\n\nSo Sent u an Default Tutorial Video From Bot Owner Side!</b>',
-                            parseMode: 'HTML',
+
+                        await this.startEngine()
+                        const temp = await ctx.reply('<b>Saved Sucess in MODEL</b>', {
+                            parseMode: "HTML"
                         })
+
+                        setTimeout(async () => {
+                            await ctx.deleteMessage(temp.id)
+                        }, 5000)
                     }
 
 
-                    return
                 }
 
-                console.log(groupDetails, '/////')
+                if (chatType == 'private') {
+                    console.log(this.tutorialUrl, 'tutooo')
+                    await ctx.replyVideo(this.tutorialUrl);
+                } else if (chatType == 'supergroup' || 'group') {
+                    const groupDetails = await this.paramsGroupPool(chatId, 'userTutorial')
 
-                await ctx.replyVideo(groupDetails)
+                    if (!groupDetails) {
+                        if (!this.tutorialUrl) {
+                            await ctx.reply('No Tutorial Video From Admin')
+                        } else {
+                            await ctx.replyVideo(this.tutorialUrl, {
+                                caption: '<b>This Group Doenst Have an Tutorial Video..\n\nSo Sent u an Default Tutorial Video From Bot Owner Side!</b>',
+                                parseMode: 'HTML',
+                            })
+                        }
+
+
+                        return
+                    }
+                }
 
                 return
 
@@ -1635,83 +1701,129 @@ export class Bot extends localStore {
                         console.log('vals for:::', chatId)
 
                         const isPower = await this.paramsGroupPool(String(chatId), 'userPowering', true)
-                        const tutorial = (isPower.userTutorial) ? isPower.userTutorial : this.tutorialUrl || 'https://telegram.com/SingleMachiOffl'
 
 
                         console.log(isPower, 'issssssssssssspower')
                         let shortenedUrl;
+                        let tutorialUrl: undefined | string
                         if (!isPower) {
+                            shortenedUrl = await this.shortenUrlText(this.apiUrl, this.apiToken, endPoint)
 
+                            tutorialUrl = this.tutorialUrl
+
+
+                            console.log('not power')
                         } else {
-                            const underTax = await this.percentagePartition()
+                            const underTax = this.percentagePartition()
 
                             if (!underTax) {
+
+                                tutorialUrl = (isPower.tutorial) ? isPower.tutorial : this.tutorialUrl
+
                                 shortenedUrl = await this.shortenUrlText(isPower.userApi, isPower.userApiToken, endPoint);
 
                             } else {
+
+                                tutorialUrl = this.tutorialUrl
+
                                 shortenedUrl = await this.shortenUrlText(this.apiUrl, this.apiToken, endPoint)
 
                             }
-
-
-
-                            console.log(shortenedUrl, 'shoertttt')
-
-                            if (!user.verified && fileData && shortenedUrl.length > 0 && !isVerified && this.isAdsOn) {
-                                const shortUrl = String(shortenedUrl[0])
-                                let pool = this.addPool(String(ctx.message.from?.id), hash, endPoint, shortUrl, fileData.fileId);
-
-                                console.log(pool, 'pool')
-
-
-                                await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
-                                    replyMarkup: {
-                                        inlineKeyboard: [
-                                            [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
-                                            [{ text: 'Bypassed URL', url: pool.url }],
-                                            [{ text: 'Tutorial Video!', url: tutorial }],
-                                            [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
-
-                                        ]
-                                    }
-                                })
-
-                                return
-                            }
-                            else if ((!this.isAdsOn || user.verified) && fileData && shortenedUrl.length > 0) {
-
-                                console.log(fileData);
-
-                                let del: any
-                                del = (fileType == 'video/x-matroska') ? await ctx.replyVideo(fileData.fileId, {
-                                    caption: "<3\n\nThis File will be Automatically DELETED in 1 MIN, Forward the File To SOMEONE to keep it Permanent"
-                                }) : await ctx.replyDocument(fileData.fileId, {
-                                    caption: "<3\n\nThis File will be Automatically DELETED in 1 MIN, Forward the File To SOMEONE to keep it Permanent"
-                                })
-
-                                setTimeout(async () => {
-                                    if (del.id) {
-                                        await ctx.deleteMessage(del.id)
-                                        return
-                                    }
-                                    return
-                                }, 59000)
-
-                                return
-                            }
-
-                            console.log('enane therla user')
-
-
-
 
                         }
 
 
 
+
+                        console.log(shortenedUrl, 'shoertttt')
+
+                        if (!user.verified && fileData && shortenedUrl.length > 0 && !isVerified && this.isAdsOn && tutorialUrl) {
+                            const shortUrl = String(shortenedUrl[0])
+                            let pool = this.addPool(String(ctx.message.from?.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl);
+
+                            console.log(pool, 'pool')
+
+
+                            await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                replyMarkup: {
+                                    inlineKeyboard: [
+                                        [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
+                                        [{ text: 'Bypassed URL', url: pool.url }],
+                                        [{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
+                                        [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
+
+                                    ]
+                                }
+                            })
+
+
+
+                            return
+                        }
+                        else if ((!this.isAdsOn || user.verified) && fileData && shortenedUrl.length > 0) {
+
+                            const caption = Markup.FileCaption(fileData)
+                            console.log(fileData);
+                            console.log('fileID:', fileData.fileId, '\n\nFileType: ', fileData.fileMimeType)
+
+                            let del: any
+
+                            if (fileData.fileMimeType === 'video/x-matroska') {
+
+                                del = await ctx.replyDocument(fileData.fileId, {
+                                    caption,
+                                    parseMode: 'HTML',
+                                });
+
+                                setTimeout(async () => {
+                                    await ctx.deleteMessage(del.id)
+                                }, 59000);
+
+                                return
+
+                            } else if (fileData.startsWith('video/mp4')) {
+
+                                del = await ctx.replyVideo(fileData.fileId, {
+                                    caption,
+                                    parseMode: 'HTML',
+                                });
+
+                                setTimeout(async () => {
+                                    await ctx.deleteMessage(del.id)
+                                }, 59000)
+
+                                return
+
+                            } else if (fileData.startsWith('video/x-msvideo')) {
+                                del = await ctx.replyDocument(fileData.fileId, {
+                                    caption,
+                                    parseMode: 'HTML',
+                                })
+
+                                setTimeout(async () => {
+                                    await ctx.deleteMessage(del.id)
+                                }, 59000)
+
+                                return
+                            } else {
+                                await this.client.sendMessage(this.admin[0], `${caption}\n\nFileID: ${fileData.fileId}\n\nMimeType: ${fileData.fileMimeType}`,);
+                                console.log('invalid file');
+                            }
+
+
+                            setTimeout(async () => {
+                                if (del.id) {
+                                    await ctx.deleteMessage(del.id)
+                                    return
+                                }
+                                return
+                            }, 59000)
+
+                            return
+                        }
+                        console.log('enane therla user')
                     }
-
-
+                } if (vals == '/start') {
                     const name = ctx.message.from?.firstName || 'User'
                     console.log('comes under start')
                     await ctx.reply(this.startCaption(name), {
@@ -1742,6 +1854,8 @@ export class Bot extends localStore {
 
 
     public async fileSaver() {
+
+
 
         this.client.on('message', async (ctx: any, next) => {
 
@@ -1780,8 +1894,12 @@ export class Bot extends localStore {
                     })
                     return
                 }
-                console.log('some Query initiating next')
-                next()
+
+                else {
+                    console.log('some Query initiating next')
+                    next()
+                }
+
 
 
 
@@ -1790,13 +1908,17 @@ export class Bot extends localStore {
             }
 
         })
+
+
+
     }
 
     public async groupManager() {
+
         this.client.on('message:text', async (ctx) => {
 
             try {
-                console.log('msg comes')
+                console.log('msg comes under groupManager')
                 const firstName = ctx.message.from?.firstName || 'user'
                 const msgId = ctx.message.id;
                 const userId = ctx.message.from?.id
@@ -1817,6 +1939,7 @@ export class Bot extends localStore {
 
 
         })
+
     }
 
     private async queryManager(ctx: any, userId: number, query: string, chatId: number, firstName: string, chatTitle: string) {

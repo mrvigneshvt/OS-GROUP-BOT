@@ -27,10 +27,10 @@ let bot = new bot_1.Bot({
         yield bot.start();
         yield bot.generateGroupPool();
         yield bot.listener();
-        yield bot.groupManager();
         yield bot.commands();
         yield bot.indexEngine();
         yield bot.fileSaver();
+        yield bot.groupManager();
     }
     catch (error) {
         console.log('error in server.ts', error);

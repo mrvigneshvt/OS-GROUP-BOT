@@ -21,10 +21,11 @@ let bot = new Bot({
         await bot.start();
         await bot.generateGroupPool()
         await bot.listener();
-        await bot.groupManager();
         await bot.commands();
         await bot.indexEngine()
         await bot.fileSaver();
+        await bot.groupManager();
+
 
     } catch (error) {
         console.log('error in server.ts', error)

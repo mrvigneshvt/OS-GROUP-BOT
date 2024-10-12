@@ -75,7 +75,7 @@ export class localStore {
 
     }
 
-    public addPool(id: string, hash: string, endPoint: string, short: string, uniqueId: string) {
+    public addPool(id: string, hash: string, endPoint: string, short: string, uniqueId: string, tutorialId: string) {
 
 
         if (!this.unlockPool[hash]) {
@@ -84,6 +84,7 @@ export class localStore {
                 url: endPoint,
                 shortUrl: short,
                 fileId: uniqueId,
+                tutorial: tutorialId,
             }
         }
 
