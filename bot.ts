@@ -830,11 +830,15 @@ export class Bot extends localStore {
 
             let finalSaved
 
+            const lastBatchTime = await this.getCurrentISTTime();
+
+
             for (const message of messages) {
                 if (
                     message.document &&
-                    message.document.fileId &&
-                    (message.document.mimeType === 'video/x-matroska' || message.document.mimeType === 'video/mp4' || message.document.mimeType == 'video/x-msvideo')
+                    message.document.fileId
+                    /* &&
+                     (message.document.mimeType === 'video/x-matroska' || message.document.mimeType === 'video/mp4' || message.document.mimeType == 'video/x-msvideo')*/
                 ) {
 
                     finalSaved = message.id
@@ -842,8 +846,9 @@ export class Bot extends localStore {
                     //await db.addFile(message.document, buttonNum, Datas);
                 } else if (
                     message.video &&
-                    message.video.fileId &&
-                    (message.video.mimeType === 'video/x-matroska' || message.video.mimeType === 'video/mp4' || message.video.mimeType == 'video/x-msvideo')
+                    message.video.fileId
+                    /*&&
+                    (message.video.mimeType === 'video/x-matroska' || message.video.mimeType === 'video/mp4' || message.video.mimeType == 'video/x-msvideo')*/
                 ) {
                     finalSaved = message.id
 
@@ -852,15 +857,59 @@ export class Bot extends localStore {
 
                     //await db.addFile(message.video, buttonNum, Datas);
                 } else {
-                    params.datas.skip++
-                    console.log('Ignoring non-file messages...', message, 'ingoreeeeeeeeeeeeeeee');
+                    try {
+                        params.datas.skip++
+                        console.log('Ignoring non-file messages...', message, 'ingoreeeeeeeeeeeeeeee');
 
-                    await this.client.forwardMessage(params.channelId, this.supportLog, message.id);
+                        console.log(message, 'meessafe')
+
+                        await this.client.forwardMessage(params.channelId, this.supportLog, message.id);
+
+                    } catch (error: any) {
+                        if (error.errorMessage == 'MESSAGE_ID_INVALID') {
+                            if (finalSaved) {
+                                await this.client.forwardMessage(params.channelId, this.indexLog, finalSaved)
+                            }
+
+                            const modified = await params.ctx.editMessageText(params.msgToModify, `<b>Total Rounds: ${params.datas.round}\n\nSaved: ${params.datas.done}\n\nSkipped: ${params.datas.skip}\n\nLast Indexed Batch Time: ${lastBatchTime}\n<spoiler>If You Believe Your Current Time is Past Than this Atleast 5 Mins Send the Last File From the Index Log and /Index Again<spoiler></b>`, {
+                                parseMode: 'HTML',
+                            });
+
+                            if (currentTasks > 0) {
+
+                                setTimeout(async () => {
+
+                                    await this.indexRounds({
+                                        datas: {
+                                            done: params.datas.done,
+                                            skip: params.datas.skip,
+                                            round: params.datas.round++
+                                        },
+                                        ctx: params.ctx,
+                                        channelId: params.channelId,
+                                        msgId: currentTasks,
+                                        chatId: params.chatId,
+                                        msgToModify: params.msgToModify,
+                                        channelName: params.channelName,
+                                    });
+
+                                }, 59000); //
+
+                            } else {
+                                console.log(`Indexing Finished !!\n\nSaved: ${params.datas.done}\n\nDuplicated: ${params.datas.skip}\n\nTotal Rounds: ${params.datas.round}`);
+                                return await params.ctx.editMessageText(params.msgToModify, `<b>Indexing Finished !!\n\nSaved: ${params.datas.done}\n\nDuplicated: ${params.datas.skip}\n\nTotal Rounds: ${params.datas.round}</b>`, {
+                                    parseMode: 'HTML',
+                                });
+                            }
+
+
+
+                        }
+                    }
 
                 }
             }
 
-            const lastBatchTime = await this.getCurrentISTTime();
 
             console.log('going again for', params.datas.round++)
 
@@ -902,9 +951,11 @@ export class Bot extends localStore {
                 });
             }
 
-        } catch (error) {
+        } catch (error: any) {
 
             console.log('errorr in indexRounds::::', error)
+
+
         }
     }
 

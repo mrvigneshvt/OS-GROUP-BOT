@@ -634,28 +634,68 @@ class Bot extends localStore_1.localStore {
                 }
                 const messages = yield this.client.getMessages(params.channelId, fileArr);
                 let finalSaved;
+                const lastBatchTime = yield this.getCurrentISTTime();
                 for (const message of messages) {
                     if (message.document &&
-                        message.document.fileId &&
-                        (message.document.mimeType === 'video/x-matroska' || message.document.mimeType === 'video/mp4' || message.document.mimeType == 'video/x-msvideo')) {
+                        message.document.fileId
+                    /* &&
+                     (message.document.mimeType === 'video/x-matroska' || message.document.mimeType === 'video/mp4' || message.document.mimeType == 'video/x-msvideo')*/
+                    ) {
                         finalSaved = message.id;
                         yield this.mongo.addFile(message.document, params.datas, params.channelId, params.channelName);
                         //await db.addFile(message.document, buttonNum, Datas);
                     }
                     else if (message.video &&
-                        message.video.fileId &&
-                        (message.video.mimeType === 'video/x-matroska' || message.video.mimeType === 'video/mp4' || message.video.mimeType == 'video/x-msvideo')) {
+                        message.video.fileId
+                    /*&&
+                    (message.video.mimeType === 'video/x-matroska' || message.video.mimeType === 'video/mp4' || message.video.mimeType == 'video/x-msvideo')*/
+                    ) {
                         finalSaved = message.id;
                         yield this.mongo.addFile(message.video, params.datas, params.channelId, params.channelName);
                         //await db.addFile(message.video, buttonNum, Datas);
                     }
                     else {
-                        params.datas.skip++;
-                        console.log('Ignoring non-file messages...', message, 'ingoreeeeeeeeeeeeeeee');
-                        yield this.client.forwardMessage(params.channelId, this.supportLog, message.id);
+                        try {
+                            params.datas.skip++;
+                            console.log('Ignoring non-file messages...', message, 'ingoreeeeeeeeeeeeeeee');
+                            console.log(message, 'meessafe');
+                            yield this.client.forwardMessage(params.channelId, this.supportLog, message.id);
+                        }
+                        catch (error) {
+                            if (error.errorMessage == 'MESSAGE_ID_INVALID') {
+                                if (finalSaved) {
+                                    yield this.client.forwardMessage(params.channelId, this.indexLog, finalSaved);
+                                }
+                                const modified = yield params.ctx.editMessageText(params.msgToModify, `<b>Total Rounds: ${params.datas.round}\n\nSaved: ${params.datas.done}\n\nSkipped: ${params.datas.skip}\n\nLast Indexed Batch Time: ${lastBatchTime}\n<spoiler>If You Believe Your Current Time is Past Than this Atleast 5 Mins Send the Last File From the Index Log and /Index Again<spoiler></b>`, {
+                                    parseMode: 'HTML',
+                                });
+                                if (currentTasks > 0) {
+                                    setTimeout(() => __awaiter(this, void 0, void 0, function* () {
+                                        yield this.indexRounds({
+                                            datas: {
+                                                done: params.datas.done,
+                                                skip: params.datas.skip,
+                                                round: params.datas.round++
+                                            },
+                                            ctx: params.ctx,
+                                            channelId: params.channelId,
+                                            msgId: currentTasks,
+                                            chatId: params.chatId,
+                                            msgToModify: params.msgToModify,
+                                            channelName: params.channelName,
+                                        });
+                                    }), 59000); //
+                                }
+                                else {
+                                    console.log(`Indexing Finished !!\n\nSaved: ${params.datas.done}\n\nDuplicated: ${params.datas.skip}\n\nTotal Rounds: ${params.datas.round}`);
+                                    return yield params.ctx.editMessageText(params.msgToModify, `<b>Indexing Finished !!\n\nSaved: ${params.datas.done}\n\nDuplicated: ${params.datas.skip}\n\nTotal Rounds: ${params.datas.round}</b>`, {
+                                        parseMode: 'HTML',
+                                    });
+                                }
+                            }
+                        }
                     }
                 }
-                const lastBatchTime = yield this.getCurrentISTTime();
                 console.log('going again for', params.datas.round++);
                 console.log(finalSaved, 'finalsabeeed');
                 if (finalSaved) {
@@ -1398,14 +1438,16 @@ class Bot extends localStore_1.localStore {
                                 }
                                 catch (error) {
                                     console.log('error when sendinf as video');
-                                    const sendDoc = yield yield ctx.replyDocument(fileData.fileId, {
-                                        caption,
-                                        parseMode: 'HTML',
-                                    });
-                                    setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-                                        yield ctx.deleteMessage(sendDoc.id);
-                                    }), 59000);
-                                    return;
+                                    if (error.message.startsWith('Unreachable')) {
+                                        const sendDoc = yield ctx.replyDocument(fileData.fileId, {
+                                            caption,
+                                            parseMode: 'HTML',
+                                        });
+                                        setTimeout(() => __awaiter(this, void 0, void 0, function* () {
+                                            yield ctx.deleteMessage(sendDoc.id);
+                                        }), 59000);
+                                        return;
+                                    }
                                 }
                             }
                             else {
