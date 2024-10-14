@@ -1962,7 +1962,7 @@ export class Bot extends localStore {
                                 replyMarkup: {
                                     inlineKeyboard: [
                                         [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
-                                        [{ text: 'Bypassed URL', url: pool.url }],
+                                        //    [{ text: 'Bypassed URL', url: pool.url }],
                                         [{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
                                         [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
 
