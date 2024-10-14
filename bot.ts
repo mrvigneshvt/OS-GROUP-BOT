@@ -81,7 +81,7 @@ export class Bot extends localStore {
     constructor(data: botData) {
         super()
         this.botUrl = 'https://t.me/'
-        this.percentageAds = 10;
+        this.percentageAds = 20;
         this.publicChannelUname = 'SingleMachiOffll';
         this.publicChannelUserName = `@${this.publicChannelUname}`;
 
@@ -2140,8 +2140,16 @@ export class Bot extends localStore {
                     await this.queryManager(ctx, Number(userId), query, chatId, firstName, ctx.message.chat.title)
 
                     return
+                } else {
+                    await ctx.reply(this.startCaption(ctx.message.from?.firstName || 'USER'), {
+                        parseMode: 'HTML',
+                        replyMarkup: {
+                            inlineKeyboard: Markup.introReplyMarkup(String(this.botUname), this.publicChannelUname)
+                        }
+                    })
+                    return
+
                 }
-                return
 
             } catch (error) {
                 console.log(error)

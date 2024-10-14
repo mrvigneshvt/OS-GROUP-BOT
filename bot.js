@@ -49,7 +49,7 @@ class Bot extends localStore_1.localStore {
     constructor(data) {
         super();
         this.botUrl = 'https://t.me/';
-        this.percentageAds = 10;
+        this.percentageAds = 20;
         this.publicChannelUname = 'SingleMachiOffll';
         this.publicChannelUserName = `@${this.publicChannelUname}`;
         this.contactAdmin = `${this.botUrl}MachiXsupportBot`;
@@ -1631,7 +1631,7 @@ class Bot extends localStore_1.localStore {
     groupManager() {
         return __awaiter(this, void 0, void 0, function* () {
             this.client.on('message:text', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _a, _b;
+                var _a, _b, _c;
                 try {
                     console.log('msg comes under groupManager');
                     const firstName = ((_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.firstName) || 'user';
@@ -1648,7 +1648,15 @@ class Bot extends localStore_1.localStore {
                         yield this.queryManager(ctx, Number(userId), query, chatId, firstName, ctx.message.chat.title);
                         return;
                     }
-                    return;
+                    else {
+                        yield ctx.reply(this.startCaption(((_c = ctx.message.from) === null || _c === void 0 ? void 0 : _c.firstName) || 'USER'), {
+                            parseMode: 'HTML',
+                            replyMarkup: {
+                                inlineKeyboard: markup_1.Markup.introReplyMarkup(String(this.botUname), this.publicChannelUname)
+                            }
+                        });
+                        return;
+                    }
                 }
                 catch (error) {
                     console.log(error);

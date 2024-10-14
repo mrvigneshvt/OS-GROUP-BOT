@@ -37,7 +37,7 @@ class markup {
     }
     newMemberReplyMarkup(publicChannelName, paymentScreenshotId, updatesChannel = 'https://t.me/MachiXhubBot') {
         return [
-            [{ text: 'Support Group', url: `https://t.me/${publicChannelName}` }, { text: 'Updates Channel', url: updatesChannel }],
+            [{ text: 'Support Group', url: `${publicChannelName}` }, { text: 'Updates Channel', url: updatesChannel }],
             [{ text: 'Bot Owner', url: `${paymentScreenshotId}` }]
         ];
     }
