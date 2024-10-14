@@ -71,21 +71,21 @@ const start = async () => {
             botToken: '7503916985:AAG9h6PjaiVVDj2Gl7sZI-OhfG_Gpa0poXA',
         })
 
-        console.log(was)
+        console.log(was, 'was')
 
         const iss = await botModel.create({
             botToken: '7503916985:AAG9h6PjaiVVDj2Gl7sZI-OhfG_Gpa0poXA',
             botUsername: 'MachiXhubBot',
             publicChannelUName: 'SingleMachiOffll',
             contactAdmin: 'MachiXsupportBot',
-            poweringGroupLog: '-1002269051306',
+            poweringGroupLog: '-1002363091043',
             fileLog: ['-1002094214421'],
             upiId: 'TeamMachiX@apl',
         })
 
-        cosnole.log(iss)
+        console.log(iss, 'is')
     } catch (error) {
-
+        console.log(error)
     }
 
 
