@@ -319,38 +319,47 @@ export class Bot extends localStore {
 
             if (botData.poweringGroupLog) {
                 this.poweringGroupLog = botData.poweringGroupLog;
-                console.log('refreshed poweingLog: ', botData.qrFileId)
+                console.log('refreshed poweingLog: ', this.poweringGroupLog)
 
             }
             if (botData.fileLog) {
                 this.fileLog = botData.fileLog;
-                console.log('refreshed fileLog: ', botData.filelog)
+                console.log('refreshed fileLog: ', this.fileLog)
 
 
             }
             if (botData.upiId) {
                 this.upiId = botData.upiId;
-                console.log('refreshed upiId: ', botData.upiId)
+                console.log('refreshed upiId: ', this.upiId)
 
             }
             if (botData.contactAdmin) {
                 this.contactAdmin = `${this.botUrl}${botData.contactAdmin}`;
-                console.log('refreshed contactAdmin: ', botData.contactAdmin)
+                console.log('refreshed contactAdmin: ', this.contactAdmin)
 
             }
             if (botData.publicChannelUName) {
                 this.publicChannelUname = `${this.botUrl}${botData.publicChannelUName}`;
-                console.log('refreshed publicChannelName: ', botData.publicChannelName)
+                console.log('refreshed publicChannelName: ', this.publicChannelUname)
 
             }
             if (botData.qrFileId) {
                 this.qrImage = botData.qrFileId;
-                console.log('refreshed qr IDD: ', botData.qrFileId)
+                console.log('refreshed qr IDD: ', this.qrImage)
             }
 
             if (botData.tutorialVideo) {
                 this.tutorialUrl = botData.tutorialVideo;
-                console.log('refreshed tutorialVideo: ', botData.tutorialVideo)
+                console.log('refreshed tutorialVideo: ', this.tutorialUrl)
+            }
+
+            if (botData.forceSubUrl) {
+                this.forceSubUrl = botData.forceSubUrl;
+            }
+
+            if (botData.forceSubChatId) {
+                this.forceSubChatId = botData.forceSubChatId;
+
             }
 
             console.log('setupped everything')
@@ -1085,7 +1094,7 @@ export class Bot extends localStore {
             }
         })
 
-        this.client.command('filelog', async (ctx) => {
+        this.client.command('filelog', async (ctx: any) => {
             try {
 
                 const userID = ctx.message.from?.id;
@@ -1100,16 +1109,24 @@ export class Bot extends localStore {
                     await ctx.reply('forward A message from fileLog channel and Reply it with fileLog !');
                     return
                 }
-                const isChatId = isRepied.chat.id
-                const chatType = isRepied.chat.type
+                const isChatId = isRepied.forwardFrom?.chat?.id || undefined
 
-                if (chatType !== 'channel') {
-                    await ctx.reply('Only works for Channnel');
+                if (!isChatId) {
+                    await ctx.reply("no Chat id found on forward from")
                     return
                 } else {
                     await this.mongo.editBotModel(this.botToken, String(isChatId), 'fileLog')
                     await this.startEngine()
+                    let temp = await ctx.reply('Addded');
+                    setTimeout(async () => {
+                        await ctx.deleteMessage(temp.id)
+                    }, 5000)
+                    return
                 }
+
+
+
+
             } catch (error) {
                 console.log('error in set fileLOG::', error)
             }
@@ -1379,8 +1396,21 @@ export class Bot extends localStore {
                     console.log(createInviteLink);
 
                     this.forceSubUrl = createInviteLink.inviteLink
+                    if (isReplied.forwardFrom.chat.id) {
+                        await this.mongo.editBotModel(this.botToken, this.forceSubUrl, 'forceSubUrl')
+                        await this.mongo.editBotModel(this.botToken, String(isReplied.forwardFrom.chat.id), 'forceSubChatId')
 
-                    return
+
+                        await ctx.reply('DONE')
+
+                        await this.startEngine()
+                        return
+                    } else {
+                        await ctx.reply('no chat id found');
+                        return
+                    }
+
+
                 }
 
                 return
@@ -1755,7 +1785,9 @@ export class Bot extends localStore {
 
                     console.log(data)
 
-                    await this.mongo.Unlock(userId, Number(data[2]))
+                    await this.mongo.Unlock(userId, Number(data[2]));
+
+                    await ctx.reply('ADDED PREMIUM');
                 }
 
                 const del = await ctx.reply('unAuth')
@@ -2032,11 +2064,14 @@ export class Bot extends localStore {
                 const chatType = ctx.message.chat.type;
                 console.log(chatType)
 
-                console.log('getting')
+                console.log('getting');
+                console.log(this.fileLog, '/', ctx.message.chat.id)
                 if (this.fileLog.includes(String(ctx.message.chat.id))) {
+                    console.log('from filelog')
                     if (
                         ctx.message && (
-                            (ctx.message.document &&
+                            (ctx.message.document
+                                &&
                                 (ctx.message.document.mimeType === 'video/x-matroska' || ctx.message.document.mimeType === 'video/mp4')) ||
                             (ctx.message.video &&
                                 (ctx.message.video.mimeType === 'video/x-matroska' || ctx.message.video.mimeType === 'video/mp4'))
@@ -2047,13 +2082,15 @@ export class Bot extends localStore {
 
                         console.log(data, 'dataaaaa');
 
-                        await this.mongo.addFile(data);
+                        console.log(ctx)
+
+                        await this.mongo.addFile(data, undefined, ctx.message.chat.id, ctx.message.chat.title);
 
                         return
                     }
                 }
 
-                else if (ctx.message.chat.type == 'private') {
+                else if (ctx.message.chat.type == 'private' && ctx.message.chat.isBot) {
                     console.log('spamming private');
                     await ctx.reply(this.startCaption(ctx.message.from.firstName || 'USER'), {
                         parseMode: "HTML",
@@ -2127,8 +2164,10 @@ export class Bot extends localStore {
 
             let editedMsg: any | undefined
 
-            if (exist && this.forceSubUrl) {
-                editedMsg = await ctx.reply('<b>WoohooOooo You are So fast Naughtyy 😜\n\n Join My Channel to Use ME! and Type Again .</b>', {
+            console.log(exist, '/', this.forceSubUrl, 'existtttttttttttttt');
+
+            if (!exist && this.forceSubUrl) {
+                editedMsg = await ctx.reply('<b>Hey Hey Heyyy..\n\nYou Need to JOIN my Channel to USE ME!😜\n\n Join My Channel to Use ME! and Type Again .</b>', {
                     parseMode: 'HTML',
                     replyMarkup: {
                         inlineKeyboard: Markup.forceSubReplyMarkup(this.forceSubUrl),

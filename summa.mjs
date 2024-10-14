@@ -38,6 +38,12 @@ const schema = new mongoose.Schema({
     },
     tutorialVideo: {
         type: String,
+    },
+    forceSubUrl: {
+        type: String
+    },
+    forceSubChatId: {
+        type: String,
     }
 
 });
@@ -59,17 +65,33 @@ const start = async () => {
     const k = await mongoose.connect(uri)
     console.log('connected')
 
+    try {
+
+        const was = await botModel.findOneAndDelete({
+            botToken: '7503916985:AAG9h6PjaiVVDj2Gl7sZI-OhfG_Gpa0poXA',
+        })
+
+        console.log(was)
+
+        const iss = await botModel.create({
+            botToken: '7503916985:AAG9h6PjaiVVDj2Gl7sZI-OhfG_Gpa0poXA',
+            botUsername: 'MachiXhubBot',
+            publicChannelUName: 'SingleMachiOffll',
+            contactAdmin: 'MachiXsupportBot',
+            poweringGroupLog: '-1002269051306',
+            fileLog: ['-1002094214421'],
+            upiId: 'TeamMachiX@apl',
+        })
+
+        cosnole.log(iss)
+    } catch (error) {
+
+    }
 
 
-    const is = await botModel.create({
-        botToken: '7503916985:AAG9h6PjaiVVDj2Gl7sZI-OhfG_Gpa0poXA',
-        botUsername: 'MachiXhubBot',
-        publicChannelUName: 'SingleMachiOffll',
-        contactAdmin: 'MachiXsupportBot',
-        poweringGroupLog: '+1002269051306',
-        fileLog: ['-1002094214421'],
-        upiId: 'TeamMachiX@apl',
-    })
+
+
+
 
 }
 
