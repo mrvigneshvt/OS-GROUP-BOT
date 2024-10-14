@@ -159,6 +159,40 @@ export class Bot extends localStore {
 
     }
 
+    /* private async sendFile(data: any) {
+         try {
+             try {
+                 const sendDoc = await await ctx.replyVideo(fileData.fileId, {
+                     caption,
+                     parseMode: 'HTML',
+                 });
+ 
+                 setTimeout(async () => {
+                     await ctx.deleteMessage(del.id)
+                 }, 59000);
+ 
+                 return
+             } catch (error: any) {
+                 console.log('error when sendinf as video')
+                 if (error.message.startsWith('Unreachable')) {
+                     const sendDoc = await ctx.replyDocument(fileData.fileId, {
+                         caption,
+                         parseMode: 'HTML',
+                     });
+ 
+                     setTimeout(async () => {
+                         await ctx.deleteMessage(sendDoc.id)
+                     }, 59000);
+ 
+                     return
+                 }
+ 
+ 
+             }
+         } catch (error) {
+             console.log('error in send FIle:;;;', error)
+         }
+     }*/
     private upiInformation(upiId: string) {
         return `Pay On This Upi Id 👇\nUPI Handle - <code>${upiId}</code>\n\nIMPORTANT - After Payment Send Screenshot Here👇`
     }
@@ -261,7 +295,7 @@ export class Bot extends localStore {
 
             this.botUname = data.username;
             this.botUserName = this.botUserName + data.username;
-            this.botUrl = this.botUrl + data.username;
+
             console.log(this.botDetails);
 
             const conclude = await this.startEngine();
@@ -282,23 +316,46 @@ export class Bot extends localStore {
                 throw new Error('cant find Your BotModel or Datas..!')
             }
             botData = botData[0]
-            this.publicChannelUname = `${this.botUrl}${botData.publicChannelUName}`;
-            this.contactAdmin = `${this.botUrl}${botData.contactAdmin}`;
-            this.poweringGroupLog = botData.poweringGroupLog;
-            this.fileLog = botData.fileLog;
-            this.upiId = botData.upiId;
 
+            if (botData.poweringGroupLog) {
+                this.poweringGroupLog = botData.poweringGroupLog;
+                console.log('refreshed poweingLog: ', botData.qrFileId)
+
+            }
+            if (botData.fileLog) {
+                this.fileLog = botData.fileLog;
+                console.log('refreshed fileLog: ', botData.filelog)
+
+
+            }
+            if (botData.upiId) {
+                this.upiId = botData.upiId;
+                console.log('refreshed upiId: ', botData.upiId)
+
+            }
+            if (botData.contactAdmin) {
+                this.contactAdmin = `${this.botUrl}${botData.contactAdmin}`;
+                console.log('refreshed contactAdmin: ', botData.contactAdmin)
+
+            }
+            if (botData.publicChannelUName) {
+                this.publicChannelUname = `${this.botUrl}${botData.publicChannelUName}`;
+                console.log('refreshed publicChannelName: ', botData.publicChannelName)
+
+            }
             if (botData.qrFileId) {
-                this.qrImage = botData.qrCaption;
-                console.log(botData.qrFileId)
+                this.qrImage = botData.qrFileId;
+                console.log('refreshed qr IDD: ', botData.qrFileId)
             }
 
             if (botData.tutorialVideo) {
                 this.tutorialUrl = botData.tutorialVideo;
-                console.log(botData.tutorialVideo)
+                console.log('refreshed tutorialVideo: ', botData.tutorialVideo)
             }
 
             console.log('setupped everything')
+            console.log('botURl:   ', this.botUrl)
+
             console.log('publicchannelname:   ', this.publicChannelUname)
             console.log('contact:   ', this.contactAdmin);
             console.log('powering group:   ', this.poweringGroupLog);
@@ -389,11 +446,11 @@ export class Bot extends localStore {
                         const msgID = await ctx.editMessageText(msgId, 'Choose The Season You Need !', {
                             replyMarkup: {
                                 inlineKeyboard: [
-                                    [{ text: 'Season 1', callbackData: `reQuery/${query} S01` }, { text: 'Season 6', callbackData: `reQuery/${query} S06` }],
-                                    [{ text: 'Season 2', callbackData: `reQuery/${query} S02` }, { text: 'Season 7', callbackData: `reQuery/${query} S07` }],
-                                    [{ text: 'Season 3', callbackData: `reQuery/${query} S03` }, { text: 'Season 8', callbackData: `reQuery/${query} S08` }],
-                                    [{ text: 'Season 4', callbackData: `reQuery/${query} S04` }, { text: 'Season 9', callbackData: `reQuery/${query} S09` }],
-                                    [{ text: 'Season 5', callbackData: `reQuery/${query} S05` }, { text: 'Season 10', callbackData: `reQuery/${query} S10` }]
+                                    [{ text: 'Season 1', callbackData: `reQuery/${query}/S01` }, { text: 'Season 6', callbackData: `reQuery/${query}/S06` }],
+                                    [{ text: 'Season 2', callbackData: `reQuery/${query}/S02` }, { text: 'Season 7', callbackData: `reQuery/${query}/S07` }],
+                                    [{ text: 'Season 3', callbackData: `reQuery/${query}/S03` }, { text: 'Season 8', callbackData: `reQuery/${query}/S08` }],
+                                    [{ text: 'Season 4', callbackData: `reQuery/${query}/S04` }, { text: 'Season 9', callbackData: `reQuery/${query}/S09` }],
+                                    [{ text: 'Season 5', callbackData: `reQuery/${query}/S05` }, { text: 'Season 10', callbackData: `reQuery/${query}/S10` }]
                                 ]
                             }
                         })
@@ -425,9 +482,24 @@ export class Bot extends localStore {
 
                     const data = callBackData.split('/');
 
-                    await ctx.deleteMessage(ctx.msg.id);
-                    console.log(msgId)
-                    await this.queryManager(ctx, ctx.callbackQuery.from.id, data[1], ctx.msg.chat.id, ctx.callbackQuery.from.firstName, chatTitle)
+                    console.log(data, 'datataaaaaaaa')
+
+                    if (data.length > 2) {
+                        await ctx.deleteMessage(ctx.msg.id);
+                        const queryData: {
+                            query: string,
+                            addOn: string
+                        } = {
+                            query: data[1],
+                            addOn: data[2],
+                        }
+
+                        await this.queryManager(ctx, ctx.callbackQuery.from.id, queryData, ctx.msg.chat.id, ctx.callbackQuery.from.firstName, chatTitle)
+
+                    }
+
+                    return
+
 
                 } catch (error) {
                     console.log('error in reQuery::::::::', error)
@@ -448,12 +520,12 @@ export class Bot extends localStore {
                         return
                     }
 
-                    const modif = await ctx.editMessageText(Number(msgId), `<b>The Results for : ${data[1]}\n\nRequested by: ${ctx.callbackQuery.from.firstName}\n\nPowered By: ${ctx.chat.title}</b>`, {
+                    const modif = await ctx.editMessageText(Number(msgId), `< b > The Results for : ${data[1]} \n\nRequested by: ${ctx.callbackQuery.from.firstName} \n\nPowered By: ${ctx.chat.title} </b>`, {
                         replyMarkup: {
                             inlineKeyboard: [
-                                [{ text: '360p', callbackData: `reQuery/${data[1]} 360p` }, { text: '480p', callbackData: `reQuery/${data[1]} 480p` }],
-                                [{ text: '720p', callbackData: `reQuery/${data[1]} 720p` }, { text: '1080p', callbackData: `reQuery/${data[1]} 1080p` }],
-                                [{ text: '1440p', callbackData: `reQuery/${data[1]} 1440p` }, { text: '2160p', callbackData: `reQuery/${data[1]} 2160p` }]
+                                [{ text: '360p', callbackData: `reQuery/${data[1]}/360p` }, { text: '480p', callbackData: `reQuery/${data[1]}/480p` }],
+                                [{ text: '720p', callbackData: `reQuery/${data[1]}/720p` }, { text: '1080p', callbackData: `reQuery/${data[1]}/1080p` }],
+                                [{ text: '1440p', callbackData: `reQuery/${data[1]}/1440p` }, { text: '2160p', callbackData: `reQuery/${data[1]}/2160p` }]
                             ],
                         },
                         parseMode: 'HTML',
@@ -478,12 +550,9 @@ export class Bot extends localStore {
 
                 try {
                     const senderId = ctx.callbackQuery.from.id;
-                    console.log(ctx)
                     const data = callBackData.split('/');
-                    console.log(data, 'dddat')
 
-                    console.log('/iddddddd')
-                    console.log(ctx.msg.replyToMessage.from.id, 'bydddddddd')
+                    console.log(data[3], 'dataaaaaaaaaa')
                     if (ctx.callbackQuery.from.id !== ctx.msg.replyToMessage.from.id) {
                         await ctx.answerCallbackQuery({
                             text: 'Search for YOUrself Dont Distrub others Chat',
@@ -492,14 +561,14 @@ export class Bot extends localStore {
 
                         return
                     }
-                    if (Number(data[3]) < 0) {
+                    if (Number(data[3]) < 1) {
                         await ctx.answerCallbackQuery({
                             text: `You ARE IN THE FIRST PAGE !!`,
                             alert: true,
                         })
-
                         return
                     }
+
 
                     let markup = this.getResult(data[1], Number(data[2]), userId);
 
@@ -1081,6 +1150,7 @@ export class Bot extends localStore {
                     return
                 } else {
                     await ctx.reply(`QR ID SET!`);
+                    await ctx.reply(`${this.qrImage}`)
                     await this.startEngine();
                     await ctx.replyPhoto(String(this.qrImage), {
                         caption: 'Your Current QR Image..'
@@ -1131,19 +1201,25 @@ export class Bot extends localStore {
 
         this.client.command('commands', async (ctx) => {
             try {
+
+                const chatType = ctx.message.chat.type
                 const commandListAdmin = `<b><u>COMMAND LIST (ADMIN only) !!</u>\n\n\n<u>QR image:</u>\n  '/set_qr' Usage:(send an Image and Reply with /set_qr)\n\n<u>Premium Benefit Video:</u>\n  '/set_benefitvideo' Usage:(send an Video and Reply with /set_benefitvideo)\n\n<u>BroadCast:</u>\n  '/bcast' Usage:(send an Text and Reply with /bcast {Coming SOoon..})\n\n<u>ForceSUB:</u>\n  '/forceSub' Usage:(send an Message from any Channel with Bot Admin and Reply with /forceSub)\n\n<u>Default Tutorial Video:</u>\n  '/tutorial' Usage:(send an Video and Reply with /tutorial)\n\n<u>Ban / UBan User:</u>\n  '/ban/NuMeRiCuSeRiD' '/uban/NuMeRiCuSeRiD'' Usage:(/ban/1585451545)\n\n<u>Index Files:</u>\n  '/index' Usage:(Forward a File from The Channel and Reply with /index)\n\n<u>Premium An USER:</u>\n  '/prime' Usage:(/prime/NuMeRiCuSERiD)\n\n</b>`;
-                const commandListUser = `<b>COMMAND LIST !!\n\n<u>1) Set Shortner:</u>\n\n"<i>Create a Group and Add me Admin. and then use this Command in the Group"</i>\n\n<u>Command:</u> /set_shortner/yourShortner.com/yOuRsHoRtNeRTokeNHer651255241520\n\n<u>2) Set Tutorial:</u>\n\n"<i>Create a Group and Add me Admin. and send a Video for the Group Tutorial Video then use this Command by Replying to the Video in the Group"</i>\n\n<u>Command:</u> /set_tutorial\n\n<u>3) Plan:</u>\n\n"<i>come @${this.botUname} use this Command to <u>Check Available Plans</u>"</i>\n\n<u>Command:</u> /plan\n\n<u>4) My Plan:</u>\n\n"<i>come @${this.botUname} use this Command to <u>Check Your Current Plan</u></i>\n\n<u>Command:</u> /myPlan`
+                const commandListUserGroup = `<b>COMMAND LIST !!\n\n<u>1) Set Shortner:</u>\n\n"<i>Create a Group and Add me Admin. and then use this Command in the Group (Owner ONlY Command)"</i>\n\n<u>Command:</u> /set_shortner/yourShortner.com/yOuRsHoRtNeRTokeNHer651255241520\n\n<u>2) Set Tutorial:</u>\n\n"<i>Create a Group and Add me Admin. and send a Video for the Group Tutorial Video then use this Command by Replying to the Video in the Group<u>(Owner ONlY Command)</u>"</i>\n\n<u>Command:</u> /set_tutorial\n\n<u>3) Plan:</u>\n\n"<i>come @${this.botUname} use this Command to <u>Check Available Plans</u>"</i>\n\n<u>Command:</u> /plan\n\n<u>4) My Plan:</u>\n\n"<i>come @${this.botUname} use this Command to <u>Check Your Current Plan</u></i>\n\n<u>Command:</u> /myPlan`;
 
-                /* if (this.admin.includes(String(ctx.message.from?.id))) {
-                     await ctx.reply(commandListAdmin, {
-                         parseMode: 'HTML'
-                     });
-                 }*/
+                if (this.admin.includes(String(ctx.message.from?.id))) {
+                    await ctx.reply(commandListAdmin, {
+                        parseMode: 'HTML'
+                    });
 
-                await ctx.reply(commandListUser, {
-                    parseMode: "HTML",
-                })
+                    return
+                }
+                else if (chatType == 'group' || chatType == 'supergroup' || chatType == 'private') {
+                    await ctx.reply(commandListUserGroup, {
+                        parseMode: "HTML",
+                    })
 
+                    return
+                }
             } catch (error) {
                 console.log(error)
             }
@@ -1252,27 +1328,27 @@ export class Bot extends localStore {
 
                     /*
                     console.log(isReplied);
-    
+         
                     const caption = isReplied.caption ?? undefined;
-    
+         
                     const text = isReplied.text ?? undefined
-    
+         
                     if (text) {
                         const total = await userModel.find({});
-    
+         
                         const users = total.map((m) => m.userId);
-    
+         
                         console.log(users)
-    
+         
                         const totalUsers = users.length
-    
+         
                         if (totalUsers > 100) {
-    
+         
                         }
-    
-    
+         
+         
                     }
-    */
+        */
 
 
 
@@ -1730,19 +1806,41 @@ export class Bot extends localStore {
                         parseMode: 'HTML',
                     })
 
-                    const del1 = await ctx.replyDocument(pool.fileId, {
-                        caption: '<3'
-                    })
+                    let del1: undefined | any
 
-                    setTimeout(async () => {
-                        await ctx.deleteMessage(del.id)
-                    }, 4000)
+                    try {
+                        del1 = await ctx.replyDocument(pool.fileId, {
+                            caption: '💬   🗨️   ➤   💬'
+                        })
+                    } catch (error: any) {
+                        if (error.message.startsWith('Unreachable')) {
+                            del1 = await ctx.replyVideo(pool.fileId, {
+                                caption: '💬   🗨️   ➤   💬'
+                            });
 
-                    setTimeout(async () => {
-                        await ctx.deleteMessage(del1.id)
-                    }, 59000)
+                            return
+                        }
 
-                    return
+                    } finally {
+
+                        setTimeout(async () => {
+                            await ctx.deleteMessage(del.id)
+                        }, 4000)
+
+                        if (!del1) {
+                            return
+                        } else {
+                            setTimeout(async () => {
+                                await ctx.deleteMessage(del1.id)
+                            }, 59000)
+
+                            return
+                        }
+
+                    }
+
+
+
                 }
 
 
@@ -1850,11 +1948,10 @@ export class Bot extends localStore {
                             console.log(fileData);
                             console.log('fileID:', fileData.fileId, '\n\nFileType: ', fileData.fileMimeType)
 
-                            let del: any
-
+                            let del: undefined | any
 
                             try {
-                                const sendDoc = await await ctx.replyVideo(fileData.fileId, {
+                                del = await await ctx.replyVideo(fileData.fileId, {
                                     caption,
                                     parseMode: 'HTML',
                                 });
@@ -1871,25 +1968,30 @@ export class Bot extends localStore {
                                         caption,
                                         parseMode: 'HTML',
                                     });
-
-                                    setTimeout(async () => {
-                                        await ctx.deleteMessage(sendDoc.id)
-                                    }, 59000);
-
-                                    return
                                 }
-
-
                             }
 
+                            if (!del) {
+                                return
+                            } else {
+                                setTimeout(async () => {
+                                    await ctx.deleteMessage(del.id)
+                                }, 59000); del
 
-                        } else {
-                            console.log('un behabioured user....')
+                                return
+                            }
+
                         }
 
+
+
+                    } else {
+                        console.log('un behabioured user....')
                     }
 
-                } if (vals == '/start') {
+                }
+
+                if (vals == '/start') {
                     const name = ctx.message.from?.firstName || 'User'
                     console.log('comes under start')
                     await ctx.reply(this.startCaption(name), {
@@ -1994,7 +2096,11 @@ export class Bot extends localStore {
                 const text = ctx.message.text
                 if ((typeMedium == 'group' || typeMedium == 'supergroup') && !text.startsWith('/')) {
 
-                    await this.queryManager(ctx, Number(userId), text, chatId, firstName, ctx.message.chat.title)
+                    const query = {
+                        query: text,
+                        addOn: ''
+                    }
+                    await this.queryManager(ctx, Number(userId), query, chatId, firstName, ctx.message.chat.title)
 
                     return
                 }
@@ -2009,9 +2115,10 @@ export class Bot extends localStore {
 
     }
 
-    private async queryManager(ctx: any, userId: number, query: string, chatId: number, firstName: string, chatTitle: string) {
+    private async queryManager(ctx: any, userId: number, Query: { query: string, addOn: String }, chatId: number, firstName: string, chatTitle: string) {
         try {
 
+            let query = `${Query.query} ${Query.addOn}`
             let exist
             if (this.forceSubChatId) {
                 exist = await this.isForceSub(this.forceSubChatId, userId);
@@ -2045,7 +2152,7 @@ export class Bot extends localStore {
 
             if (file.length > 0) {
 
-                const fileAsReplyMarkup = this.savingReplyMarkup(query, file, 8, String(chatId), editedMsg.id, userId);
+                const fileAsReplyMarkup = this.savingReplyMarkup(Query.query, file, 8, String(chatId), editedMsg.id, userId);
 
                 editedMsg = await ctx.editMessageText(editedMsg.id, `𝙏𝙝𝙚 𝙍𝙚𝙨𝙪𝙡𝙩 𝙛𝙤𝙧: ${query}\n\nTotal: ${fileAsReplyMarkup.length}\n\n𝙍𝙚𝙦𝙪𝙚𝙨𝙩 𝘽𝙮: ${firstName}\n\n𝙋𝙤𝙬𝙚𝙧𝙚𝙙 𝘽𝙮: ${chatTitle}\n\n<b>!! This Message will be Deleted in 1 Min !!</b>`, {
                     parseMode: "HTML",
@@ -2099,7 +2206,7 @@ export class Bot extends localStore {
     // private userplanCaption(name: string,)
 
     private startCaption(name: string) {
-        return `👋 Hey ${name} , <b>GOOD DAY</b>  ⚡️\n🤗 Welcome to  Open Source Advance Filter bot.\n🤖 I Can Send you Direct Files by searching OpenLy Available Datas. \n📁 Type & Send Me Any File Name`
+        return `👋 Hey ${name} , <b>GOOD DAY</b>  ⚡️\n\n🤗 Welcome to  Open Source Advance Filter bot.\n\n🤖 I Can Send you Direct Files by searching OpenLy Available Datas. \n\n📁 Add Me to a Group First and Send Me Any File Name on the <b><u>GROUP</u></b>`
     }
     private paymentCaption(ammount: number | string) {
         return `Wow!!🤯\nYou Have Choosen Weekly Bot Membership Of Price ₹${ammount}\nChoose Payment Method 👇`

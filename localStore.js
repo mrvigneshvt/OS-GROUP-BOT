@@ -130,7 +130,7 @@ class localStore {
         // Function to create the main structure
         const createMarkup = (query, fileChunk, currentIndex, totalChunks) => {
             const result = [
-                [{ text: `⚡️${text}⚡️`, url: `https://t.me/${server_1.default.publicChannelUname}` }],
+                [{ text: `⚡️${text}⚡️`, url: `${server_1.default.publicChannelUname}` }],
                 [{ text: `Quality`, callbackData: `Quality/${query}` }, { text: "Series", callbackData: `Series/${query}` }],
             ];
             result.push(...fileChunk); // Add file chunk

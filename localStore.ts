@@ -158,7 +158,7 @@ export class localStore {
         // Function to create the main structure
         const createMarkup = (query: string, fileChunk: any[], currentIndex: number, totalChunks: number) => {
             const result: any[][] = [
-                [{ text: `⚡️${text}⚡️`, url: `https://t.me/${bot.publicChannelUname}` }],
+                [{ text: `⚡️${text}⚡️`, url: `${bot.publicChannelUname}` }],
                 [{ text: `Quality`, callbackData: `Quality/${query}` }, { text: "Series", callbackData: `Series/${query}` }],
             ];
 
