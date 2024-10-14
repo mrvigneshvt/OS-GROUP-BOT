@@ -2165,6 +2165,8 @@ export class Bot extends localStore {
 
             let query = `${Query.query} ${Query.addOn}`
             let exist
+
+            const isExistInDb = await this.mongo.isExist(String(userId))
             if (this.forceSubChatId) {
                 exist = await this.isForceSub(this.forceSubChatId, userId);
 
