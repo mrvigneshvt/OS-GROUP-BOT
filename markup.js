@@ -10,7 +10,7 @@ class markup {
     introReplyMarkup(botName, publicChannelName) {
         return [
             [{ text: 'Add to Group', url: `http://t.me/${botName}?startgroup=true` }],
-            [{ text: 'Update', url: `https://t.me/${publicChannelName}` }, { text: 'Premium', callbackData: 'planIntro' }]
+            [{ text: 'Update', url: `${publicChannelName}` }, { text: 'Premium', callbackData: 'planIntro' }]
         ];
     }
     bannedReplyMarkup(paymentScreenshotId) {
