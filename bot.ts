@@ -1951,24 +1951,48 @@ export class Bot extends localStore {
 
                         console.log(shortenedUrl, 'shoertttt')
 
-                        if (!user.verified && fileData && shortenedUrl.length > 0 && !isVerified && this.isAdsOn && tutorialUrl) {
+                        console.log(user.verified, '/', isVerified, '/', tutorialUrl)
+
+                        if (!user.verified && fileData && shortenedUrl.length > 0 && !isVerified && this.isAdsOn) {
                             const shortUrl = String(shortenedUrl[0])
-                            let pool = this.addPool(String(ctx.message.from?.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl);
+                            if (tutorialUrl) {
 
-                            console.log(pool, 'pool')
+                                let pool = this.addPool(String(ctx.message.from?.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl);
+
+                                console.log(pool, 'pool')
 
 
-                            await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
-                                replyMarkup: {
-                                    inlineKeyboard: [
-                                        [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
-                                        //    [{ text: 'Bypassed URL', url: pool.url }],
-                                        [{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
-                                        [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
+                                await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                    replyMarkup: {
+                                        inlineKeyboard: [
+                                            [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
+                                            //    [{ text: 'Bypassed URL', url: pool.url }],
+                                            [{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
+                                            [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
 
-                                    ]
-                                }
-                            })
+                                        ]
+                                    }
+                                })
+
+                                return
+                            } else {
+                                let pool = this.addPool(String(ctx.message.from?.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl);
+
+                                await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                    replyMarkup: {
+                                        inlineKeyboard: [
+                                            [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
+                                            //    [{ text: 'Bypassed URL', url: pool.url }],
+                                            ///[{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
+                                            [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
+
+                                        ]
+                                    }
+                                })
+
+                                return
+                            }
+
 
 
 

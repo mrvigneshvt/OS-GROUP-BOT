@@ -68,13 +68,23 @@ class localStore {
     }
     addPool(id, hash, endPoint, short, uniqueId, tutorialId) {
         if (!this.unlockPool[hash]) {
-            this.unlockPool[hash] = {
-                user: id,
-                url: endPoint,
-                shortUrl: short,
-                fileId: uniqueId,
-                tutorial: tutorialId,
-            };
+            if (tutorialId) {
+                this.unlockPool[hash] = {
+                    user: id,
+                    url: endPoint,
+                    shortUrl: short,
+                    fileId: uniqueId,
+                    tutorial: tutorialId,
+                };
+            }
+            else {
+                this.unlockPool[hash] = {
+                    user: id,
+                    url: endPoint,
+                    shortUrl: short,
+                    fileId: uniqueId,
+                };
+            }
         }
         setTimeout(() => {
             delete this.unlockPool[hash];

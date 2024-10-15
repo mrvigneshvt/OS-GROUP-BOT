@@ -75,17 +75,27 @@ export class localStore {
 
     }
 
-    public addPool(id: string, hash: string, endPoint: string, short: string, uniqueId: string, tutorialId: string) {
+    public addPool(id: string, hash: string, endPoint: string, short: string, uniqueId: string, tutorialId?: string) {
 
 
         if (!this.unlockPool[hash]) {
-            this.unlockPool[hash] = {
-                user: id,
-                url: endPoint,
-                shortUrl: short,
-                fileId: uniqueId,
-                tutorial: tutorialId,
+            if (tutorialId) {
+                this.unlockPool[hash] = {
+                    user: id,
+                    url: endPoint,
+                    shortUrl: short,
+                    fileId: uniqueId,
+                    tutorial: tutorialId,
+                }
+            } else {
+                this.unlockPool[hash] = {
+                    user: id,
+                    url: endPoint,
+                    shortUrl: short,
+                    fileId: uniqueId,
+                }
             }
+
         }
 
         setTimeout(() => {
