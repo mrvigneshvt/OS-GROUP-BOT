@@ -1,4 +1,4 @@
-import { Client, ID, StorageLocalStorage, errors } from '@mtkruto/node'
+import { Client, Context, ID, StorageLocalStorage, errors } from '@mtkruto/node'
 import { DataBase } from './data'
 import * as fs from 'fs'
 import { format } from 'date-fns';
@@ -75,11 +75,13 @@ export class Bot extends localStore {
     public publicChannelUname;
     private percentageAds
     private supportLog;
+    private sendLogs
 
 
 
     constructor(data: botData) {
         super()
+        this.sendLogs = '-1002462166410'
         this.botUrl = 'https://t.me/'
         this.percentageAds = 20;
         this.publicChannelUname = 'SingleMachiOffll';
@@ -159,6 +161,19 @@ export class Bot extends localStore {
 
     }
 
+    private async fileLogs(client: Client, data: {
+        userId: string,
+        userName: string,
+        fileName: string,
+    }) {
+        try {
+            let caption = `USER: ${data.userName}\n\nUSERID: ${data.userId}\n\nFILENAME: ${data.fileName}`
+            await this.client.sendMessage(this.sendLogs, caption)
+        } catch (error) {
+            console.log('error in fileLogs:::', error)
+        }
+    }
+
     /* private async sendFile(data: any) {
          try {
              try {
@@ -213,13 +228,13 @@ export class Bot extends localStore {
                     const chatId = ctx.message.chat.id
                     const channelId = ctx.message.replyToMessage?.forwardFrom?.chat?.id || undefined
                     const userId = String(ctx.message.from?.id)
-                    console.log(ctx.message.replyToMessage)
+                    //console.log(ctx.message.replyToMessage)
                     const channelName = ctx.message.replyToMessage?.forwardFrom?.chat.title || undefined
                     const indexMsgId = ctx.message.replyToMessage || undefined
 
                     const INDEXmsgId = indexMsgId.forwardFrom.messageId
 
-                    console.log(INDEXmsgId, 'chaattt');
+                    //console.log(INDEXmsgId, 'chaattt');
 
 
 
@@ -238,7 +253,7 @@ export class Bot extends localStore {
 
                     const isAccessible = await this.client.getMessage(channelId, INDEXmsgId);
 
-                    console.log(isAccessible);
+                    //   console.log(isAccessible);
 
 
                     editedMsg = await ctx.reply(`<b>Indexing Started!!\n\nChannel: <u>${channelName}</u></b>`, {
@@ -266,7 +281,6 @@ export class Bot extends localStore {
 
                 } catch (error: any) {
                     console.log('error in index::::::::', error);
-                    console.log('error in index::::::::', error.message);
                     console.log('error in index::::::::', error.errorMessage)
                     if (error.errorMessage == 'CHANNEL_PRIVATE') {
                         return await ctx.reply("<b>Bot Has NO RIGHTS !!\n\nPlease ADD bot as Admin with All RIghts !</b>", {
@@ -284,7 +298,6 @@ export class Bot extends localStore {
     public async start() {
         try {
             await this.mongo.connectDB();
-            console.log('making admin rep')
             console.log(await this.mongo.adminReport(this.isAdsOn))
             console.log('trying to connect to bot.....')
             await this.client.start({ botToken: this.botToken })
@@ -311,7 +324,7 @@ export class Bot extends localStore {
     private async startEngine() {
         try {
             let botData = await this.mongo.botModel(this.botToken);
-            console.log(botData, 'botDataaaaaaaa');
+            // console.log(botData, 'botDataaaaaaaa');
             if (!botData) {
                 throw new Error('cant find Your BotModel or Datas..!')
             }
@@ -409,7 +422,7 @@ export class Bot extends localStore {
             const msgId = Number(ctx.callbackQuery.message?.id)
             const chatId = Number(ctx.callbackQuery.message?.chat.id)
             const chatTitle = ctx.callbackQuery.message.chat.title
-            console.log(ctx);
+            //console.log(ctx);
 
 
             if (callBackData.startsWith('freePlan')) {
@@ -448,7 +461,7 @@ export class Bot extends localStore {
                     query = query[1]
                     const msgId = ctx.msg?.id || undefined;
 
-                    console.log(query, msgId)
+                    //  console.log(query, msgId)
 
                     if (query && msgId) {
 
@@ -464,7 +477,7 @@ export class Bot extends localStore {
                             }
                         })
 
-                        console.log(msgID.id, 'msgID')
+                        //console.log(msgID.id, 'msgID')
 
                         return
                     }
@@ -480,7 +493,7 @@ export class Bot extends localStore {
                     let data = callBackData.split('/')
                     data = await this.mongo.sendFile(data[1]);
 
-                    console.log(data)
+                    //console.log(data)
                 } catch (error) {
                     console.log('eror in sending callback file:::::::', error)
                 }
@@ -491,7 +504,7 @@ export class Bot extends localStore {
 
                     const data = callBackData.split('/');
 
-                    console.log(data, 'datataaaaaaaa')
+                    //console.log(data, 'datataaaaaaaa')
 
                     if (data.length > 2) {
                         await ctx.deleteMessage(ctx.msg.id);
@@ -561,7 +574,7 @@ export class Bot extends localStore {
                     const senderId = ctx.callbackQuery.from.id;
                     const data = callBackData.split('/');
 
-                    console.log(data[3], 'dataaaaaaaaaa')
+                    // console.log(data[3], 'dataaaaaaaaaa')
                     if (ctx.callbackQuery.from.id !== ctx.msg.replyToMessage.from.id) {
                         await ctx.answerCallbackQuery({
                             text: 'Search for YOUrself Dont Distrub others Chat',
@@ -591,7 +604,7 @@ export class Bot extends localStore {
                         return
                     }
 
-                    console.log(await ctx.getMessage(Number(data[2])), 'msgREFF');
+                    // console.log(await ctx.getMessage(Number(data[2])), 'msgREFF');
 
 
                     const del = await this.client.editMessageText(data[1], Number(data[2]), `< b > RESULTS: \n\nCurrent Page: ${(Number(data[3]) + 1)}\n\nThis Message Will be Deleted Automatically in 1 Minute </b>`, {
@@ -638,7 +651,7 @@ export class Bot extends localStore {
                     const msgId = Number(destructure[1])
                     const chatId = destructure[2]
 
-                    console.log(chatId, '/', msgId)
+                    //console.log(chatId, '/', msgId)
                     if (this.isAdsOn) {
                         console.log('turning off ads')
                         this.isAdsOn = false
@@ -744,8 +757,6 @@ export class Bot extends localStore {
                         });
                     }
 
-                    console.log('comes here');
-
                     await ctx.answerCallbackQuery({
                         text: 'No QR has Been Set By ADMIN !',
                         alert: true
@@ -792,7 +803,7 @@ export class Bot extends localStore {
                 try {
                     await this.client.deleteMessage(chatId, msgId)
                     const data = callBackData.split('/')
-                    console.log(data);
+                    // console.log(data);
                     await ctx.replyPhoto(this.planImage, {
                         caption: this.paymentCaption(data[2]),
                         replyMarkup: {
@@ -830,7 +841,7 @@ export class Bot extends localStore {
                 const newMember = ctx.message.newChatMembers[0].username
 
 
-                console.log(ctx, 'newwwwwwwwwww')
+                //  console.log(ctx, 'newwwwwwwwwww')
                 if (newMember == this.botDetails.username) {
                     let channelName = (ctx?.message?.chat?.title) ? ctx.message.chat.title : 'Channel';
 
@@ -848,8 +859,8 @@ export class Bot extends localStore {
                     const ownerdata = chatDetails.filter((d: any) => d.status == 'creator');
                     const ownerUserId = ownerdata[0].user.id;
 
-                    console.log(chatDetails, '////');
-                    console.log(ownerUserId)
+                    // console.log(chatDetails, '////');
+                    //console.log(ownerUserId)
 
                     await this.mongo.newGroup(String(ownerUserId), String(chatId))
 
@@ -997,7 +1008,7 @@ export class Bot extends localStore {
                 await this.client.forwardMessage(params.channelId, this.indexLog, finalSaved)
             }
 
-            const modified = await params.ctx.editMessageText(params.msgToModify, `<b>Total Rounds: ${params.datas.round}\n\nSaved: ${params.datas.done}\n\nSkipped: ${params.datas.skip}\n\nLast Indexed Batch Time: ${lastBatchTime}\n<spoiler>If You Believe Your Current Time is Past Than this Atleast 5 Mins Send the Last File From the Index Log and /Index Again<spoiler></b>`, {
+            const modified = await params.ctx.editMessageText(params.msgToModify, `<b>Total Rounds: ${params.datas.round}\n\nSaved: ${params.datas.done}\n\nSkipped: ${params.datas.skip}\n\nBalance Msg Left: ${currentTasks}\n\nLast Indexed Batch Time: ${lastBatchTime}\n<spoiler>If You Believe Your Current Time is Past Than this Atleast 5 Mins Send the Last File From the Index Log and /Index Again<spoiler></b>`, {
                 parseMode: 'HTML',
             });
 
@@ -1150,8 +1161,8 @@ export class Bot extends localStore {
                 const fileId = isRepied.photo?.fileId || undefined
 
                 if (!fileId) {
-                    await ctx.reply('Cant file FILEID..');
-                    console.log(fileId, 'missing fileeee iDDDD');
+                    await ctx.reply('Cant find FILEID..');
+                    // console.log(fileId, 'missing fileeee iDDDD');
                     return
                 }
 
@@ -1187,7 +1198,7 @@ export class Bot extends localStore {
 
                 const text = ctx.msg.text || undefined
 
-                console.log(text)
+                // console.log(text)
 
                 if (this.admin.includes(String(ctx.message.from?.id)) && text) {
 
@@ -1299,7 +1310,7 @@ export class Bot extends localStore {
                             }
                         })
 
-                        console.log(msg.id, 'og')
+                        // console.log(msg.id, 'og')
                         return
                     } else {
                         const msg = await ctx.editMessageText(modify.id, data, {
@@ -1312,7 +1323,7 @@ export class Bot extends localStore {
                                 ]
                             }
                         })
-                        console.log(msg.id, 'og')
+                        // console.log(msg.id, 'og')
 
                     }
 
@@ -1474,7 +1485,7 @@ export class Bot extends localStore {
                 }
 
                 if (chatType == 'private') {
-                    console.log(this.tutorialUrl, 'tutooo')
+                    //console.log(this.tutorialUrl, 'tutooo')
                     await ctx.replyVideo(this.tutorialUrl);
                 } else if (chatType == 'supergroup' || 'group') {
                     const groupDetails = await this.paramsGroupPool(chatId, 'userTutorial')
@@ -1548,7 +1559,7 @@ export class Bot extends localStore {
                     const ownerId = groupDetails.filter((m: any) => m.status == 'creator')
                     const ownerUserId = ownerId[0].user.id
 
-                    console.log(ownerUserId, '/', senderId)
+                    //console.log(ownerUserId, '/', senderId)
 
                     if (ownerUserId !== senderId) {
                         const del = await ctx.reply("unAuth only group owner can set!");
@@ -1608,7 +1619,7 @@ export class Bot extends localStore {
                 const msgFrom = ctx.message.chat.type
                 const isRepied = ctx.message.replyToMessage || undefined;
                 const fileAvailable = ctx.message.replyToMessage?.video?.fileId || undefined
-                console.log(ctx.message.replyToMessage, 'filleee')
+                //  console.log(ctx.message.replyToMessage, 'filleee')
 
 
                 if (msgFrom == 'private') {
@@ -1635,7 +1646,7 @@ export class Bot extends localStore {
                         return;
                     };
 
-                    console.log(fileAvailable, 'filllllll')
+                    //console.log(fileAvailable, 'filllllll')
                     await this.mongo.setTutorial(String(ownerUserId), String(chatId), fileAvailable)
 
                     await this.generateGroupPool();
@@ -1783,7 +1794,7 @@ export class Bot extends localStore {
                     }
                     const data = vals.split('/')
 
-                    console.log(data)
+                    //console.log(data)
 
                     await this.mongo.Unlock(userId, Number(data[2]));
 
@@ -1811,7 +1822,7 @@ export class Bot extends localStore {
                 const chatId = String(ctx.message.chat.id)
                 const isExist = await this.mongo.isExist(userId);
                 const vals = ctx.message.text;
-                console.log(ctx.message.text)
+                //console.log(ctx.message.text)
 
 
                 if (vals.startsWith(`/start@${this.botUname}`)) {
@@ -1842,12 +1853,12 @@ export class Bot extends localStore {
 
                     try {
                         del1 = await ctx.replyDocument(pool.fileId, {
-                            caption: '💬   🗨️   ➤   💬'
+                            caption: '💬   🗨️   ➤   💬\n\nThis File WIll be Deleted in 1 Min to keep it permanent forward the file to Other Chat'
                         })
                     } catch (error: any) {
                         if (error.message.startsWith('Unreachable')) {
                             del1 = await ctx.replyVideo(pool.fileId, {
-                                caption: '💬   🗨️   ➤   💬'
+                                caption: '💬   🗨️   ➤   💬\n\nThis File WIll be Deleted in 1 Min to keep it permanent forward the file to Other Chat'
                             });
 
                             return
@@ -1855,6 +1866,11 @@ export class Bot extends localStore {
 
                     } finally {
 
+                        await this.fileLogs(this.client, {
+                            userId,
+                            userName: ctx.message.from?.firstName || 'USER',
+                            fileName: pool.fileName,
+                        })
                         setTimeout(async () => {
                             await ctx.deleteMessage(del.id)
                         }, 4000)
@@ -1912,7 +1928,6 @@ export class Bot extends localStore {
                         const hash = crypto.randomUUID()
 
                         const endPoint = `https://t.me/${this.botUname}?start=hash_${hash}`
-                        console.log('vals for:::', chatId)
 
                         const isPower = await this.paramsGroupPool(String(chatId), 'userPowering', true)
 
@@ -1957,7 +1972,7 @@ export class Bot extends localStore {
                             const shortUrl = String(shortenedUrl[0])
                             if (tutorialUrl) {
 
-                                let pool = this.addPool(String(ctx.message.from?.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl);
+                                let pool = this.addPool(String(ctx.message.from?.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl, fileData.fileName);
 
                                 console.log(pool, 'pool')
 
@@ -1976,7 +1991,7 @@ export class Bot extends localStore {
 
                                 return
                             } else {
-                                let pool = this.addPool(String(ctx.message.from?.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl);
+                                let pool = this.addPool(String(ctx.message.from?.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl, fileData.fileName);
 
                                 await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
                                     replyMarkup: {
@@ -2000,14 +2015,23 @@ export class Bot extends localStore {
                         }
                         else if ((!this.isAdsOn || user.verified) && fileData && shortenedUrl.length > 0) {
 
+                            let data = vals.split('_');
+
+                            const hash = data[1];
+                            let pool = this.poolExist(hash)
+
+                            if (!pool) {
+                                await ctx.reply('<b>BYPASS_DETECTED !!\n\nDont TRY to Bypass ME\n\nIf you beleive you are not bypassing and facing an error\n\nMSG: @MachiXadminBot');
+                                return
+                            }
                             const caption = Markup.FileCaption(fileData)
-                            console.log(fileData);
-                            console.log('fileID:', fileData.fileId, '\n\nFileType: ', fileData.fileMimeType)
+                            //   console.log(fileData);
+                            // console.log('fileID:', fileData.fileId, '\n\nFileType: ', fileData.fileMimeType)
 
                             let del: undefined | any
 
                             try {
-                                del = await await ctx.replyVideo(fileData.fileId, {
+                                del = await ctx.replyVideo(fileData.fileId, {
                                     caption,
                                     parseMode: 'HTML',
                                 });
@@ -2025,6 +2049,12 @@ export class Bot extends localStore {
                                         parseMode: 'HTML',
                                     });
                                 }
+                            } finally {
+                                await this.fileLogs(this.client, {
+                                    userId,
+                                    userName: ctx.message.from?.firstName || 'USER',
+                                    fileName: pool.fileName,
+                                })
                             }
 
                             if (!del) {
@@ -2164,7 +2194,8 @@ export class Bot extends localStore {
                     await this.queryManager(ctx, Number(userId), query, chatId, firstName, ctx.message.chat.title)
 
                     return
-                } else {
+                } else if (typeMedium == 'private') {
+
                     await ctx.reply(this.startCaption(ctx.message.from?.firstName || 'USER'), {
                         parseMode: 'HTML',
                         replyMarkup: {

@@ -66,7 +66,7 @@ class localStore {
         }
         return this.unlockPool[hash];
     }
-    addPool(id, hash, endPoint, short, uniqueId, tutorialId) {
+    addPool(id, hash, endPoint, short, uniqueId, tutorialId, fileName) {
         if (!this.unlockPool[hash]) {
             if (tutorialId) {
                 this.unlockPool[hash] = {
@@ -75,6 +75,7 @@ class localStore {
                     shortUrl: short,
                     fileId: uniqueId,
                     tutorial: tutorialId,
+                    fileName: fileName,
                 };
             }
             else {
@@ -83,6 +84,7 @@ class localStore {
                     url: endPoint,
                     shortUrl: short,
                     fileId: uniqueId,
+                    fileName: fileName,
                 };
             }
         }

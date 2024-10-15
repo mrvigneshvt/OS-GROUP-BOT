@@ -286,10 +286,12 @@ export class DataBase {
     }
 
 
+
     public async isFileExist(query: string): Promise<any[]> {
         try {
-            // Build the raw pattern to handle spaces and special characters
-            const raw_pattern = query.replace(/ /g, '.*[\\s\\.\\+\\-_\\(\\)\\[\\]]');
+            const raw_pattern = query
+                .replace(/['’]?s/g, "(?:['’]?[sS])?") // Optional 's' or 'S' with or without apostrophe
+                .replace(/ /g, '.*[\\s\\.\\+\\-_\\(\\)\\[\\]]?'); // Flexible separator handling
 
             // Compile the regex, making it case-insensitive with 'i' flag
             const regex = new RegExp(raw_pattern, 'i');

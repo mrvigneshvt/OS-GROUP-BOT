@@ -263,8 +263,9 @@ class DataBase {
     isFileExist(query) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // Build the raw pattern to handle spaces and special characters
-                const raw_pattern = query.replace(/ /g, '.*[\\s\\.\\+\\-_\\(\\)\\[\\]]');
+                const raw_pattern = query
+                    .replace(/['’]?s/g, "(?:['’]?[sS])?") // Optional 's' or 'S' with or without apostrophe
+                    .replace(/ /g, '.*[\\s\\.\\+\\-_\\(\\)\\[\\]]?'); // Flexible separator handling
                 // Compile the regex, making it case-insensitive with 'i' flag
                 const regex = new RegExp(raw_pattern, 'i');
                 // Perform the search with the compiled regex
