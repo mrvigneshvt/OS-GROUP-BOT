@@ -1977,33 +1977,62 @@ export class Bot extends localStore {
                                 console.log(pool, 'pool')
 
 
-                                await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
-                                    replyMarkup: {
-                                        inlineKeyboard: [
-                                            [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
-                                            //    [{ text: 'Bypassed URL', url: pool.url }],
-                                            [{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
-                                            [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
+                                if (this.admin.includes(userId)) {
+                                    await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                        replyMarkup: {
+                                            inlineKeyboard: [
+                                                [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
+                                                [{ text: 'Bypassed URL', url: pool.url }],
+                                                [{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
+                                                [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
 
-                                        ]
-                                    }
-                                })
+                                            ]
+                                        }
+                                    })
+                                } else {
+                                    await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                        replyMarkup: {
+                                            inlineKeyboard: [
+                                                [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
+                                                //    [{ text: 'Bypassed URL', url: pool.url }],
+                                                [{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
+                                                [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
+
+                                            ]
+                                        }
+                                    })
+                                }
 
                                 return
                             } else {
                                 let pool = this.addPool(String(ctx.message.from?.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl, fileData.fileName);
 
-                                await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
-                                    replyMarkup: {
-                                        inlineKeyboard: [
-                                            [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
-                                            //    [{ text: 'Bypassed URL', url: pool.url }],
-                                            ///[{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
-                                            [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
+                                if (this.admin.includes(userId)) {
+                                    await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                        replyMarkup: {
+                                            inlineKeyboard: [
+                                                [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
+                                                [{ text: 'Bypassed URL', url: pool.url }],
+                                                ///[{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
+                                                [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
 
-                                        ]
-                                    }
-                                })
+                                            ]
+                                        }
+                                    })
+                                } else {
+                                    await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                        replyMarkup: {
+                                            inlineKeyboard: [
+                                                [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
+                                                //    [{ text: 'Bypassed URL', url: pool.url }],
+                                                ///[{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
+                                                [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
+
+                                            ]
+                                        }
+                                    })
+                                }
+
 
                                 return
                             }
@@ -2018,7 +2047,9 @@ export class Bot extends localStore {
                             let data = vals.split('_');
 
                             const hash = data[1];
-                            let pool = this.poolExist(hash)
+                            let pool = this.poolExist(hash);
+
+                            console.log(pool, 'pooool')
 
                             if (!pool) {
                                 await ctx.reply('<b>BYPASS_DETECTED !!\n\nDont TRY to Bypass ME\n\nIf you beleive you are not bypassing and facing an error\n\nMSG: @MachiXadminBot');
