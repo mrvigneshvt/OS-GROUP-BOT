@@ -284,7 +284,7 @@ export class DataBase {
 
 
 
-            return Markup.adminReportCaption(userDetails, primeUserCount, bannedUserCount, todayUnlockCount, totalFiles, Ads, totalFiles)
+            return Markup.adminReportCaption(userDetails, primeUserCount, bannedUserCount, todayUnlockCount, totalFiles, Ads, totalGroup)
 
             //return passingData(userDetails, primeUser, unlockCount,)
 

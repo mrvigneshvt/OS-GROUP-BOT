@@ -264,7 +264,7 @@ class DataBase {
                     })
                 ]);
                 // Now you can use userDetails, primeUser, bannedUser, totalFiles, and totalGroup
-                return markup_1.Markup.adminReportCaption(userDetails, primeUserCount, bannedUserCount, todayUnlockCount, totalFiles, Ads, totalFiles);
+                return markup_1.Markup.adminReportCaption(userDetails, primeUserCount, bannedUserCount, todayUnlockCount, totalFiles, Ads, totalGroup);
                 //return passingData(userDetails, primeUser, unlockCount,)
             }
             catch (error) {
