@@ -17,6 +17,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const model_1 = require("./model");
 const plugins_1 = require("./plugins");
 const date_fns_1 = require("date-fns");
+const markup_1 = require("./markup");
 class DataBase {
     constructor(mongoUri) {
         this.sanitizeFileName = (fileName) => {
@@ -263,7 +264,7 @@ class DataBase {
                     })
                 ]);
                 // Now you can use userDetails, primeUser, bannedUser, totalFiles, and totalGroup
-                return `╭───[ 𝙰𝙳𝙼𝙸𝙽 𝙿𝙰𝙽𝙴𝙻 ]───⍟ \n│\n├🔴 Total Users : ${userDetails}\n│\n├🟠 Prime Users : ${primeUserCount}\n│\n├🟡 Banned Users : ${bannedUserCount}\n│\n├🟢 Unlock count : ${todayUnlockCount}\n│\n├🔵 Total Files count : ${totalFiles}\n│\n├🟣 Ads : ${Ads}\n│\n├⚫️ Total Group Count: ${totalGroup}`;
+                return markup_1.Markup.adminReportCaption(userDetails, primeUserCount, bannedUserCount, todayUnlockCount, totalFiles, Ads, totalFiles);
                 //return passingData(userDetails, primeUser, unlockCount,)
             }
             catch (error) {

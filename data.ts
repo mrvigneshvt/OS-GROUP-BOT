@@ -4,6 +4,7 @@ import { formatBytes } from './plugins';
 import { startOfToday, endOfDay, format, addDays, isPast, parseISO, closestIndexTo, isThisSecond } from 'date-fns';
 import { ID, is } from '@mtkruto/node';
 import { group } from 'console';
+import { Markup } from './markup';
 
 export class DataBase {
     private mongoUri
@@ -283,8 +284,7 @@ export class DataBase {
 
 
 
-            return `╭───[ 𝙰𝙳𝙼𝙸𝙽 𝙿𝙰𝙽𝙴𝙻 ]───⍟ \n│\n├🔴 Total Users : ${userDetails}\n│\n├🟠 Prime Users : ${primeUserCount}\n│\n├🟡 Banned Users : ${bannedUserCount}\n│\n├🟢 Unlock count : ${todayUnlockCount}\n│\n├🔵 Total Files count : ${totalFiles}\n│\n├🟣 Ads : ${Ads}\n│\n├⚫️ Total Group Count: ${totalGroup}`
-
+            return Markup.adminReportCaption(userDetails, primeUserCount, bannedUserCount, todayUnlockCount, totalFiles, Ads, totalFiles)
 
             //return passingData(userDetails, primeUser, unlockCount,)
 

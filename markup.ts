@@ -14,6 +14,10 @@ class markup {
     }
 
 
+    public adminReportCaption(userDetails: number, primeUserCount: number, bannedUserCount: number, todayUnlockCount: number, totalFiles: number, Ads: string, totalGroup: number) {
+        return `╭───[ 𝙰𝙳𝙼𝙸𝙽 𝙿𝙰𝙽𝙴𝙻 ]───⍟ \n│\n├🔴 Total Users : ${userDetails}\n│\n├🟠 Prime Users : ${primeUserCount}\n│\n├🟡 Banned Users : ${bannedUserCount}\n│\n├🟢 Unlock count : ${todayUnlockCount}\n│\n├🔵 Total Files count : ${totalFiles}\n│\n├🟣 Ads : ${Ads}\n│\n├⚫️ Total Group Count: ${totalGroup}\n╰────────────────⍟`
+
+    }
 
     public FileCaption(file: FileCaption) {
         return `<b><u>File Name:</u> ${file.fileName}\n\n<u>File Size:</u> ${file.fileSize}\n\n<u>These File WIll be deleted in 1 Min to keep it Permanent forward to Any Other Chat !</u></b>`
