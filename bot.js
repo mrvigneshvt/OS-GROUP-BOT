@@ -1414,7 +1414,7 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('start', (ctx, next) => __awaiter(this, void 0, void 0, function* () {
-                var _3, _4, _5, _6, _7, _8, _9, _10;
+                var _3, _4, _5, _6, _7, _8, _9, _10, _11, _12;
                 try {
                     const userId = String((_3 = ctx.message.from) === null || _3 === void 0 ? void 0 : _3.id);
                     const chatId = String(ctx.message.chat.id);
@@ -1523,30 +1523,58 @@ class Bot extends localStore_1.localStore {
                                 if (tutorialUrl) {
                                     let pool = this.addPool(String((_5 = ctx.message.from) === null || _5 === void 0 ? void 0 : _5.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl, fileData.fileName);
                                     console.log(pool, 'pool');
-                                    yield ctx.reply(`🫂 ʜᴇʏ.. ${((_6 = ctx.message.from) === null || _6 === void 0 ? void 0 : _6.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
-                                        replyMarkup: {
-                                            inlineKeyboard: [
-                                                [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
-                                                //    [{ text: 'Bypassed URL', url: pool.url }],
-                                                [{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
-                                                [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
-                                            ]
-                                        }
-                                    });
+                                    if (this.admin.includes(userId)) {
+                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_6 = ctx.message.from) === null || _6 === void 0 ? void 0 : _6.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                            replyMarkup: {
+                                                inlineKeyboard: [
+                                                    [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
+                                                    [{ text: 'Bypassed URL', url: pool.url }],
+                                                    [{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
+                                                    [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
+                                                ]
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_7 = ctx.message.from) === null || _7 === void 0 ? void 0 : _7.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                            replyMarkup: {
+                                                inlineKeyboard: [
+                                                    [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
+                                                    //    [{ text: 'Bypassed URL', url: pool.url }],
+                                                    [{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
+                                                    [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
+                                                ]
+                                            }
+                                        });
+                                    }
                                     return;
                                 }
                                 else {
-                                    let pool = this.addPool(String((_7 = ctx.message.from) === null || _7 === void 0 ? void 0 : _7.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl, fileData.fileName);
-                                    yield ctx.reply(`🫂 ʜᴇʏ.. ${((_8 = ctx.message.from) === null || _8 === void 0 ? void 0 : _8.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
-                                        replyMarkup: {
-                                            inlineKeyboard: [
-                                                [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
-                                                //    [{ text: 'Bypassed URL', url: pool.url }],
-                                                ///[{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
-                                                [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
-                                            ]
-                                        }
-                                    });
+                                    let pool = this.addPool(String((_8 = ctx.message.from) === null || _8 === void 0 ? void 0 : _8.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl, fileData.fileName);
+                                    if (this.admin.includes(userId)) {
+                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_9 = ctx.message.from) === null || _9 === void 0 ? void 0 : _9.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                            replyMarkup: {
+                                                inlineKeyboard: [
+                                                    [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
+                                                    [{ text: 'Bypassed URL', url: pool.url }],
+                                                    ///[{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
+                                                    [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
+                                                ]
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_10 = ctx.message.from) === null || _10 === void 0 ? void 0 : _10.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                            replyMarkup: {
+                                                inlineKeyboard: [
+                                                    [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
+                                                    //    [{ text: 'Bypassed URL', url: pool.url }],
+                                                    ///[{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
+                                                    [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
+                                                ]
+                                            }
+                                        });
+                                    }
                                     return;
                                 }
                                 return;
@@ -1586,7 +1614,7 @@ class Bot extends localStore_1.localStore {
                                 finally {
                                     yield this.fileLogs(this.client, {
                                         userId,
-                                        userName: ((_9 = ctx.message.from) === null || _9 === void 0 ? void 0 : _9.firstName) || 'USER',
+                                        userName: ((_11 = ctx.message.from) === null || _11 === void 0 ? void 0 : _11.firstName) || 'USER',
                                         fileName: pool.fileName,
                                     });
                                 }
@@ -1607,7 +1635,7 @@ class Bot extends localStore_1.localStore {
                         }
                     }
                     if (vals == '/start') {
-                        const name = ((_10 = ctx.message.from) === null || _10 === void 0 ? void 0 : _10.firstName) || 'User';
+                        const name = ((_12 = ctx.message.from) === null || _12 === void 0 ? void 0 : _12.firstName) || 'User';
                         console.log('comes under start');
                         yield ctx.reply(this.startCaption(name), {
                             parseMode: 'HTML',

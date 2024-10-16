@@ -508,6 +508,7 @@ export class Bot extends localStore {
 
                     if (data.length > 2) {
                         await ctx.deleteMessage(ctx.msg.id);
+
                         const queryData: {
                             query: string,
                             addOn: string
