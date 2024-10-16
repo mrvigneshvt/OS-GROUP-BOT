@@ -221,14 +221,17 @@ export class Bot extends localStore {
         return randomValue <= this.percentageAds;
     }
 
-    private async gcast(text: string, client: Context) {
+    private async gcast(client: Client, text?: string, photo?: any, caption?: string, captionEntities?: any) {
         try {
             const groupsData = await this.mongo.poweringGroups();
+            console.log(groupsData, 'groupsssssssssssdata')
+
 
             if (!groupsData || groupsData.length === 0) {
-                await client.reply('NO GROUPS DATA FOUND!');
+                await client.sendMessage(this.admin[0], 'NO GROUPS DATA FOUND!');
                 return;
             }
+
 
             for (const data of groupsData) {
                 const groupId = data.userGroupId;
@@ -236,13 +239,39 @@ export class Bot extends localStore {
                 // Wait 10 seconds before sending the next message
 
                 try {
-                    await this.client.sendMessage(groupId, text);
+
+                    if (photo && caption && captionEntities) {
+                        await client.sendPhoto(groupId, photo, {
+                            caption,
+                            captionEntities,
+                        });
+                    }
+
+                    else if (photo && caption) {
+                        await client.sendPhoto(groupId, photo, {
+                            caption,
+                        });
+                    }
+
+                    else if (text && captionEntities) {
+                        await client.sendMessage(groupId, text, {
+                            entities: captionEntities
+                        })
+                    }
+
+                    else if (text) {
+                        await client.sendMessage(groupId, text);
+                    }
                     await new Promise(resolve => setTimeout(resolve, 10000));
 
                 } catch (error) {
                     console.log(`Error sending message to group ${groupId}:`, error);
                 }
             }
+
+
+            await client.sendMessage(this.admin[0], 'GCAST FINISHED !!')
+
         } catch (error) {
             console.log('Error in gcast:::', error);
         }
@@ -892,7 +921,7 @@ export class Bot extends localStore {
                     // console.log(chatDetails, '////');
                     //console.log(ownerUserId)
 
-                    await this.mongo.newGroup(String(ownerUserId), String(chatId))
+                    await this.mongo.newGroup(String(chatId), String(ownerUserId));
 
                     await this.generateGroupPool()
                     await this.client.sendMessage(this.poweringGroupLog, `Bot ADDED to NEW Group !!\n\nUser: ${userName}\n\nGroupName: ${channelName}\n\nGroupId: ${chatId}`)
@@ -1108,7 +1137,7 @@ export class Bot extends localStore {
 
     public async commands() {
 
-        this.client.command('gcast', async (ctx) => {
+        this.client.command('gcast', async (ctx: any) => {
             try {
                 const userID = ctx.message.from?.id
 
@@ -1120,6 +1149,44 @@ export class Bot extends localStore {
                     }
 
                     console.log(isReplied, 'isReepppp')
+
+                    const text = isReplied.text || undefined;
+                    const picture = isReplied.photo?.fileId || undefined;
+                    const caption = isReplied.caption || undefined;
+                    const captionEntites = isReplied.captionEntities || undefined
+                    const entities = isReplied.entities || undefined
+
+                    console.log(text, 'text')
+                    console.log(picture, 'piccture')
+                    console.log(caption, 'caption')
+                    console.log(captionEntites, 'captionEntities');
+                    console.log(entities, 'entities')
+
+
+
+
+
+                    if (picture && caption && captionEntites) {
+                        await this.gcast(this.client, undefined, picture, caption, captionEntites)
+                        return
+                    }
+
+                    else if (picture && caption) {
+                        await this.gcast(this.client, undefined, picture, caption)
+                        return
+                    }
+
+                    else if (text && entities) {
+                        await this.gcast(this.client, text, undefined, undefined, entities);
+                        return
+                    }
+
+                    else if (text) {
+                        await this.gcast(this.client, text);
+                        return
+                    }
+
+
                 }
 
                 return
@@ -1843,11 +1910,13 @@ export class Bot extends localStore {
                     }
                     const data = vals.split('/')
 
-                    //console.log(data)
+                    console.log(data, 'prime data')
 
-                    await this.mongo.Unlock(userId, Number(data[2]));
+                    await this.mongo.Unlock(data[2], this.client, Number(data[3]));
 
                     await ctx.reply('ADDED PREMIUM');
+
+                    return
                 }
 
                 const del = await ctx.reply('unAuth')

@@ -61,6 +61,7 @@ const data = {
 }
 
 
+
 const start = async () => {
     const k = await mongoose.connect(uri)
     console.log('connected')

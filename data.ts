@@ -1,8 +1,8 @@
 import mongoose, { Collection, connection, mongo } from 'mongoose'
 import { fileModel, groupModel, IUser, userModel } from './model';
 import { formatBytes } from './plugins';
-import { startOfToday, endOfDay, format, addDays, isPast, parseISO, closestIndexTo, isThisSecond } from 'date-fns';
-import { ID, is } from '@mtkruto/node';
+import { isValid, startOfToday, endOfDay, format, addDays, isPast, parseISO, closestIndexTo, isThisSecond } from 'date-fns';
+import { Client, ID, is } from '@mtkruto/node';
 import { group } from 'console';
 import { Markup } from './markup';
 
@@ -197,67 +197,88 @@ export class DataBase {
         }
     }
 
-    public async Unlock(id: string, client?: any, days?: number, isFreeTrial?: boolean) {
+    public async Unlock(id: string, client?: Client, days?: number, isFreeTrial?: boolean): Promise<void> {
         try {
+            console.log(days, 'daysss')
+            const currentDate = new Date();
+
+            // Format current date for 'verifiedAt'
+            const updateData: any = {
+                verified: true,
+                verifiedAt: format(currentDate, 'yyyy-MM-dd HH:mm:ss')
+            };
+
+            // Determine the 'verifiedTill' date based on free trial or premium plan
             if (isFreeTrial) {
-                const user = await userModel.findOneAndUpdate({
-                    userId: id
-                }, {
-                    $set: {
-                        isFreeTrialUsed: true,
-                        verified: true,
-                        verifiedAt: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
-                        verifiedTill: format(endOfDay(new Date()), 'yyyy-MM-dd HH:mm:ss'),
-                    }
-                }, {})
-
-                const del = await client.sendMessage(id, "Unlocked Till MIDNIGHT !");
-
-                setTimeout(async () => {
-                    await client.deleteMessage(id, del.id)
-                }, 300000)
-            }
-            else if (days) {
-                const user = await userModel.findOneAndUpdate({
-                    userId: id
-                }, {
-                    $set: {
-                        verified: true,
-                        verifiedAt: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
-                        verifiedTill: format(addDays(new Date(), days), 'yyyy-MM-dd HH:mm:ss'),
-
-                    }
-                }, {})
-
-
-                await client.sendMessage(id, `!! Premium Plan Added !!\n\nDays: ${days}`);
-
-                return;
+                updateData.isFreeTrialUsed = true;
+                updateData.verifiedTill = format(endOfDay(currentDate), 'yyyy-MM-dd HH:mm:ss');
+            } else if (days) {
+                const futureDate = addDays(currentDate, days);
+                updateData.verifiedTill = format(futureDate, 'yyyy-MM-dd HH:mm:ss'); // Always use the future date
             } else {
-
-                const user = await userModel.findOneAndUpdate({
-                    userId: id
-                }, {
-                    $set: {
-                        verified: true,
-                        verifiedAt: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
-                        verifiedTill: format(endOfDay(new Date()), 'yyyy-MM-dd HH:mm:ss'),
-                    }
-                }, {})
-
-                const del = await client.sendMessage(id, "Unlocked Till MIDNIGHT !");
-
-                setTimeout(async () => {
-                    await client.deleteMessage(id, del.id)
-                }, 300000)
-
+                updateData.verifiedTill = format(endOfDay(currentDate), 'yyyy-MM-dd HH:mm:ss');
             }
 
-        } catch (error) {
+            // Update user in the database
+            const user = await userModel.findOneAndUpdate(
+                { userId: id },
+                { $set: updateData }
+            );
 
-            console.log('error in unlock:::', error)
+            // Handle client messaging
+            if (client) {
+                if (isFreeTrial || !days) {
+                    const del = await client.sendMessage(id, "Unlocked Till MIDNIGHT!");
+                    setTimeout(async () => {
+                        await client.deleteMessage(id, del.id);
+                    }, 300000); // 5 minutes
+                } else if (days) {
+                    await client.sendMessage(id, `!! Premium Plan Added !!\n\nDays: ${days}`);
+                }
+            }
+        } catch (error) {
+            console.error('Error in Unlock:', error);
+            throw error; // Rethrow to handle or log further
         }
     }
+
+    /* public async Unlock(id: string, client?: Client, days?: number, isFreeTrial?: boolean): Promise<void> {
+         try {
+             const currentDate = new Date();
+             const updateData: any = {
+                 verified: true,
+                 verifiedAt: format(currentDate, 'yyyy-MM-dd HH:mm:ss')
+             };
+ 
+             if (isFreeTrial) {
+                 updateData.isFreeTrialUsed = true;
+                 updateData.verifiedTill = format(endOfDay(currentDate), 'yyyy-MM-dd HH:mm:ss');
+             } else if (days) {
+                 updateData.verifiedTill = format(addDays(currentDate, days), 'yyyy-MM-dd HH:mm:ss');
+             } else {
+                 updateData.verifiedTill = format(endOfDay(currentDate), 'yyyy-MM-dd HH:mm:ss');
+             }
+ 
+             const user = await userModel.findOneAndUpdate(
+                 { userId: id },
+                 { $set: updateData }
+             );
+ 
+             if (client) {
+                 if (isFreeTrial || !days) {
+                     const del = await client.sendMessage(id, "Unlocked Till MIDNIGHT!");
+                     setTimeout(async () => {
+                         await client.deleteMessage(id, del.id);
+                     }, 300000); // 5 minutes
+                 } else if (days) {
+                     await client.sendMessage(id, `!! Premium Plan Added !!\n\nDays: ${days}`);
+                 }
+             }
+         } catch (error) {
+             console.error('Error in Unlock:', error);
+             throw error; // Rethrow or handle based on your needs
+         }
+     }*/
 
     public async adminReport(ads: boolean): Promise<string> {
         try {

@@ -195,56 +195,83 @@ class DataBase {
     Unlock(id, client, days, isFreeTrial) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                console.log(days, 'daysss');
+                const currentDate = new Date();
+                // Format current date for 'verifiedAt'
+                const updateData = {
+                    verified: true,
+                    verifiedAt: (0, date_fns_1.format)(currentDate, 'yyyy-MM-dd HH:mm:ss')
+                };
+                // Determine the 'verifiedTill' date based on free trial or premium plan
                 if (isFreeTrial) {
-                    const user = yield model_1.userModel.findOneAndUpdate({
-                        userId: id
-                    }, {
-                        $set: {
-                            isFreeTrialUsed: true,
-                            verified: true,
-                            verifiedAt: (0, date_fns_1.format)(new Date(), 'yyyy-MM-dd HH:mm:ss'),
-                            verifiedTill: (0, date_fns_1.format)((0, date_fns_1.endOfDay)(new Date()), 'yyyy-MM-dd HH:mm:ss'),
-                        }
-                    }, {});
-                    const del = yield client.sendMessage(id, "Unlocked Till MIDNIGHT !");
-                    setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-                        yield client.deleteMessage(id, del.id);
-                    }), 300000);
+                    updateData.isFreeTrialUsed = true;
+                    updateData.verifiedTill = (0, date_fns_1.format)((0, date_fns_1.endOfDay)(currentDate), 'yyyy-MM-dd HH:mm:ss');
                 }
                 else if (days) {
-                    const user = yield model_1.userModel.findOneAndUpdate({
-                        userId: id
-                    }, {
-                        $set: {
-                            verified: true,
-                            verifiedAt: (0, date_fns_1.format)(new Date(), 'yyyy-MM-dd HH:mm:ss'),
-                            verifiedTill: (0, date_fns_1.format)((0, date_fns_1.addDays)(new Date(), days), 'yyyy-MM-dd HH:mm:ss'),
-                        }
-                    }, {});
-                    yield client.sendMessage(id, `!! Premium Plan Added !!\n\nDays: ${days}`);
-                    return;
+                    const futureDate = (0, date_fns_1.addDays)(currentDate, days);
+                    updateData.verifiedTill = (0, date_fns_1.format)(futureDate, 'yyyy-MM-dd HH:mm:ss'); // Always use the future date
                 }
                 else {
-                    const user = yield model_1.userModel.findOneAndUpdate({
-                        userId: id
-                    }, {
-                        $set: {
-                            verified: true,
-                            verifiedAt: (0, date_fns_1.format)(new Date(), 'yyyy-MM-dd HH:mm:ss'),
-                            verifiedTill: (0, date_fns_1.format)((0, date_fns_1.endOfDay)(new Date()), 'yyyy-MM-dd HH:mm:ss'),
-                        }
-                    }, {});
-                    const del = yield client.sendMessage(id, "Unlocked Till MIDNIGHT !");
-                    setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-                        yield client.deleteMessage(id, del.id);
-                    }), 300000);
+                    updateData.verifiedTill = (0, date_fns_1.format)((0, date_fns_1.endOfDay)(currentDate), 'yyyy-MM-dd HH:mm:ss');
+                }
+                // Update user in the database
+                const user = yield model_1.userModel.findOneAndUpdate({ userId: id }, { $set: updateData });
+                // Handle client messaging
+                if (client) {
+                    if (isFreeTrial || !days) {
+                        const del = yield client.sendMessage(id, "Unlocked Till MIDNIGHT!");
+                        setTimeout(() => __awaiter(this, void 0, void 0, function* () {
+                            yield client.deleteMessage(id, del.id);
+                        }), 300000); // 5 minutes
+                    }
+                    else if (days) {
+                        yield client.sendMessage(id, `!! Premium Plan Added !!\n\nDays: ${days}`);
+                    }
                 }
             }
             catch (error) {
-                console.log('error in unlock:::', error);
+                console.error('Error in Unlock:', error);
+                throw error; // Rethrow to handle or log further
             }
         });
     }
+    /* public async Unlock(id: string, client?: Client, days?: number, isFreeTrial?: boolean): Promise<void> {
+         try {
+             const currentDate = new Date();
+             const updateData: any = {
+                 verified: true,
+                 verifiedAt: format(currentDate, 'yyyy-MM-dd HH:mm:ss')
+             };
+ 
+             if (isFreeTrial) {
+                 updateData.isFreeTrialUsed = true;
+                 updateData.verifiedTill = format(endOfDay(currentDate), 'yyyy-MM-dd HH:mm:ss');
+             } else if (days) {
+                 updateData.verifiedTill = format(addDays(currentDate, days), 'yyyy-MM-dd HH:mm:ss');
+             } else {
+                 updateData.verifiedTill = format(endOfDay(currentDate), 'yyyy-MM-dd HH:mm:ss');
+             }
+ 
+             const user = await userModel.findOneAndUpdate(
+                 { userId: id },
+                 { $set: updateData }
+             );
+ 
+             if (client) {
+                 if (isFreeTrial || !days) {
+                     const del = await client.sendMessage(id, "Unlocked Till MIDNIGHT!");
+                     setTimeout(async () => {
+                         await client.deleteMessage(id, del.id);
+                     }, 300000); // 5 minutes
+                 } else if (days) {
+                     await client.sendMessage(id, `!! Premium Plan Added !!\n\nDays: ${days}`);
+                 }
+             }
+         } catch (error) {
+             console.error('Error in Unlock:', error);
+             throw error; // Rethrow or handle based on your needs
+         }
+     }*/
     adminReport(ads) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
