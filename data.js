@@ -281,7 +281,7 @@ class DataBase {
                 // Compile the regex, making it case-insensitive with 'i' flag
                 const regex = new RegExp(raw_pattern, 'i');
                 // Perform the search with the compiled regex
-                const files = yield model_1.fileModel.find({ fileName: { $regex: regex } }).limit(50).sort({ createdAt: -1 });
+                const files = yield model_1.fileModel.find({ fileName: { $regex: regex } }).limit(50).sort({ _id: -1 });
                 console.log(files.length);
                 return files;
             }

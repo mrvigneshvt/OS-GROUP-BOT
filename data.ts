@@ -307,7 +307,7 @@ export class DataBase {
             const regex = new RegExp(raw_pattern, 'i');
 
             // Perform the search with the compiled regex
-            const files = await fileModel.find({ fileName: { $regex: regex } }).limit(50).sort({ createdAt: -1 })
+            const files = await fileModel.find({ fileName: { $regex: regex } }).limit(50).sort({ _id: -1 })
 
             console.log(files.length);
             return files;
