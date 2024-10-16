@@ -143,6 +143,16 @@ export class DataBase {
             console.log('error in setTutorial:::;', error)
         }
     }
+
+    public async poweringGroups(): Promise<any | false> {
+        try {
+            const data = await groupModel.find({})
+            return data
+        } catch (error) {
+            console.log('error getting poweingGroups::', error)
+            return false
+        }
+    }
     public async newGroup(groupId: string, ownerUserId: string) {
         try {
             const isExist = await groupModel.findOne({ userGroupId: groupId });
@@ -297,7 +307,7 @@ export class DataBase {
             const regex = new RegExp(raw_pattern, 'i');
 
             // Perform the search with the compiled regex
-            const files = await fileModel.find({ fileName: { $regex: regex } }).limit(50);
+            const files = await fileModel.find({ fileName: { $regex: regex } }).limit(50).sort({ createdAt: -1 })
 
             console.log(files.length);
             return files;

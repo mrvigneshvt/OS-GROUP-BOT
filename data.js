@@ -144,6 +144,18 @@ class DataBase {
             }
         });
     }
+    poweringGroups() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield model_1.groupModel.find({});
+                return data;
+            }
+            catch (error) {
+                console.log('error getting poweingGroups::', error);
+                return false;
+            }
+        });
+    }
     newGroup(groupId, ownerUserId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -269,7 +281,7 @@ class DataBase {
                 // Compile the regex, making it case-insensitive with 'i' flag
                 const regex = new RegExp(raw_pattern, 'i');
                 // Perform the search with the compiled regex
-                const files = yield model_1.fileModel.find({ fileName: { $regex: regex } }).limit(50);
+                const files = yield model_1.fileModel.find({ fileName: { $regex: regex } }).limit(50).sort({ createdAt: -1 });
                 console.log(files.length);
                 return files;
             }

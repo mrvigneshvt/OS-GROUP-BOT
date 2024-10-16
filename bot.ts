@@ -84,7 +84,7 @@ export class Bot extends localStore {
         this.sendLogs = '-1002462166410'
         this.botUrl = 'https://t.me/'
         this.percentageAds = 20;
-        this.publicChannelUname = 'SingleMachiOffll';
+        this.publicChannelUname = 'MachiXupdates';
         this.publicChannelUserName = `@${this.publicChannelUname}`;
 
         this.contactAdmin = `${this.botUrl}MachiXsupportBot`;
@@ -165,9 +165,10 @@ export class Bot extends localStore {
         userId: string,
         userName: string,
         fileName: string,
+        fileSize: string,
     }) {
         try {
-            let caption = `USER: ${data.userName}\n\nUSERID: ${data.userId}\n\nFILENAME: ${data.fileName}`
+            let caption = `USER: ${data.userName}\n\nUSERID: ${data.userId}\n\nFILENAME: ${data.fileName}\n\nFILESIZE: ${data.fileSize}`
             await this.client.sendMessage(this.sendLogs, caption)
         } catch (error) {
             console.log('error in fileLogs:::', error)
@@ -219,6 +220,34 @@ export class Bot extends localStore {
         // Return true if the random value is less than or equal to the percentage chance
         return randomValue <= this.percentageAds;
     }
+
+    private async gcast(text: string, client: Context) {
+        try {
+            const groupsData = await this.mongo.poweringGroups();
+
+            if (!groupsData || groupsData.length === 0) {
+                await client.reply('NO GROUPS DATA FOUND!');
+                return;
+            }
+
+            for (const data of groupsData) {
+                const groupId = data.userGroupId;
+
+                // Wait 10 seconds before sending the next message
+
+                try {
+                    await this.client.sendMessage(groupId, text);
+                    await new Promise(resolve => setTimeout(resolve, 10000));
+
+                } catch (error) {
+                    console.log(`Error sending message to group ${groupId}:`, error);
+                }
+            }
+        } catch (error) {
+            console.log('Error in gcast:::', error);
+        }
+    }
+
 
     public async indexEngine() {
         try {
@@ -1079,6 +1108,25 @@ export class Bot extends localStore {
 
     public async commands() {
 
+        this.client.command('gcast', async (ctx) => {
+            try {
+                const userID = ctx.message.from?.id
+
+                if (this.admin.includes(String(userID))) {
+                    const isReplied = ctx.message.replyToMessage
+                    if (!isReplied) {
+                        await ctx.reply('reply to an MSG and use COMMAND')
+                        return
+                    }
+
+                    console.log(isReplied, 'isReepppp')
+                }
+
+                return
+            } catch (error) {
+                console.log('error in gcastt:::', error)
+            }
+        })
         this.client.command('set_admin', async (ctx) => {
             try {
 
@@ -1871,6 +1919,7 @@ export class Bot extends localStore {
                             userId,
                             userName: ctx.message.from?.firstName || 'USER',
                             fileName: pool.fileName,
+                            fileSize: del1.document.fileSize || del1.video.fileSize,
                         })
                         setTimeout(async () => {
                             await ctx.deleteMessage(del.id)
@@ -2069,16 +2118,18 @@ export class Bot extends localStore {
                             } catch (error: any) {
                                 console.log('error when sendinf as video')
                                 if (error.message.startsWith('Unreachable')) {
-                                    const sendDoc = await ctx.replyDocument(fileData.fileId, {
+                                    del = await ctx.replyDocument(fileData.fileId, {
                                         caption,
                                         parseMode: 'HTML',
                                     });
                                 }
                             } finally {
+                                console.log(del, 'deeeeeellllll')
                                 await this.fileLogs(this.client, {
                                     userId,
                                     userName: ctx.message.from?.firstName || 'USER',
-                                    fileName: pool.fileName,
+                                    fileName: del.document.fileName || del.video.fileName,
+                                    fileSize: del.document.fileSize || del.document.fileSize
                                 })
                             }
 
