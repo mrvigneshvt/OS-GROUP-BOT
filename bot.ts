@@ -2048,14 +2048,7 @@ export class Bot extends localStore {
                             let data = vals.split('_');
 
                             const hash = data[1];
-                            let pool = this.poolExist(hash);
 
-                            console.log(pool, 'pooool')
-
-                            if (!pool) {
-                                await ctx.reply('<b>BYPASS_DETECTED !!\n\nDont TRY to Bypass ME\n\nIf you beleive you are not bypassing and facing an error\n\nMSG: @MachiXadminBot');
-                                return
-                            }
                             const caption = Markup.FileCaption(fileData)
                             //   console.log(fileData);
                             // console.log('fileID:', fileData.fileId, '\n\nFileType: ', fileData.fileMimeType)
