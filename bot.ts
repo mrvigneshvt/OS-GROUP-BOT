@@ -101,7 +101,7 @@ export class Bot extends localStore {
         this.fileLog = ['-1002094214421']
 
 
-        this.isAdsOn = true;
+        this.isAdsOn = false;
 
 
         this.botUserName = '@';
@@ -158,8 +158,44 @@ export class Bot extends localStore {
                 return next(); // Proceed with the next middleware
             }
         });
-
     }
+
+    public async switchUserIds() {
+        try {
+            const docs = await groupModel.find({});
+
+            console.log(docs, '//////', docs.length)
+
+
+            for (const doc of docs) {
+                if (doc.userId.startsWith('-')) {
+                    // Convert to a plain object to avoid modifying the Mongoose document directly
+                    const temp = doc.toObject();
+                    console.log(temp, 'teeeempppp')
+
+                    // Delete the old document
+                    await groupModel.findOneAndDelete({ userId: temp.userId });
+
+                    // Swap userId and userGroupId
+                    const tempGroupId = temp.userId;
+                    temp.userId = temp.userGroupId;
+                    temp.userGroupId = tempGroupId;
+
+                    console.log('creating...')
+                    // Create the new document
+                    await groupModel.create(temp);
+
+                    console.log(`Created new document with userId: ${temp.userId} and userGroupId: ${temp.userGroupId}`);
+                }
+            }
+
+
+            console.log('User IDs processed successfully!');
+        } catch (error) {
+            console.error('Error switching user IDs:', error);
+        }
+    }
+
 
     private async fileLogs(client: Client, data: {
         userId: string,
@@ -1161,9 +1197,6 @@ export class Bot extends localStore {
                     console.log(caption, 'caption')
                     console.log(captionEntites, 'captionEntities');
                     console.log(entities, 'entities')
-
-
-
 
 
                     if (picture && caption && captionEntites) {

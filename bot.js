@@ -61,7 +61,7 @@ class Bot extends localStore_1.localStore {
         this.indexLog = '-1002473253639'; // - 1002279938392';
         this.poweringGroupLog = '-1002363091043'; //channel id of groupChat !
         this.fileLog = ['-1002094214421'];
-        this.isAdsOn = true;
+        this.isAdsOn = false;
         this.botUserName = '@';
         this.botUname = undefined;
         this.tutorialUrl = undefined;
@@ -100,6 +100,35 @@ class Bot extends localStore_1.localStore {
                 return next(); // Proceed with the next middleware
             }
         }));
+    }
+    switchUserIds() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const docs = yield model_1.groupModel.find({});
+                console.log(docs, '//////', docs.length);
+                for (const doc of docs) {
+                    if (doc.userId.startsWith('-')) {
+                        // Convert to a plain object to avoid modifying the Mongoose document directly
+                        const temp = doc.toObject();
+                        console.log(temp, 'teeeempppp');
+                        // Delete the old document
+                        yield model_1.groupModel.findOneAndDelete({ userId: temp.userId });
+                        // Swap userId and userGroupId
+                        const tempGroupId = temp.userId;
+                        temp.userId = temp.userGroupId;
+                        temp.userGroupId = tempGroupId;
+                        console.log('creating...');
+                        // Create the new document
+                        yield model_1.groupModel.create(temp);
+                        console.log(`Created new document with userId: ${temp.userId} and userGroupId: ${temp.userGroupId}`);
+                    }
+                }
+                console.log('User IDs processed successfully!');
+            }
+            catch (error) {
+                console.error('Error switching user IDs:', error);
+            }
+        });
     }
     fileLogs(client, data) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -165,7 +194,7 @@ class Bot extends localStore_1.localStore {
                     return;
                 }
                 for (const data of groupsData) {
-                    const groupId = data.userId;
+                    const groupId = data.userGroupId;
                     // Wait 10 seconds before sending the next message
                     try {
                         if (photo && caption && captionEntities) {
@@ -703,7 +732,7 @@ class Bot extends localStore_1.localStore {
                         const ownerUserId = ownerdata[0].user.id;
                         // console.log(chatDetails, '////');
                         //console.log(ownerUserId)
-                        yield this.mongo.newGroup(String(ownerUserId), String(chatId));
+                        yield this.mongo.newGroup(String(chatId), String(ownerUserId));
                         yield this.generateGroupPool();
                         yield this.client.sendMessage(this.poweringGroupLog, `Bot ADDED to NEW Group !!\n\nUser: ${userName}\n\nGroupName: ${channelName}\n\nGroupId: ${chatId}`);
                         setTimeout(() => __awaiter(this, void 0, void 0, function* () {
