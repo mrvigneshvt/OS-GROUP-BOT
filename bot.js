@@ -995,6 +995,10 @@ class Bot extends localStore_1.localStore {
                         const Number = data[3];
                         let imdb = yield (0, movier_1.searchTitleByName)(fileName);
                         console.log(imdb);
+                        if (!imdb) {
+                            yield ctx.reply('<b>No RESULTS FOUND !!!</b>');
+                            return;
+                        }
                         imdb = imdb.splice(0, 7);
                         let format = imdb.map((c, index) => {
                             // If item directly contains link, fileName, and fileSizen
