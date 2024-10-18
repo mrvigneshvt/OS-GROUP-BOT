@@ -98,7 +98,7 @@ class localStore {
         console.log(chatId, '/', userID, '/', msgId);
         if (this.storage[chatId] && this.storage[chatId][userID] && this.storage[chatId][userID][msgId]) {
             // Delete the msgId from storage
-            delete this.storage[chatId][userID][msgId];
+            delete this.storage[chatId][userID];
             console.log(`Deleted msgId ${msgId} from chat ${chatId}, user ${userID}`);
         }
         else {

@@ -16,7 +16,8 @@
     "clipboardy": "^4.0.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
-    "mongoose": "^8.7.0"
+    "mongoose": "^8.7.0",
+    "movier": "^3.0.8"
   },
   "devDependencies": {
     "@types/node": "^22.7.4"

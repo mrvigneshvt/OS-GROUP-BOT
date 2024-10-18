@@ -2,17 +2,14 @@ import { Client, Context, ID, StorageLocalStorage, errors } from '@mtkruto/node'
 import { DataBase } from './data'
 import * as fs from 'fs'
 import { format } from 'date-fns';
-
+import { getTitleDetailsByName, searchTitleByName, getTitleDetailsByIMDBId } from 'movier';
 import { toZonedTime } from 'date-fns-tz';
 
 import { localStore } from './localStore'
 import axios from 'axios'
-import { EmailHashExpired } from '@mtkruto/node/script/3_errors'
 import { groupModel, userModel } from './model'
-import { totalmem } from 'os';
 import { Markup } from './markup';
-import { text } from 'stream/consumers';
-import { send } from 'process';
+
 
 
 interface botData {
@@ -76,11 +73,15 @@ export class Bot extends localStore {
     private percentageAds
     private supportLog;
     private sendLogs
+    private inlineBot
+    private posterChannelId
 
 
 
     constructor(data: botData) {
         super()
+        this.posterChannelId = '-1001897524951'
+        this.inlineBot = `Machi_x_bot`
         this.sendLogs = '-1002462166410'
         this.botUrl = 'https://t.me/'
         this.percentageAds = 20;
@@ -158,6 +159,10 @@ export class Bot extends localStore {
                 return next(); // Proceed with the next middleware
             }
         });
+    }
+
+    private imdbInlineUrl(FileName: string, CollectionNum: number) {
+        return ` https://t.me/${this.inlineBot}?start=poster_${CollectionNum}_${FileName}`
     }
 
     public async switchUserIds() {
@@ -516,8 +521,99 @@ export class Bot extends localStore {
             const msgId = Number(ctx.callbackQuery.message?.id)
             const chatId = Number(ctx.callbackQuery.message?.chat.id)
             const chatTitle = ctx.callbackQuery.message.chat.title
-            //console.log(ctx);
+            console.log(callBackData);
 
+
+            if (callBackData.startsWith('imdb')) {
+                try {
+                    const data = callBackData.split('-');
+
+                    const url = data[1];
+                    const num: string = data[2]
+
+                    const imdbDetails = await getTitleDetailsByIMDBId(url);
+
+                    const genre = imdbDetails.genres
+                        .map((g: string) => g.charAt(0).toUpperCase() + g.slice(1).toLowerCase())
+                        .join(' - ') || 'NA';
+
+
+
+                    const collectionNumber: Record<string, string> = {
+                        '0': 'Exclusive',
+                        '1': 'Kollywood',
+                        '2': 'Hollywood',
+                        '3': 'Mollywood',
+                        '4': 'Webseries',
+                        '5': 'Tollywood',
+                        '6': 'Bollywood',
+                    };
+
+                    // Access the collection based on the num value
+                    const collection = collectionNumber[num] || undefined;
+
+                    if (!collection) {
+                        await ctx.answerCallbackQuery('No Valid CollectionNumber', {
+                            alert: true,
+                        })
+                        return
+                    }
+
+                    const dataNameLink = imdbDetails.name
+                        .replace(/\s+/g, '_')           // Replace spaces with underscores
+                        .replace(/[^a-zA-Z0-9_]/g, ''); // Remove non-alphanumeric characters (except underscores)
+
+
+
+
+                    await ctx.replyPhoto(imdbDetails.posterImage.url, {
+                        caption: `🎬 <b>Title :</b>  ${imdbDetails.name}\n\n🌟 <b>Ratings :</b>  ${imdbDetails.allRates[0].rate}\n\n🎭 <b>Genre :</b>  ${genre}\n\n📆 <b>Release :</b>${imdbDetails.titleYear}\n\n🔘 <b>Button : ${collection}</b> \n\n🎙️ <b>Language :</b>\n\n ★ 𝓟𝓸𝔀𝓮𝓻𝓮𝓭 𝓫𝔂 : <a href="https://t.me/+0CIJvlEC4YQwODg0">MachiX Networks</a> \n\n👉 <b>Button Unlock 🔓: </b><a href="https://t.me/HowToUseMachiXbot">Tutorial</a>`,
+                        parseMode: 'HTML',
+                        replyMarkup: {
+                            inlineKeyboard: [
+                                [{ text: 'Download', url: `https://t.me/${this.inlineBot}?start=poster_${num}_${dataNameLink}` }],
+                                [{ text: 'Confirm ?', callbackData: `-poster/${num}/${imdbDetails.name}` }],
+                            ]
+                        }
+                    })
+
+
+
+                } catch (error) {
+                    console.log('error in callBAck IMDB::', error)
+                }
+            }
+
+            if (callBackData.startsWith('-poster/')) {
+                try {
+                    console.log('invoking poster')
+                    const data = callBackData.split('/');
+
+                    const number = data[1];
+                    const fileName = data[2];
+
+
+                    const file = fileName.split('_').join(' ');
+
+                    const url = ctx.callbackQuery.message.replyMarkup.inlineKeyboard[0][0].url
+
+                    await this.client.sendPhoto(this.posterChannelId, ctx.callbackQuery.message.photo.fileId, {
+                        caption: ctx.callbackQuery.message.caption,
+                        captionEntities: ctx.callbackQuery.message.captionEntities,
+                        parseMode: "HTML",
+                        replyMarkup: {
+                            inlineKeyboard: [
+                                [{ text: 'Download 📁', url }],
+                                [{ text: `Type @${this.inlineBot} ${number} ${file}`, url }]
+
+                            ]
+                        }
+                    })
+
+                } catch (error) {
+                    console.log('error in poster::', error)
+                }
+            }
 
             if (callBackData.startsWith('freePlan')) {
                 try {
@@ -1173,6 +1269,55 @@ export class Bot extends localStore {
 
     public async commands() {
 
+        this.client.command('imdb', async (ctx) => {
+            try {
+                const userID = ctx.message.from?.id
+
+                if (!this.admin.includes(String(userID))) {
+                    return
+                }
+
+                const data = ctx.message.text.split('/');
+                console.log(data, 'dataaaaaa')
+
+                if (data.length > 4) {
+                    return await ctx.reply('Send In this Format\n\n/imdb/fileName/0')
+                }
+
+                else if (data.length == 4) {
+
+                    const fileName = data[2];
+                    const Number = data[3];
+
+                    let imdb = await searchTitleByName(fileName);
+                    console.log(imdb)
+
+                    if (!imdb) {
+                        await ctx.reply('<b>No RESULTS FOUND !!!</b>');
+                        return
+                    }
+                    imdb = imdb.splice(0, 7);
+
+
+
+                    let format = imdb.map((c, index) => {
+                        // If item directly contains link, fileName, and fileSizen
+                        return [{ text: `${c.name} ${c.titleYear}`, callbackData: `imdb-${c.url}-${Number}` }]
+                    })
+
+
+                    await ctx.reply(`Your Results for ${fileName}`, {
+                        replyMarkup: {
+                            inlineKeyboard: format
+                        }
+                    })
+
+
+                }
+            } catch (error) {
+                console.log('ERROR in IMDB:::', error)
+            }
+        })
         this.client.command('gcast', async (ctx: any) => {
             try {
                 const userID = ctx.message.from?.id
