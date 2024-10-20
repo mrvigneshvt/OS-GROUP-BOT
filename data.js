@@ -391,30 +391,30 @@ class DataBase {
     isVerified(id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let exist = yield model_1.userModel.findOne({ userId: id });
-                if (!exist) {
-                    console.log('new user');
+                let user = yield model_1.userModel.findOne({ userId: id });
+                if (!user) {
                     yield this.addUser(id);
-                    exist = yield model_1.userModel.findOne({ userId: id });
+                    user = yield model_1.userModel.findOne({ userId: id });
                 }
-                console.log(exist);
-                if (exist === null || exist === void 0 ? void 0 : exist.verified) {
-                    const premiumExpired = (0, date_fns_1.isPast)((0, date_fns_1.parseISO)(String(exist === null || exist === void 0 ? void 0 : exist.verifiedTill)));
-                    console.log(premiumExpired, 'premuium status');
-                    if (!premiumExpired) {
-                        return true;
-                    }
-                    yield model_1.userModel.findOneAndUpdate({ userId: id }, {
-                        verified: false,
-                        verifiedAt: '',
-                        verifiedTill: '',
-                    });
-                    return false;
+                if (!user.valid) {
+                    return 'ban';
                 }
-                return false;
+                if (!user.verified) {
+                    return 'notVerified';
+                }
+                const premiumExpired = (0, date_fns_1.isPast)((0, date_fns_1.parseISO)(String(user.verifiedTill)));
+                console.log(premiumExpired, 'premium status');
+                if (premiumExpired) {
+                    user.verified = false;
+                    user.verifiedAt = '';
+                    user.verifiedTill = '';
+                    yield user.save(); // Save the updated user object
+                    return 'notVerified';
+                }
+                return true;
             }
             catch (error) {
-                console.log(error);
+                console.error(error);
                 return false;
             }
         });

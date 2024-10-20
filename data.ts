@@ -412,46 +412,41 @@ export class DataBase {
         }
     }
 
-    public async isVerified(id: string): Promise<Boolean> {
+    public async isVerified(id: string): Promise<Boolean | String> {
         try {
 
-            let exist = await userModel.findOne({ userId: id })
+            let user: any = await userModel.findOne({ userId: id });
 
-            if (!exist) {
-                console.log('new user')
-
-                await this.addUser(id)
-                exist = await userModel.findOne({ userId: id });
+            if (!user) {
+                await this.addUser(id);
+                user = await userModel.findOne({ userId: id });
             }
 
-            console.log(exist)
-
-
-            if (exist?.verified) {
-                const premiumExpired = isPast(parseISO(String(exist?.verifiedTill)));
-
-                console.log(premiumExpired, 'premuium status')
-
-                if (!premiumExpired) {
-                    return true
-                }
-
-                await userModel.findOneAndUpdate({ userId: id }, {
-                    verified: false,
-                    verifiedAt: '',
-                    verifiedTill: '',
-                })
-                return false
+            if (!user.valid) {
+                return 'ban';
             }
 
-            return false
+            if (!user.verified) {
+                return 'notVerified';
+            }
 
+            const premiumExpired = isPast(parseISO(String(user.verifiedTill)));
 
+            console.log(premiumExpired, 'premium status');
+
+            if (premiumExpired) {
+                user.verified = false;
+                user.verifiedAt = '';
+                user.verifiedTill = '';
+                await user.save(); // Save the updated user object
+                return 'notVerified';
+            }
+
+            return true;
 
         } catch (error) {
-            console.log(error)
-
-            return false
+            console.error(error);
+            return false;
         }
     }
 

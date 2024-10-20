@@ -103,7 +103,7 @@ export class localStore {
 
         setTimeout(() => {
             delete this.unlockPool[hash]
-        }, 600000 + 600000);
+        }, 700000);
 
         return this.unlockPool[hash];
     }

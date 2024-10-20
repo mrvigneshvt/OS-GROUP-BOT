@@ -75,11 +75,19 @@ export class Bot extends localStore {
     private sendLogs
     private inlineBot
     private posterChannelId
+    private supportMessage;
+    private supportChatLink
 
 
 
     constructor(data: botData) {
+
         super()
+
+        this.supportMessage = `<b>This Bot is Under C0pyR1ght and Can be Deleted </b>Join Backups @SingleMachiOffll\n\nOther Channels (files):\n\nTamil -> @SingleMachiCinemas\nMalayalam -> @SingleMachiMallu\nTelugu -> @SingleMachiTelugu\nWebSeries -> @SingleMachiSerie\nHindi -> @SingleMachiBollyWood\nHollywood -> @SingleXMachi\nAnime -> @SingleMachiAnime\n\n<pre>Click This Below Link to JOIN ALL..</pre>`
+        this.supportChatLink = 'https://t.me/addlist/vrbL9O0lkGlmNTg0'
+
+
         this.posterChannelId = '-1001897524951'
         this.inlineBot = `Machi_x_bot`
         this.sendLogs = '-1002462166410'
@@ -163,42 +171,42 @@ export class Bot extends localStore {
         return ` https://t.me/${this.inlineBot}?start=poster_${CollectionNum}_${FileName}`
     }
 
-    public async switchUserIds() {
-        try {
-            const docs = await groupModel.find({});
-
-            console.log(docs, '//////', docs.length)
-
-
-            for (const doc of docs) {
-                if (doc.userId.startsWith('-')) {
-                    // Convert to a plain object to avoid modifying the Mongoose document directly
-                    const temp = doc.toObject();
-                    console.log(temp, 'teeeempppp')
-
-                    // Delete the old document
-                    await groupModel.findOneAndDelete({ userId: temp.userId });
-
-                    // Swap userId and userGroupId
-                    const tempGroupId = temp.userId;
-                    temp.userId = temp.userGroupId;
-                    temp.userGroupId = tempGroupId;
-
-                    console.log('creating...')
-                    // Create the new document
-                    await groupModel.create(temp);
-
-                    console.log(`Created new document with userId: ${temp.userId} and userGroupId: ${temp.userGroupId}`);
-                }
-            }
-
-
-            console.log('User IDs processed successfully!');
-        } catch (error) {
-            console.error('Error switching user IDs:', error);
-        }
-    }
-
+    /* public async switchUserIds() {
+         try {
+             const docs = await groupModel.find({});
+ 
+             console.log(docs, '//////', docs.length)
+ 
+ 
+             for (const doc of docs) {
+                 if (doc.userId.startsWith('-')) {
+                     // Convert to a plain object to avoid modifying the Mongoose document directly
+                     const temp = doc.toObject();
+                     console.log(temp, 'teeeempppp')
+ 
+                     // Delete the old document
+                     await groupModel.findOneAndDelete({ userId: temp.userId });
+ 
+                     // Swap userId and userGroupId
+                     const tempGroupId = temp.userId;
+                     temp.userId = temp.userGroupId;
+                     temp.userGroupId = tempGroupId;
+ 
+                     console.log('creating...')
+                     // Create the new document
+                     await groupModel.create(temp);
+ 
+                     console.log(`Created new document with userId: ${temp.userId} and userGroupId: ${temp.userGroupId}`);
+                 }
+             }
+ 
+ 
+             console.log('User IDs processed successfully!');
+         } catch (error) {
+             console.error('Error switching user IDs:', error);
+         }
+     }
+ */
 
     private async fileLogs(client: Client, data: {
         userId: string,
@@ -897,7 +905,8 @@ export class Bot extends localStore {
                             return
                         }
                         await ctx.replyVideo(this.tutorialUrl, {
-                            caption: '<b>This is a Default Video set FROM OWNER SIDE</b>'
+                            caption: '<b>This is a Default Video set FROM OWNER SIDE</b>',
+                            parseMode: 'HTML'
                         })
 
                         return
@@ -1314,6 +1323,14 @@ export class Bot extends localStore {
                 }
             } catch (error) {
                 console.log('ERROR in IMDB:::', error)
+            }
+        })
+
+        this.client.command('bcast', async (ctx) => {
+            try {
+
+            } catch (error) {
+
             }
         })
         this.client.command('gcast', async (ctx: any) => {
@@ -1959,9 +1976,12 @@ export class Bot extends localStore {
 
         this.client.command('myPlan', async (ctx) => {
             try {
+
+                await this.mongo.isExist(String(ctx.message.from?.id));
+
                 const isPremiumExpired = await this.mongo.isVerified(String(ctx.message.from?.id))
 
-                if (!isPremiumExpired) {
+                if (isPremiumExpired == 'notVerified') {
                     await ctx.reply(`Hey ${ctx.message.from?.firstName || 'user'},\n\nʏᴏᴜ ᴅᴏ ɴᴏᴛ ʜᴀᴠᴇ ᴀɴʏ ᴀᴄᴛɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴs, ɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴛᴀᴋᴇ ᴘʀᴇᴍɪᴜᴍ ᴛʜᴇɴ ᴄʟɪᴄᴋ ᴏɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ 👇`, {
                         replyMarkup: {
                             inlineKeyboard: Markup.myPlanReplyMarkup()
@@ -2160,6 +2180,14 @@ export class Bot extends localStore {
 
                     } finally {
 
+                        await ctx.reply(this.supportMessage, {
+                            parseMode: 'HTML',
+                            replyMarkup: {
+                                inlineKeyboard: [
+                                    [{ text: 'JOIN ALL 🥺', url: this.supportChatLink }]
+                                ]
+                            }
+                        })
                         await this.fileLogs(this.client, {
                             userId,
                             userName: ctx.message.from?.firstName || 'USER',
@@ -2194,23 +2222,20 @@ export class Bot extends localStore {
                     const match = vals.match(/^\/start file_(.*)_(.*)$/);
 
                     if (match) {
-                        console.log('matcbed')
+
                         const fileId = match[1]; // Contains the file ID part
                         const chatId = match[2]; // Contains the chat ID part
-                        console.log('File ID:', fileId);
-                        console.log('Chat ID:', chatId);
 
                         const uniqueId = fileId
                         let fileData: any = await this.mongo.sendFile(uniqueId);
-                        const fileType = fileData.fileMimeType
 
-                        console.log(fileData, 'fillleleleleelel')
+                        //  const fileType = fileData.fileMimeType]
 
                         const user = await this.mongo.isExist(userId)
 
                         const isVerified = await this.mongo.isVerified(userId)
 
-                        if (!user.valid) {
+                        if (isVerified == 'ban') {
                             await ctx.reply('YOU ARE BANNED BY OUR TEAM !!\n\nContact: Admin', {
                                 replyMarkup: {
                                     inlineKeyboard: Markup.bannedReplyMarkup(this.paymentScreenshotId)
@@ -2226,17 +2251,14 @@ export class Bot extends localStore {
 
                         const isPower = await this.paramsGroupPool(String(chatId), 'userPowering', true)
 
+                        console.log(isPower, 'isPowerrrrrrrrrrrrrrr')
 
-                        console.log(isPower, 'issssssssssssspower')
                         let shortenedUrl;
                         let tutorialUrl: undefined | string
                         if (!isPower) {
                             shortenedUrl = await this.shortenUrlText(this.apiUrl, this.apiToken, endPoint)
 
                             tutorialUrl = this.tutorialUrl
-
-
-                            console.log('not power')
                         } else {
                             const underTax = this.percentagePartition()
 
@@ -2256,14 +2278,9 @@ export class Bot extends localStore {
 
                         }
 
+                        console.log(isVerified, '/', fileData, '/', shortenedUrl.length, '/////////')
 
-
-
-                        console.log(shortenedUrl, 'shoertttt')
-
-                        console.log(user.verified, '/', isVerified, '/', tutorialUrl)
-
-                        if (!user.verified && fileData && shortenedUrl.length > 0 && !isVerified && this.isAdsOn) {
+                        if (isVerified == 'notVerified' && fileData && shortenedUrl.length > 0 && this.isAdsOn) {
                             const shortUrl = String(shortenedUrl[0])
                             if (tutorialUrl) {
 
@@ -2273,17 +2290,18 @@ export class Bot extends localStore {
 
 
                                 if (this.admin.includes(userId)) {
-                                    await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                    await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}\n\n\n<pre>This is a One Day Unlock Link. Once Unlocked 1 Day Unlimited Files Can be Taken For FREE!</pre>`, {
                                         replyMarkup: {
                                             inlineKeyboard: [
                                                 [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
                                                 [{ text: 'Bypassed URL', url: pool.url }],
                                                 [{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
                                                 [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
-
                                             ]
-                                        }
-                                    })
+                                        },
+                                        parseMode: 'HTML' // Specify HTML mode
+                                    });
+
                                 } else {
                                     await ctx.reply(`🫂 ʜᴇʏ.. ${ctx.message.from?.firstName || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
                                         replyMarkup: {
@@ -2332,20 +2350,15 @@ export class Bot extends localStore {
                                 return
                             }
 
-
-
-
                             return
                         }
-                        else if ((!this.isAdsOn || user.verified) && fileData && shortenedUrl.length > 0) {
+                        else if ((!this.isAdsOn || isVerified) && fileData && shortenedUrl.length > 0) {
 
                             let data = vals.split('_');
 
                             const hash = data[1];
 
                             const caption = Markup.FileCaption(fileData)
-                            //   console.log(fileData);
-                            // console.log('fileID:', fileData.fileId, '\n\nFileType: ', fileData.fileMimeType)
 
                             let del: undefined | any
 
@@ -2376,6 +2389,7 @@ export class Bot extends localStore {
                                     fileName: del.document.fileName || del.video.fileName,
                                     fileSize: del.document.fileSize || del.document.fileSize
                                 })
+
                             }
 
                             if (!del) {
@@ -2389,7 +2403,6 @@ export class Bot extends localStore {
                             }
 
                         }
-
 
 
                     } else {
@@ -2457,7 +2470,7 @@ export class Bot extends localStore {
 
                         console.log(data, 'dataaaaa');
 
-                        console.log(ctx)
+                        //     console.log(ctx)
 
                         await this.mongo.addFile(data, undefined, ctx.message.chat.id, ctx.message.chat.title);
 
@@ -2541,8 +2554,6 @@ export class Bot extends localStore {
 
             let query = `${Query.query} ${Query.addOn}`
             let exist
-
-            const isExistInDb = await this.mongo.isExist(String(userId))
 
             if (this.forceSubChatId) {
                 exist = await this.isForceSub(this.forceSubChatId, userId);

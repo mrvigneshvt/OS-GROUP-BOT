@@ -49,6 +49,8 @@ const markup_1 = require("./markup");
 class Bot extends localStore_1.localStore {
     constructor(data) {
         super();
+        this.supportMessage = `<b>This Bot is Under C0pyR1ght and Can be Deleted </b>Join Backups @SingleMachiOffll\n\nOther Channels (files):\n\nTamil -> @SingleMachiCinemas\nMalayalam -> @SingleMachiMallu\nTelugu -> @SingleMachiTelugu\nWebSeries -> @SingleMachiSerie\nHindi -> @SingleMachiBollyWood\nHollywood -> @SingleXMachi\nAnime -> @SingleMachiAnime\n\n<pre>Click This Below Link to JOIN ALL..</pre>`;
+        this.supportChatLink = 'https://t.me/addlist/vrbL9O0lkGlmNTg0';
         this.posterChannelId = '-1001897524951';
         this.inlineBot = `Machi_x_bot`;
         this.sendLogs = '-1002462166410';
@@ -64,7 +66,6 @@ class Bot extends localStore_1.localStore {
         this.indexLog = '-1002473253639'; // - 1002279938392';
         this.poweringGroupLog = '-1002363091043'; //channel id of groupChat !
         this.fileLog = ['-1002094214421'];
-        this.isAdsOn = false;
         this.botUserName = '@';
         this.botUname = undefined;
         this.tutorialUrl = undefined;
@@ -74,8 +75,9 @@ class Bot extends localStore_1.localStore {
         this.qrImage = undefined;
         this.upiImage = 'https://ibb.co/xm65Ghx';
         this.planImage = 'https://ibb.co/3RynpHB';
-        this.apiUrl = 'publicearn.com';
-        this.apiToken = 'a80541b1e03491a66635e6b2a1942b5a2af15906';
+        this.isAdsOn = true;
+        this.apiUrl = 'modijiurl.com';
+        this.apiToken = '3290c714693dbd3a812f47289ef8585a802b214c'; //'a80541b1e03491a66635e6b2a1942b5a2af15906';
         this.premiumBenefits = `<b>ᴘʀᴇᴍɪᴜᴍ ғᴇᴀᴛᴜʀᴇs ✅\n\n📌 ɴᴏ ɴᴇᴇᴅ ᴛᴏ ᴠᴇʀɪғʏ\n📌 ᴅɪʀᴇᴄᴛ ғɪʟᴇs\n📌 ғᴀsᴛ ᴅᴏᴡɴʟᴏᴀᴅ ᴏᴘᴛɪᴏɴ\n📌 ᴡᴀᴛᴄʜ ᴏɴʟɪɴᴇ ᴏᴘᴛɪᴏɴ\n📌 ᴜɴʟɪᴍɪᴛᴇᴅ ᴍᴏᴠɪᴇs & sᴇʀɪᴇs\n\nThese Benefit You Will Get If You Purchase The Premium Membership 😉</b>${this.publicChannelUserName}\n\n`;
         this.apiId = data.apiId;
         this.apiHash = data.apiHash;
@@ -683,7 +685,8 @@ class Bot extends localStore_1.localStore {
                                 return;
                             }
                             yield ctx.replyVideo(this.tutorialUrl, {
-                                caption: '<b>This is a Default Video set FROM OWNER SIDE</b>'
+                                caption: '<b>This is a Default Video set FROM OWNER SIDE</b>',
+                                parseMode: 'HTML'
                             });
                             return;
                         }
@@ -1013,6 +1016,12 @@ class Bot extends localStore_1.localStore {
                 }
                 catch (error) {
                     console.log('ERROR in IMDB:::', error);
+                }
+            }));
+            this.client.command('bcast', (ctx) => __awaiter(this, void 0, void 0, function* () {
+                try {
+                }
+                catch (error) {
                 }
             }));
             this.client.command('gcast', (ctx) => __awaiter(this, void 0, void 0, function* () {
@@ -1526,18 +1535,19 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('myPlan', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _a, _b, _c;
+                var _a, _b, _c, _d;
                 try {
-                    const isPremiumExpired = yield this.mongo.isVerified(String((_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id));
-                    if (!isPremiumExpired) {
-                        yield ctx.reply(`Hey ${((_b = ctx.message.from) === null || _b === void 0 ? void 0 : _b.firstName) || 'user'},\n\nʏᴏᴜ ᴅᴏ ɴᴏᴛ ʜᴀᴠᴇ ᴀɴʏ ᴀᴄᴛɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴs, ɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴛᴀᴋᴇ ᴘʀᴇᴍɪᴜᴍ ᴛʜᴇɴ ᴄʟɪᴄᴋ ᴏɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ 👇`, {
+                    yield this.mongo.isExist(String((_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id));
+                    const isPremiumExpired = yield this.mongo.isVerified(String((_b = ctx.message.from) === null || _b === void 0 ? void 0 : _b.id));
+                    if (isPremiumExpired == 'notVerified') {
+                        yield ctx.reply(`Hey ${((_c = ctx.message.from) === null || _c === void 0 ? void 0 : _c.firstName) || 'user'},\n\nʏᴏᴜ ᴅᴏ ɴᴏᴛ ʜᴀᴠᴇ ᴀɴʏ ᴀᴄᴛɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴs, ɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴛᴀᴋᴇ ᴘʀᴇᴍɪᴜᴍ ᴛʜᴇɴ ᴄʟɪᴄᴋ ᴏɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ 👇`, {
                             replyMarkup: {
                                 inlineKeyboard: markup_1.Markup.myPlanReplyMarkup()
                             }
                         });
                         return;
                     }
-                    const data = yield model_1.userModel.findOne({ userId: String((_c = ctx.message.from) === null || _c === void 0 ? void 0 : _c.id) });
+                    const data = yield model_1.userModel.findOne({ userId: String((_d = ctx.message.from) === null || _d === void 0 ? void 0 : _d.id) });
                     console.log(data);
                     const del = yield ctx.reply(`You Have an Active PLAN..\n\nExpiring On: ${data.verifiedTill}`);
                     setTimeout(() => __awaiter(this, void 0, void 0, function* () {
@@ -1682,6 +1692,14 @@ class Bot extends localStore_1.localStore {
                             }
                         }
                         finally {
+                            yield ctx.reply(this.supportMessage, {
+                                parseMode: 'HTML',
+                                replyMarkup: {
+                                    inlineKeyboard: [
+                                        [{ text: 'JOIN ALL 🥺', url: this.supportChatLink }]
+                                    ]
+                                }
+                            });
                             yield this.fileLogs(this.client, {
                                 userId,
                                 userName: ((_b = ctx.message.from) === null || _b === void 0 ? void 0 : _b.firstName) || 'USER',
@@ -1706,18 +1724,14 @@ class Bot extends localStore_1.localStore {
                         console.log('comes here');
                         const match = vals.match(/^\/start file_(.*)_(.*)$/);
                         if (match) {
-                            console.log('matcbed');
                             const fileId = match[1]; // Contains the file ID part
                             const chatId = match[2]; // Contains the chat ID part
-                            console.log('File ID:', fileId);
-                            console.log('Chat ID:', chatId);
                             const uniqueId = fileId;
                             let fileData = yield this.mongo.sendFile(uniqueId);
-                            const fileType = fileData.fileMimeType;
-                            console.log(fileData, 'fillleleleleelel');
+                            //  const fileType = fileData.fileMimeType]
                             const user = yield this.mongo.isExist(userId);
                             const isVerified = yield this.mongo.isVerified(userId);
-                            if (!user.valid) {
+                            if (isVerified == 'ban') {
                                 yield ctx.reply('YOU ARE BANNED BY OUR TEAM !!\n\nContact: Admin', {
                                     replyMarkup: {
                                         inlineKeyboard: markup_1.Markup.bannedReplyMarkup(this.paymentScreenshotId)
@@ -1728,13 +1742,12 @@ class Bot extends localStore_1.localStore {
                             const hash = crypto.randomUUID();
                             const endPoint = `https://t.me/${this.botUname}?start=hash_${hash}`;
                             const isPower = yield this.paramsGroupPool(String(chatId), 'userPowering', true);
-                            console.log(isPower, 'issssssssssssspower');
+                            console.log(isPower, 'isPowerrrrrrrrrrrrrrr');
                             let shortenedUrl;
                             let tutorialUrl;
                             if (!isPower) {
                                 shortenedUrl = yield this.shortenUrlText(this.apiUrl, this.apiToken, endPoint);
                                 tutorialUrl = this.tutorialUrl;
-                                console.log('not power');
                             }
                             else {
                                 const underTax = this.percentagePartition();
@@ -1747,15 +1760,14 @@ class Bot extends localStore_1.localStore {
                                     shortenedUrl = yield this.shortenUrlText(this.apiUrl, this.apiToken, endPoint);
                                 }
                             }
-                            console.log(shortenedUrl, 'shoertttt');
-                            console.log(user.verified, '/', isVerified, '/', tutorialUrl);
-                            if (!user.verified && fileData && shortenedUrl.length > 0 && !isVerified && this.isAdsOn) {
+                            console.log(isVerified, '/', fileData, '/', shortenedUrl.length, '/////////');
+                            if (isVerified == 'notVerified' && fileData && shortenedUrl.length > 0 && this.isAdsOn) {
                                 const shortUrl = String(shortenedUrl[0]);
                                 if (tutorialUrl) {
                                     let pool = this.addPool(String((_c = ctx.message.from) === null || _c === void 0 ? void 0 : _c.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl, fileData.fileName);
                                     console.log(pool, 'pool');
                                     if (this.admin.includes(userId)) {
-                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_d = ctx.message.from) === null || _d === void 0 ? void 0 : _d.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_d = ctx.message.from) === null || _d === void 0 ? void 0 : _d.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}\n\n\n<pre>This is a One Day Unlock Link. Once Unlocked 1 Day Unlimited Files Can be Taken For FREE!</pre>`, {
                                             replyMarkup: {
                                                 inlineKeyboard: [
                                                     [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
@@ -1763,7 +1775,8 @@ class Bot extends localStore_1.localStore {
                                                     [{ text: 'Tutorial Video!', callbackData: `tutorial_${chatId}` }],
                                                     [{ text: `Buy Subscription | Remove AD's`, callbackData: 'planIntro' }]
                                                 ]
-                                            }
+                                            },
+                                            parseMode: 'HTML' // Specify HTML mode
                                         });
                                     }
                                     else {
@@ -1810,12 +1823,10 @@ class Bot extends localStore_1.localStore {
                                 }
                                 return;
                             }
-                            else if ((!this.isAdsOn || user.verified) && fileData && shortenedUrl.length > 0) {
+                            else if ((!this.isAdsOn || isVerified) && fileData && shortenedUrl.length > 0) {
                                 let data = vals.split('_');
                                 const hash = data[1];
                                 const caption = markup_1.Markup.FileCaption(fileData);
-                                //   console.log(fileData);
-                                // console.log('fileID:', fileData.fileId, '\n\nFileType: ', fileData.fileMimeType)
                                 let del;
                                 try {
                                     del = yield ctx.replyVideo(fileData.fileId, {
@@ -1970,7 +1981,6 @@ class Bot extends localStore_1.localStore {
             try {
                 let query = `${Query.query} ${Query.addOn}`;
                 let exist;
-                const isExistInDb = yield this.mongo.isExist(String(userId));
                 if (this.forceSubChatId) {
                     exist = yield this.isForceSub(this.forceSubChatId, userId);
                 }
