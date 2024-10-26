@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.formatBytes = formatBytes;
+exports.formatBytes = void 0;
 function formatBytes(bytes) {
     const GB = 1024 * 1024 * 1024;
     const MB = 1024 * 1024;
@@ -11,3 +11,4 @@ function formatBytes(bytes) {
         return (bytes / MB).toFixed(2) + ' MB';
     }
 }
+exports.formatBytes = formatBytes;
