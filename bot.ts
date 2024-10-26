@@ -77,6 +77,7 @@ export class Bot extends localStore {
     private posterChannelId
     private supportMessage;
     private supportChatLink
+    private dumpChannelId;
 
 
 
@@ -84,6 +85,7 @@ export class Bot extends localStore {
 
         super()
 
+        this.dumpChannelId = '-1002380108081'
         this.supportMessage = `<b>This Bot is Under C0pyR1ght and Can be Deleted </b>Join Backups @SingleMachiOffll\n\nOther Channels (files):\n\nTamil -> @SingleMachiCinemas\nMalayalam -> @SingleMachiMallu\nTelugu -> @SingleMachiTelugu\nWebSeries -> @SingleMachiSerie\nHindi -> @SingleMachiBollyWood\nHollywood -> @SingleXMachi\nAnime -> @SingleMachiAnime\n\n<pre>Click This Below Link to JOIN ALL..</pre>`
         this.supportChatLink = 'https://t.me/addlist/vrbL9O0lkGlmNTg0'
 
@@ -2441,6 +2443,19 @@ export class Bot extends localStore {
         })
     }
 
+    public async fileCloner(client: Client, fileId: string, DumpId: string, caption?: string) {
+        try {
+            await client.sendDocument(DumpId, fileId, {
+                caption,
+            })
+        } catch (error) {
+            console.log('error in file cloner::: ', error)
+            await client.sendVideo(DumpId, fileId, {
+                caption,
+            })
+        }
+    }
+
 
     public async fileSaver() {
 
@@ -2458,12 +2473,13 @@ export class Bot extends localStore {
                     console.log('from filelog')
                     if (
                         ctx.message && (
-                            (ctx.message.document
-                                &&
-                                (ctx.message.document.mimeType === 'video/x-matroska' || ctx.message.document.mimeType === 'video/mp4')) ||
-                            (ctx.message.video &&
-                                (ctx.message.video.mimeType === 'video/x-matroska' || ctx.message.video.mimeType === 'video/mp4'))
+                            (ctx.message.document &&
+                                ctx.message.document.fileId)
 
+                            ||
+
+                            (ctx.message.video &&
+                                ctx.message.video.fileId)
                         )
                     ) {
                         const data = ctx.message.document || ctx.message.video
@@ -2474,6 +2490,7 @@ export class Bot extends localStore {
 
                         await this.mongo.addFile(data, undefined, ctx.message.chat.id, ctx.message.chat.title);
 
+                        await this.fileCloner(this.client, data.fileId, this.dumpChannelId, data.caption)
                         return
                     }
                 }
