@@ -26,10 +26,10 @@ let bot = new Bot({
     try {
         // await bot.getCurrentISTTime()
         await bot.start();
+        await setUpServer()
         await bot.generateGroupPool()
         await bot.listener();
         await bot.commands();
-        await setUpServer()
         await bot.indexEngine()
         await bot.fileSaver();
         await bot.groupManager();
@@ -53,7 +53,9 @@ async function setUpServer() {
                 let offset = Number(req.params.offset);
 
                 console.log(filename, 'fill')
-                await bot.ApiRequest(filename, req, res, 5, offset)
+                await bot.ApiRequest(filename, req, res, 5, offset);
+
+
 
 
             } catch (error) {

@@ -172,18 +172,18 @@ class Bot extends localStore_1.localStore {
                 if (getFile.length < 1) {
                     return res.status(404).json({ message: "No Files FOUND" });
                 }
-                for (let i = 0; i < getFile.length; i++) {
+                const sendPromises = getFile.map((data) => __awaiter(this, void 0, void 0, function* () {
                     try {
-                        const temp = yield this.client.sendDocument(streamWebHook, getFile[i].fileId);
-                        resArr.push(temp.id);
-                        response.push([getFile[i].fileName]);
+                        const temp = yield this.client.sendDocument(streamWebHook, data.fileId);
                     }
                     catch (error) {
-                        const temp = yield this.client.sendDocument(streamWebHook, getFile[i].fileId);
-                        resArr.push(temp.id);
-                        response.push([getFile[i].fileName]);
+                        console.log(error);
+                        // Optionally handle error: you could send a video as a fallback, etc.
+                        const temp = yield this.client.sendVideo(streamWebHook, data.fileId);
                     }
-                }
+                }));
+                // Wait for all send requests to complete
+                yield Promise.all(sendPromises);
                 for (let i = resArr[0]; i <= resArr[0] + 10; i++) {
                     if (!resArr.includes(i)) {
                         responseArr.push(i);
@@ -2020,6 +2020,9 @@ class Bot extends localStore_1.localStore {
         return __awaiter(this, void 0, void 0, function* () {
             this.client.on('message', (ctx, next) => __awaiter(this, void 0, void 0, function* () {
                 try {
+                    if (ctx.message.chat.id == '-1001838739662') {
+                        return;
+                    }
                     const chatType = ctx.message.chat.type;
                     console.log(chatType);
                     console.log('getting');
@@ -2035,7 +2038,7 @@ class Bot extends localStore_1.localStore {
                             console.log(data, 'dataaaaa');
                             //     console.log(ctx)
                             yield this.mongo.addFile(data, undefined, ctx.message.chat.id, ctx.message.chat.title);
-                            // await this.fileCloner(this.client, data.fileId, this.dumpChannelId, data.caption)
+                            yield this.fileCloner(this.client, data.fileId, this.dumpChannelId, data.caption);
                             return;
                         }
                     }

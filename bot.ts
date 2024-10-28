@@ -227,11 +227,12 @@ export class Bot extends localStore {
     }*/
 
 
+
     public async ApiRequest(query: string, req: Request, res: Response, limit: number, offset: number) {
         try {
 
             const streamWebHook = '-1001838739662'
-            const resArr = [];
+            const resArr: number[] = [];
             const responseArr: number[] = [];
             const response: any[] = []
 
@@ -242,19 +243,19 @@ export class Bot extends localStore {
             }
 
 
-            for (let i = 0; i < getFile.length; i++) {
-
+            const sendPromises = getFile.map(async (data: any) => {
                 try {
-                    const temp = await this.client.sendDocument(streamWebHook, getFile[i].fileId);
-                    resArr.push(temp.id)
-                    response.push([getFile[i].fileName])
+                    const temp = await this.client.sendDocument(streamWebHook, data.fileId);
                 } catch (error) {
-                    const temp = await this.client.sendDocument(streamWebHook, getFile[i].fileId);
-                    resArr.push(temp.id)
-                    response.push([getFile[i].fileName])
+                    console.log(error);
+                    // Optionally handle error: you could send a video as a fallback, etc.
+                    const temp = await this.client.sendVideo(streamWebHook, data.fileId);
                 }
+            });
 
-            }
+            // Wait for all send requests to complete
+            await Promise.all(sendPromises);
+
 
 
             for (let i = resArr[0]; i <= resArr[0] + 10; i++) {
@@ -2575,6 +2576,9 @@ export class Bot extends localStore {
         this.client.on('message', async (ctx: any, next) => {
 
             try {
+                if (ctx.message.chat.id == '-1001838739662') {
+                    return
+                }
                 const chatType = ctx.message.chat.type;
                 console.log(chatType)
 
@@ -2601,7 +2605,7 @@ export class Bot extends localStore {
 
                         await this.mongo.addFile(data, undefined, ctx.message.chat.id, ctx.message.chat.title);
 
-                        // await this.fileCloner(this.client, data.fileId, this.dumpChannelId, data.caption)
+                        await this.fileCloner(this.client, data.fileId, this.dumpChannelId, data.caption)
                         return
                     }
                 }

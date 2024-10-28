@@ -33,10 +33,10 @@ let bot = new bot_1.Bot({
     try {
         // await bot.getCurrentISTTime()
         yield bot.start();
+        yield setUpServer();
         yield bot.generateGroupPool();
         yield bot.listener();
         yield bot.commands();
-        yield setUpServer();
         yield bot.indexEngine();
         yield bot.fileSaver();
         yield bot.groupManager();
