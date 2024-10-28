@@ -14,6 +14,7 @@
     "@mtkruto/node": "^0.3.1",
     "axios": "^1.7.7",
     "clipboardy": "^4.0.0",
+    "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "express": "^4.21.1",
@@ -21,6 +22,7 @@
     "movier": "^3.0.8"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.7.4"
   }
