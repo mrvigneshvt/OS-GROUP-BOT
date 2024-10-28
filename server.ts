@@ -4,7 +4,7 @@ import cors from 'cors'
 
 const app = express();
 
-app.listen(4000, '0.0.0.', () => console.log('port opned 4000'))
+app.listen(4000, '0.0.0.', () => console.log('port opned 4000'));
 app.use(cors());
 
 
