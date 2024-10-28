@@ -16,7 +16,7 @@ const bot_1 = require("./bot");
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const app = (0, express_1.default)();
-app.listen(4000, '0.0.0.', () => console.log('port opned 4000'));
+app.listen(4000, '0.0.0.0', () => console.log('port opned 4000'));
 app.use((0, cors_1.default)());
 const apiId = 23383641;
 const apiHash = 'bc082e6638c170d35479798f8c8eaa6f';
