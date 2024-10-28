@@ -96,7 +96,7 @@ class Bot extends localStore_1.localStore {
         this.planDescription = `Hello!!😎\nThis Is Premium Purchase Section\nOwned by: ${this.publicChannelUserName} 💨 \n\nCh}eck The Premium Plans By Click the Button Below 👇`;
         this.qrCaption = `Scan The Qr Code 👆And Pay The Plan Fees\n\nIMPORTANT - After Payment Send Screenshot Here👇`;
         this.forceSub = true;
-        this.client.invoke.use(({ error }, next) => __awaiter(this, void 0, void 0, function* () {
+        this.client.invoke.use((_a, next_1) => __awaiter(this, [_a, next_1], void 0, function* ({ error }, next) {
             if (error instanceof node_1.errors.FloodWait) {
                 console.log(`Flood wait for ${error.seconds} seconds`);
                 yield new Promise((r) => setTimeout(r, 1000 * error.seconds));
@@ -106,6 +106,102 @@ class Bot extends localStore_1.localStore {
                 return next(); // Proceed with the next middleware
             }
         }));
+    }
+    /*
+    public async ApiRequest(query: string, req: Request, res: Response, limit: number, offset: number) {
+        try {
+            const streamWebHook = '-1001838739662';
+            const resArr: number[] = [];
+            const response: { fileName: string, link?: string }[] = [];
+
+            const getFile: any = await this.mongo.isFileExist(query, limit, offset);
+
+            if (getFile.length < 1) {
+                return res.status(404).json({ message: "No Files FOUND" });
+            }
+
+            // Send documents concurrently
+            const sendPromises = getFile.map(async (file: any) => {
+                try {
+                    const temp = await this.client.sendDocument(streamWebHook, file.fileId);
+                    resArr.push(temp.id);
+                    response.push({ fileName: file.fileName });
+                } catch (error) {
+                    const temp = await this.client.sendVideo(streamWebHook, file.file); // Presuming this was intended
+                    resArr.push(temp.id);
+                    response.push({ fileName: file.fileName });
+                }
+            });
+
+            // Wait for all send operations to complete
+            await Promise.all(sendPromises);
+
+            // Collect message IDs that aren't included in resArr
+            const totalMsgId = resArr[0] + 10;
+            const responseArr = Array.from({ length: totalMsgId - resArr[0] + 1 }, (_, i) => resArr[0] + i).filter(i => !resArr.includes(i));
+
+            // Fetch links based on the generated message IDs
+            setTimeout(async () => {
+                const fetchLinks: any = await this.client.getMessages(streamWebHook, responseArr);
+
+                // Map fetched links to response array
+                fetchLinks.forEach((link: any, index: number) => {
+                    if (response[index]) {
+                        response[index].link = link.text; // Assign the fetched link to the corresponding fileName
+                    }
+                });
+
+                // Send the final structured response
+                return res.status(200).json(response);
+            }, 1000)
+
+
+        } catch (error) {
+            console.log('error on apiRequest:::', error);
+            return res.status(500).json({ message: "Internal Server Error" });
+        }
+    }*/
+    ApiRequest(query, req, res, limit, offset) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const streamWebHook = '-1001838739662';
+                const resArr = [];
+                const responseArr = [];
+                const response = [];
+                const getFile = yield this.mongo.isFileExist(query, limit, offset);
+                if (getFile.length < 1) {
+                    return res.status(404).json({ message: "No Files FOUND" });
+                }
+                for (let i = 0; i < getFile.length; i++) {
+                    try {
+                        const temp = yield this.client.sendDocument(streamWebHook, getFile[i].fileId);
+                        resArr.push(temp.id);
+                        response.push([getFile[i].fileName]);
+                    }
+                    catch (error) {
+                        const temp = yield this.client.sendDocument(streamWebHook, getFile[i].fileId);
+                        resArr.push(temp.id);
+                        response.push([getFile[i].fileName]);
+                    }
+                }
+                for (let i = resArr[0]; i <= resArr[0] + 10; i++) {
+                    if (!resArr.includes(i)) {
+                        responseArr.push(i);
+                    }
+                }
+                setTimeout(() => __awaiter(this, void 0, void 0, function* () {
+                    const fetchLinks = yield this.client.getMessages(streamWebHook, responseArr);
+                    console.log(fetchLinks);
+                    const mapLinks = fetchLinks.forEach((m, i) => response[i].push(m.text));
+                    console.log(response);
+                    return res.status(200).json(response);
+                }), 1500);
+            }
+            catch (error) {
+                console.log('error on apiRequest:::', error);
+                return res.status(500).json({ message: "Internal Server Error" });
+            }
+        });
     }
     imdbInlineUrl(FileName, CollectionNum) {
         return ` https://t.me/${this.inlineBot}?start=poster_${CollectionNum}_${FileName}`;
@@ -796,15 +892,15 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.on(':newChatMembers', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _e, _f, _g, _h;
+                var _a, _b, _c, _d;
                 try {
                     const chatId = ctx.message.chat.id;
                     const userName = ctx.message.from.firstName || ctx.message.from.userName;
-                    let channelName = ((_f = (_e = ctx === null || ctx === void 0 ? void 0 : ctx.message) === null || _e === void 0 ? void 0 : _e.chat) === null || _f === void 0 ? void 0 : _f.title) ? ctx.message.chat.title : 'Channel';
+                    let channelName = ((_b = (_a = ctx === null || ctx === void 0 ? void 0 : ctx.message) === null || _a === void 0 ? void 0 : _a.chat) === null || _b === void 0 ? void 0 : _b.title) ? ctx.message.chat.title : 'Channel';
                     const newMember = ctx.message.newChatMembers[0].username;
                     //  console.log(ctx, 'newwwwwwwwwww')
                     if (newMember == this.botDetails.username) {
-                        let channelName = ((_h = (_g = ctx === null || ctx === void 0 ? void 0 : ctx.message) === null || _g === void 0 ? void 0 : _g.chat) === null || _h === void 0 ? void 0 : _h.title) ? ctx.message.chat.title : 'Channel';
+                        let channelName = ((_d = (_c = ctx === null || ctx === void 0 ? void 0 : ctx.message) === null || _c === void 0 ? void 0 : _c.chat) === null || _d === void 0 ? void 0 : _d.title) ? ctx.message.chat.title : 'Channel';
                         const d = yield this.client.sendMessage(ctx.message.chat.id, this.groupAddCaption(channelName), {
                             replyMarkup: {
                                 inlineKeyboard: markup_1.Markup.newMemberReplyMarkup(this.publicChannelUname, this.paymentScreenshotId)
@@ -1033,9 +1129,9 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('gcast', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _b, _c;
+                var _a, _b;
                 try {
-                    const userID = (_b = ctx.message.from) === null || _b === void 0 ? void 0 : _b.id;
+                    const userID = (_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id;
                     if (this.admin.includes(String(userID))) {
                         const isReplied = ctx.message.replyToMessage;
                         if (!isReplied) {
@@ -1044,7 +1140,7 @@ class Bot extends localStore_1.localStore {
                         }
                         console.log(isReplied, 'isReepppp');
                         const text = isReplied.text || undefined;
-                        const picture = ((_c = isReplied.photo) === null || _c === void 0 ? void 0 : _c.fileId) || undefined;
+                        const picture = ((_b = isReplied.photo) === null || _b === void 0 ? void 0 : _b.fileId) || undefined;
                         const caption = isReplied.caption || undefined;
                         const captionEntites = isReplied.captionEntities || undefined;
                         const entities = isReplied.entities || undefined;
@@ -1077,10 +1173,10 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('set_admin', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _d;
+                var _a;
                 try {
                     const text = ctx.message.text;
-                    const userID = (_d = ctx.message.from) === null || _d === void 0 ? void 0 : _d.id;
+                    const userID = (_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id;
                     if (!this.admin.includes(String(userID))) {
                         return;
                     }
@@ -1100,9 +1196,9 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('filelog', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _e, _f, _g;
+                var _a, _b, _c;
                 try {
-                    const userID = (_e = ctx.message.from) === null || _e === void 0 ? void 0 : _e.id;
+                    const userID = (_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id;
                     if (!this.admin.includes(String(userID))) {
                         return;
                     }
@@ -1112,7 +1208,7 @@ class Bot extends localStore_1.localStore {
                         yield ctx.reply('forward A message from fileLog channel and Reply it with fileLog !');
                         return;
                     }
-                    const isChatId = ((_g = (_f = isRepied.forwardFrom) === null || _f === void 0 ? void 0 : _f.chat) === null || _g === void 0 ? void 0 : _g.id) || undefined;
+                    const isChatId = ((_c = (_b = isRepied.forwardFrom) === null || _b === void 0 ? void 0 : _b.chat) === null || _c === void 0 ? void 0 : _c.id) || undefined;
                     if (!isChatId) {
                         yield ctx.reply("no Chat id found on forward from");
                         return;
@@ -1132,9 +1228,9 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('qr', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _h, _j;
+                var _a, _b;
                 try {
-                    const userID = (_h = ctx.message.from) === null || _h === void 0 ? void 0 : _h.id;
+                    const userID = (_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id;
                     if (!this.admin.includes(String(userID))) {
                         return;
                     }
@@ -1144,7 +1240,7 @@ class Bot extends localStore_1.localStore {
                         yield ctx.reply('Send AN Image and Reply it with QR !');
                         return;
                     }
-                    const fileId = ((_j = isRepied.photo) === null || _j === void 0 ? void 0 : _j.fileId) || undefined;
+                    const fileId = ((_b = isRepied.photo) === null || _b === void 0 ? void 0 : _b.fileId) || undefined;
                     if (!fileId) {
                         yield ctx.reply('Cant find FILEID..');
                         // console.log(fileId, 'missing fileeee iDDDD');
@@ -1175,11 +1271,11 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('upi', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _k;
+                var _a;
                 try {
                     const text = ctx.msg.text || undefined;
                     // console.log(text)
-                    if (this.admin.includes(String((_k = ctx.message.from) === null || _k === void 0 ? void 0 : _k.id)) && text) {
+                    if (this.admin.includes(String((_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id)) && text) {
                         if (text == '/upi') {
                             yield ctx.reply('Send in This format /upi/yourUPIid@som');
                             return;
@@ -1202,12 +1298,12 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('commands', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _l;
+                var _a;
                 try {
                     const chatType = ctx.message.chat.type;
                     const commandListAdmin = `<b><u>COMMAND LIST (ADMIN only) !!</u>\n\n\n<u>QR image:</u>\n  '/set_qr' Usage:(send an Image and Reply with /set_qr)\n\n<u>Premium Benefit Video:</u>\n  '/set_benefitvideo' Usage:(send an Video and Reply with /set_benefitvideo)\n\n<u>BroadCast:</u>\n  '/bcast' Usage:(send an Text and Reply with /bcast {Coming SOoon..})\n\n<u>ForceSUB:</u>\n  '/forceSub' Usage:(send an Message from any Channel with Bot Admin and Reply with /forceSub)\n\n<u>Default Tutorial Video:</u>\n  '/tutorial' Usage:(send an Video and Reply with /tutorial)\n\n<u>Ban / UBan User:</u>\n  '/ban/NuMeRiCuSeRiD' '/uban/NuMeRiCuSeRiD'' Usage:(/ban/1585451545)\n\n<u>Index Files:</u>\n  '/index' Usage:(Forward a File from The Channel and Reply with /index)\n\n<u>Premium An USER:</u>\n  '/prime' Usage:(/prime/NuMeRiCuSERiD)\n\n</b>`;
                     const commandListUserGroup = `<b>COMMAND LIST !!\n\n<u>1) Set Shortner:</u>\n\n"<i>Create a Group and Add me Admin. and then use this Command in the Group (Owner ONlY Command)"</i>\n\n<u>Command:</u> /set_shortner/yourShortner.com/yOuRsHoRtNeRTokeNHer651255241520\n\n<u>2) Set Tutorial:</u>\n\n"<i>Create a Group and Add me Admin. and send a Video for the Group Tutorial Video then use this Command by Replying to the Video in the Group<u>(Owner ONlY Command)</u>"</i>\n\n<u>Command:</u> /set_tutorial\n\n<u>3) Plan:</u>\n\n"<i>come @${this.botUname} use this Command to <u>Check Available Plans</u>"</i>\n\n<u>Command:</u> /plan\n\n<u>4) My Plan:</u>\n\n"<i>come @${this.botUname} use this Command to <u>Check Your Current Plan</u></i>\n\n<u>Command:</u> /myPlan`;
-                    if (this.admin.includes(String((_l = ctx.message.from) === null || _l === void 0 ? void 0 : _l.id))) {
+                    if (this.admin.includes(String((_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id))) {
                         yield ctx.reply(commandListAdmin, {
                             parseMode: 'HTML'
                         });
@@ -1225,11 +1321,11 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('set_qr', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _m, _o;
+                var _a, _b;
                 try {
-                    const userId = String((_m = ctx.message.from) === null || _m === void 0 ? void 0 : _m.id);
+                    const userId = String((_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id);
                     const chatType = String(ctx.message.chat.type);
-                    const isReplied = ((_o = ctx.message.replyToMessage) === null || _o === void 0 ? void 0 : _o.photo) || undefined;
+                    const isReplied = ((_b = ctx.message.replyToMessage) === null || _b === void 0 ? void 0 : _b.photo) || undefined;
                     if (this.admin.includes(String(userId)) && isReplied) {
                         this.qrImage = isReplied.fileId;
                         yield ctx.replyPhoto(this.qrImage, {
@@ -1243,11 +1339,11 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('set_benefitvideo', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _p, _q;
+                var _a, _b;
                 try {
-                    const userId = String((_p = ctx.message.from) === null || _p === void 0 ? void 0 : _p.id);
+                    const userId = String((_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id);
                     const chatType = String(ctx.message.chat.type);
-                    const isReplied = ((_q = ctx.message.replyToMessage) === null || _q === void 0 ? void 0 : _q.video) || undefined;
+                    const isReplied = ((_b = ctx.message.replyToMessage) === null || _b === void 0 ? void 0 : _b.video) || undefined;
                     if (this.admin.includes(String(userId)) && isReplied) {
                         this.premiumBenefitsVideo = isReplied.fileId;
                         yield ctx.replyVideo(this.premiumBenefitsVideo, {
@@ -1260,11 +1356,11 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('admin', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _r;
+                var _a;
                 try {
                     const modify = yield ctx.reply('<i>Fetching Details</i>');
                     const data = yield this.mongo.adminReport(this.isAdsOn);
-                    const chatId = String((_r = ctx.message.chat) === null || _r === void 0 ? void 0 : _r.id);
+                    const chatId = String((_a = ctx.message.chat) === null || _a === void 0 ? void 0 : _a.id);
                     if (data) {
                         if (this.isAdsOn) {
                             const msg = yield ctx.editMessageText(modify.id, data, {
@@ -1298,9 +1394,9 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('bcast', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _s;
+                var _a;
                 try {
-                    const userId = String((_s = ctx.message.from) === null || _s === void 0 ? void 0 : _s.id);
+                    const userId = String((_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id);
                     const chatType = String(ctx.message.chat.type);
                     const isReplied = ctx.message.replyToMessage || undefined;
                     if (this.admin.includes(userId)) {
@@ -1342,12 +1438,12 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('forceSub', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _t, _u;
+                var _a, _b;
                 try {
-                    const userId = (_t = ctx.message.from) === null || _t === void 0 ? void 0 : _t.id;
+                    const userId = (_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id;
                     const chatId = String(ctx.message.chat.id);
                     const isReplied = ctx.message.replyToMessage || undefined;
-                    if (this.admin.includes(String(userId)) && isReplied && ((_u = isReplied.forwardFrom) === null || _u === void 0 ? void 0 : _u.type) == 'channel') {
+                    if (this.admin.includes(String(userId)) && isReplied && ((_b = isReplied.forwardFrom) === null || _b === void 0 ? void 0 : _b.type) == 'channel') {
                         const forceSubId = isReplied.forwardFrom.chat.id;
                         this.forceSubChatId = String(forceSubId);
                         const createInviteLink = yield this.client.createInviteLink(forceSubId);
@@ -1375,13 +1471,13 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('tutorial', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _v, _w;
+                var _a, _b;
                 try {
-                    const userId = (_v = ctx.message.from) === null || _v === void 0 ? void 0 : _v.id;
+                    const userId = (_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id;
                     const chatId = String(ctx.message.chat.id);
                     const chatType = ctx.message.chat.type;
                     if (this.admin.includes(String(userId))) {
-                        const isRepliedVideo = ((_w = ctx.message.replyToMessage) === null || _w === void 0 ? void 0 : _w.video) || undefined;
+                        const isRepliedVideo = ((_b = ctx.message.replyToMessage) === null || _b === void 0 ? void 0 : _b.video) || undefined;
                         if (!isRepliedVideo) {
                             yield ctx.reply('Send to Video File and reply it with \n\n/tutorial \n\nto set Universal tutorial');
                             return;
@@ -1440,9 +1536,9 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('set_shortner', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _x;
+                var _a;
                 try {
-                    const senderId = (_x = ctx.message.from) === null || _x === void 0 ? void 0 : _x.id;
+                    const senderId = (_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id;
                     const chatId = ctx.message.chat.id;
                     const msgFrom = ctx.message.chat.type;
                     const msgId = ctx.message.id;
@@ -1504,13 +1600,13 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('set_tutorial', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _y, _z;
+                var _a, _b;
                 try {
                     const senderId = ctx.message.from.id;
                     const chatId = ctx.message.chat.id;
                     const msgFrom = ctx.message.chat.type;
                     const isRepied = ctx.message.replyToMessage || undefined;
-                    const fileAvailable = ((_z = (_y = ctx.message.replyToMessage) === null || _y === void 0 ? void 0 : _y.video) === null || _z === void 0 ? void 0 : _z.fileId) || undefined;
+                    const fileAvailable = ((_b = (_a = ctx.message.replyToMessage) === null || _a === void 0 ? void 0 : _a.video) === null || _b === void 0 ? void 0 : _b.fileId) || undefined;
                     //  console.log(ctx.message.replyToMessage, 'filleee')
                     if (msgFrom == 'private') {
                         yield ctx.reply('ADD Me to Your Group and Use the Command there \n\nBy Replying to Any Video');
@@ -1543,19 +1639,19 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('myPlan', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _0, _1, _2, _3;
+                var _a, _b, _c, _d;
                 try {
-                    yield this.mongo.isExist(String((_0 = ctx.message.from) === null || _0 === void 0 ? void 0 : _0.id));
-                    const isPremiumExpired = yield this.mongo.isVerified(String((_1 = ctx.message.from) === null || _1 === void 0 ? void 0 : _1.id));
+                    yield this.mongo.isExist(String((_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id));
+                    const isPremiumExpired = yield this.mongo.isVerified(String((_b = ctx.message.from) === null || _b === void 0 ? void 0 : _b.id));
                     if (isPremiumExpired == 'notVerified') {
-                        yield ctx.reply(`Hey ${((_2 = ctx.message.from) === null || _2 === void 0 ? void 0 : _2.firstName) || 'user'},\n\nʏᴏᴜ ᴅᴏ ɴᴏᴛ ʜᴀᴠᴇ ᴀɴʏ ᴀᴄᴛɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴs, ɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴛᴀᴋᴇ ᴘʀᴇᴍɪᴜᴍ ᴛʜᴇɴ ᴄʟɪᴄᴋ ᴏɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ 👇`, {
+                        yield ctx.reply(`Hey ${((_c = ctx.message.from) === null || _c === void 0 ? void 0 : _c.firstName) || 'user'},\n\nʏᴏᴜ ᴅᴏ ɴᴏᴛ ʜᴀᴠᴇ ᴀɴʏ ᴀᴄᴛɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴs, ɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴛᴀᴋᴇ ᴘʀᴇᴍɪᴜᴍ ᴛʜᴇɴ ᴄʟɪᴄᴋ ᴏɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ 👇`, {
                             replyMarkup: {
                                 inlineKeyboard: markup_1.Markup.myPlanReplyMarkup()
                             }
                         });
                         return;
                     }
-                    const data = yield model_1.userModel.findOne({ userId: String((_3 = ctx.message.from) === null || _3 === void 0 ? void 0 : _3.id) });
+                    const data = yield model_1.userModel.findOne({ userId: String((_d = ctx.message.from) === null || _d === void 0 ? void 0 : _d.id) });
                     console.log(data);
                     const del = yield ctx.reply(`You Have an Active PLAN..\n\nExpiring On: ${data.verifiedTill}`);
                     setTimeout(() => __awaiter(this, void 0, void 0, function* () {
@@ -1568,11 +1664,11 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('ban', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _4;
+                var _a;
                 try {
                     console.log('triggering ban');
                     const text = ctx.message.text;
-                    if (this.admin.includes(String((_4 = ctx.message.from) === null || _4 === void 0 ? void 0 : _4.id))) {
+                    if (this.admin.includes(String((_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id))) {
                         if (text == '/ban') {
                             const d = yield ctx.reply('send in this format\n\n/ban/uSeRiD');
                             setTimeout(() => __awaiter(this, void 0, void 0, function* () {
@@ -1596,10 +1692,10 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('uban', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _5;
+                var _a;
                 try {
                     const text = ctx.message.text;
-                    if (this.admin.includes(String((_5 = ctx.message.from) === null || _5 === void 0 ? void 0 : _5.id))) {
+                    if (this.admin.includes(String((_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id))) {
                         if (text == '/unban') {
                             const d = yield ctx.reply('send in this format\n\n/uban/uSeRiD');
                             setTimeout(() => __awaiter(this, void 0, void 0, function* () {
@@ -1633,9 +1729,9 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('prime', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _6;
+                var _a;
                 try {
-                    const userId = String((_6 = ctx.message.from) === null || _6 === void 0 ? void 0 : _6.id);
+                    const userId = String((_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id);
                     const vals = ctx.message.text;
                     if (this.admin.includes(userId)) {
                         if (vals == '/prime') {
@@ -1662,9 +1758,9 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('start', (ctx, next) => __awaiter(this, void 0, void 0, function* () {
-                var _7, _8, _9, _10, _11, _12, _13, _14, _15, _16;
+                var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
                 try {
-                    const userId = String((_7 = ctx.message.from) === null || _7 === void 0 ? void 0 : _7.id);
+                    const userId = String((_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id);
                     const chatId = String(ctx.message.chat.id);
                     const isExist = yield this.mongo.isExist(userId);
                     const vals = ctx.message.text;
@@ -1710,7 +1806,7 @@ class Bot extends localStore_1.localStore {
                             });
                             yield this.fileLogs(this.client, {
                                 userId,
-                                userName: ((_8 = ctx.message.from) === null || _8 === void 0 ? void 0 : _8.firstName) || 'USER',
+                                userName: ((_b = ctx.message.from) === null || _b === void 0 ? void 0 : _b.firstName) || 'USER',
                                 fileName: pool.fileName,
                                 fileSize: del1.document.fileSize || del1.video.fileSize,
                             });
@@ -1772,10 +1868,10 @@ class Bot extends localStore_1.localStore {
                             if (isVerified == 'notVerified' && fileData && shortenedUrl.length > 0 && this.isAdsOn) {
                                 const shortUrl = String(shortenedUrl[0]);
                                 if (tutorialUrl) {
-                                    let pool = this.addPool(String((_9 = ctx.message.from) === null || _9 === void 0 ? void 0 : _9.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl, fileData.fileName);
+                                    let pool = this.addPool(String((_c = ctx.message.from) === null || _c === void 0 ? void 0 : _c.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl, fileData.fileName);
                                     console.log(pool, 'pool');
                                     if (this.admin.includes(userId)) {
-                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_10 = ctx.message.from) === null || _10 === void 0 ? void 0 : _10.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}\n\n\n<pre>This is a One Day Unlock Link. Once Unlocked 1 Day Unlimited Files Can be Taken For FREE!</pre>`, {
+                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_d = ctx.message.from) === null || _d === void 0 ? void 0 : _d.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}\n\n\n<pre>This is a One Day Unlock Link. Once Unlocked 1 Day Unlimited Files Can be Taken For FREE!</pre>`, {
                                             replyMarkup: {
                                                 inlineKeyboard: [
                                                     [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
@@ -1788,7 +1884,7 @@ class Bot extends localStore_1.localStore {
                                         });
                                     }
                                     else {
-                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_11 = ctx.message.from) === null || _11 === void 0 ? void 0 : _11.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_e = ctx.message.from) === null || _e === void 0 ? void 0 : _e.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
                                             replyMarkup: {
                                                 inlineKeyboard: [
                                                     [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
@@ -1802,9 +1898,9 @@ class Bot extends localStore_1.localStore {
                                     return;
                                 }
                                 else {
-                                    let pool = this.addPool(String((_12 = ctx.message.from) === null || _12 === void 0 ? void 0 : _12.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl, fileData.fileName);
+                                    let pool = this.addPool(String((_f = ctx.message.from) === null || _f === void 0 ? void 0 : _f.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl, fileData.fileName);
                                     if (this.admin.includes(userId)) {
-                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_13 = ctx.message.from) === null || _13 === void 0 ? void 0 : _13.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_g = ctx.message.from) === null || _g === void 0 ? void 0 : _g.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
                                             replyMarkup: {
                                                 inlineKeyboard: [
                                                     [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
@@ -1816,7 +1912,7 @@ class Bot extends localStore_1.localStore {
                                         });
                                     }
                                     else {
-                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_14 = ctx.message.from) === null || _14 === void 0 ? void 0 : _14.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_h = ctx.message.from) === null || _h === void 0 ? void 0 : _h.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
                                             replyMarkup: {
                                                 inlineKeyboard: [
                                                     [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
@@ -1859,7 +1955,7 @@ class Bot extends localStore_1.localStore {
                                     console.log(del, 'deeeeeellllll');
                                     yield this.fileLogs(this.client, {
                                         userId,
-                                        userName: ((_15 = ctx.message.from) === null || _15 === void 0 ? void 0 : _15.firstName) || 'USER',
+                                        userName: ((_j = ctx.message.from) === null || _j === void 0 ? void 0 : _j.firstName) || 'USER',
                                         fileName: del.document.fileName || del.video.fileName,
                                         fileSize: del.document.fileSize || del.document.fileSize
                                     });
@@ -1881,7 +1977,7 @@ class Bot extends localStore_1.localStore {
                         }
                     }
                     if (vals == '/start') {
-                        const name = ((_16 = ctx.message.from) === null || _16 === void 0 ? void 0 : _16.firstName) || 'User';
+                        const name = ((_k = ctx.message.from) === null || _k === void 0 ? void 0 : _k.firstName) || 'User';
                         console.log('comes under start');
                         yield ctx.reply(this.startCaption(name), {
                             parseMode: 'HTML',
@@ -1939,7 +2035,7 @@ class Bot extends localStore_1.localStore {
                             console.log(data, 'dataaaaa');
                             //     console.log(ctx)
                             yield this.mongo.addFile(data, undefined, ctx.message.chat.id, ctx.message.chat.title);
-                            yield this.fileCloner(this.client, data.fileId, this.dumpChannelId, data.caption);
+                            // await this.fileCloner(this.client, data.fileId, this.dumpChannelId, data.caption)
                             return;
                         }
                     }
@@ -1974,6 +2070,9 @@ class Bot extends localStore_1.localStore {
                     const msgId = ctx.message.id;
                     const userId = (_b = ctx.message.from) === null || _b === void 0 ? void 0 : _b.id;
                     const chatId = ctx.message.chat.id;
+                    if (String(chatId) === '-1001838739662') {
+                        return;
+                    }
                     const typeMedium = ctx.message.chat.type;
                     const text = ctx.message.text;
                     if ((typeMedium == 'group' || typeMedium == 'supergroup') && !text.startsWith('/')) {

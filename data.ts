@@ -318,8 +318,9 @@ export class DataBase {
 
 
 
-    public async isFileExist(query: string): Promise<any[]> {
+    public async isFileExist(query: string, lim?: number, offset?: number): Promise<any[]> {
         try {
+            console.log(query)
             const raw_pattern = query
                 .replace(/['’]?s/g, "(?:['’]?[sS])?") // Optional 's' or 'S' with or without apostrophe
                 .replace(/ /g, '.*[\\s\\.\\+\\-_\\(\\)\\[\\]]?'); // Flexible separator handling
@@ -328,10 +329,17 @@ export class DataBase {
             const regex = new RegExp(raw_pattern, 'i');
 
             // Perform the search with the compiled regex
-            const files = await fileModel.find({ fileName: { $regex: regex } }).limit(50).sort({ _id: -1 })
+            if (lim && offset) {
+                const files = await fileModel.find({ fileName: { $regex: regex } }).sort({ _id: -1 }).skip(offset).limit(lim);
+                return files;
 
-            console.log(files.length);
-            return files;
+
+            } else {
+                const files = await fileModel.find({ fileName: { $regex: regex } }).limit(50).sort({ _id: -1 });
+                return files;
+
+            }
+
         } catch (error) {
             console.log(error);
             return [];

@@ -1,4 +1,9 @@
 import { Bot } from "./bot";
+import express, { Request, Response } from 'express'
+
+const app = express();
+
+app.listen(4000, () => console.log('port opned 4000'))
 
 
 const apiId = 23383641;
@@ -22,6 +27,7 @@ let bot = new Bot({
         await bot.generateGroupPool()
         await bot.listener();
         await bot.commands();
+        await setUpServer()
         await bot.indexEngine()
         await bot.fileSaver();
         await bot.groupManager();
@@ -35,6 +41,27 @@ let bot = new Bot({
 }
 
 )()
+
+async function setUpServer() {
+    try {
+        app.post('/api/query/:filename/:offset', async (req: Request, res: Response) => {
+            try {
+
+                let { filename } = req.params;
+                let offset = Number(req.params.offset);
+
+                console.log(filename, 'fill')
+                await bot.ApiRequest(filename, req, res, 5, offset)
+
+
+            } catch (error) {
+                console.log('error in setUP Server::: ', error)
+            }
+        })
+    } catch (error) {
+        console.log('error in setUp server..', error)
+    }
+}
 
 
 export default bot

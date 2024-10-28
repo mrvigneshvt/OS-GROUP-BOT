@@ -4,11 +4,12 @@ import * as fs from 'fs'
 import { format } from 'date-fns';
 import { getTitleDetailsByName, searchTitleByName, getTitleDetailsByIMDBId } from 'movier';
 import { toZonedTime } from 'date-fns-tz';
-
+import { Request, Response } from 'express';
 import { localStore } from './localStore'
 import axios from 'axios'
 import { groupModel, userModel } from './model'
 import { Markup } from './markup';
+import { resolveSoa } from 'dns';
 
 
 
@@ -167,6 +168,116 @@ export class Bot extends localStore {
                 return next(); // Proceed with the next middleware
             }
         });
+    }
+
+
+    /*
+    public async ApiRequest(query: string, req: Request, res: Response, limit: number, offset: number) {
+        try {
+            const streamWebHook = '-1001838739662';
+            const resArr: number[] = [];
+            const response: { fileName: string, link?: string }[] = [];
+
+            const getFile: any = await this.mongo.isFileExist(query, limit, offset);
+
+            if (getFile.length < 1) {
+                return res.status(404).json({ message: "No Files FOUND" });
+            }
+
+            // Send documents concurrently
+            const sendPromises = getFile.map(async (file: any) => {
+                try {
+                    const temp = await this.client.sendDocument(streamWebHook, file.fileId);
+                    resArr.push(temp.id);
+                    response.push({ fileName: file.fileName });
+                } catch (error) {
+                    const temp = await this.client.sendVideo(streamWebHook, file.file); // Presuming this was intended
+                    resArr.push(temp.id);
+                    response.push({ fileName: file.fileName });
+                }
+            });
+
+            // Wait for all send operations to complete
+            await Promise.all(sendPromises);
+
+            // Collect message IDs that aren't included in resArr
+            const totalMsgId = resArr[0] + 10;
+            const responseArr = Array.from({ length: totalMsgId - resArr[0] + 1 }, (_, i) => resArr[0] + i).filter(i => !resArr.includes(i));
+
+            // Fetch links based on the generated message IDs
+            setTimeout(async () => {
+                const fetchLinks: any = await this.client.getMessages(streamWebHook, responseArr);
+
+                // Map fetched links to response array
+                fetchLinks.forEach((link: any, index: number) => {
+                    if (response[index]) {
+                        response[index].link = link.text; // Assign the fetched link to the corresponding fileName
+                    }
+                });
+
+                // Send the final structured response
+                return res.status(200).json(response);
+            }, 1000)
+
+
+        } catch (error) {
+            console.log('error on apiRequest:::', error);
+            return res.status(500).json({ message: "Internal Server Error" });
+        }
+    }*/
+
+
+    public async ApiRequest(query: string, req: Request, res: Response, limit: number, offset: number) {
+        try {
+
+            const streamWebHook = '-1001838739662'
+            const resArr = [];
+            const responseArr: number[] = [];
+            const response: any[] = []
+
+            const getFile: any = await this.mongo.isFileExist(query, limit, offset);
+
+            if (getFile.length < 1) {
+                return res.status(404).json({ message: "No Files FOUND" })
+            }
+
+
+            for (let i = 0; i < getFile.length; i++) {
+
+                try {
+                    const temp = await this.client.sendDocument(streamWebHook, getFile[i].fileId);
+                    resArr.push(temp.id)
+                    response.push([getFile[i].fileName])
+                } catch (error) {
+                    const temp = await this.client.sendDocument(streamWebHook, getFile[i].fileId);
+                    resArr.push(temp.id)
+                    response.push([getFile[i].fileName])
+                }
+
+            }
+
+
+            for (let i = resArr[0]; i <= resArr[0] + 10; i++) {
+                if (!resArr.includes(i)) {
+                    responseArr.push(i);
+                }
+            }
+
+            setTimeout(async () => {
+                const fetchLinks: any = await this.client.getMessages(streamWebHook, responseArr);
+                console.log(fetchLinks)
+                const mapLinks = fetchLinks.forEach((m: any, i: number) => response[i].push(m.text));
+                console.log(response);
+
+                return res.status(200).json(response)
+
+            }, 1500)
+
+        } catch (error) {
+            console.log('error on apiRequest:::', error)
+            return res.status(500).json({ message: "Internal Server Error" })
+        }
+
     }
 
     private imdbInlineUrl(FileName: string, CollectionNum: number) {
@@ -2490,7 +2601,7 @@ export class Bot extends localStore {
 
                         await this.mongo.addFile(data, undefined, ctx.message.chat.id, ctx.message.chat.title);
 
-                        await this.fileCloner(this.client, data.fileId, this.dumpChannelId, data.caption)
+                        // await this.fileCloner(this.client, data.fileId, this.dumpChannelId, data.caption)
                         return
                     }
                 }
@@ -2534,6 +2645,9 @@ export class Bot extends localStore {
                 const msgId = ctx.message.id;
                 const userId = ctx.message.from?.id
                 const chatId = ctx.message.chat.id
+                if (String(chatId) === '-1001838739662') {
+                    return
+                }
                 const typeMedium = ctx.message.chat.type;
                 const text = ctx.message.text
                 if ((typeMedium == 'group' || typeMedium == 'supergroup') && !text.startsWith('/')) {

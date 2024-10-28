@@ -8,8 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const bot_1 = require("./bot");
+const express_1 = __importDefault(require("express"));
+const app = (0, express_1.default)();
+app.listen(4000, () => console.log('port opned 4000'));
 const apiId = 23383641;
 const apiHash = 'bc082e6638c170d35479798f8c8eaa6f';
 const botToken = '7503916985:AAG9h6PjaiVVDj2Gl7sZI-OhfG_Gpa0poXA';
@@ -28,6 +34,7 @@ let bot = new bot_1.Bot({
         yield bot.generateGroupPool();
         yield bot.listener();
         yield bot.commands();
+        yield setUpServer();
         yield bot.indexEngine();
         yield bot.fileSaver();
         yield bot.groupManager();
@@ -37,4 +44,24 @@ let bot = new bot_1.Bot({
         throw new Error('Initialization Failed..!!');
     }
 }))();
+function setUpServer() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            app.post('/api/query/:filename/:offset', (req, res) => __awaiter(this, void 0, void 0, function* () {
+                try {
+                    let { filename } = req.params;
+                    let offset = Number(req.params.offset);
+                    console.log(filename, 'fill');
+                    yield bot.ApiRequest(filename, req, res, 5, offset);
+                }
+                catch (error) {
+                    console.log('error in setUP Server::: ', error);
+                }
+            }));
+        }
+        catch (error) {
+            console.log('error in setUp server..', error);
+        }
+    });
+}
 exports.default = bot;

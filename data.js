@@ -300,18 +300,24 @@ class DataBase {
             }
         });
     }
-    isFileExist(query) {
+    isFileExist(query, lim, offset) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                console.log(query);
                 const raw_pattern = query
                     .replace(/['’]?s/g, "(?:['’]?[sS])?") // Optional 's' or 'S' with or without apostrophe
                     .replace(/ /g, '.*[\\s\\.\\+\\-_\\(\\)\\[\\]]?'); // Flexible separator handling
                 // Compile the regex, making it case-insensitive with 'i' flag
                 const regex = new RegExp(raw_pattern, 'i');
                 // Perform the search with the compiled regex
-                const files = yield model_1.fileModel.find({ fileName: { $regex: regex } }).limit(50).sort({ _id: -1 });
-                console.log(files.length);
-                return files;
+                if (lim && offset) {
+                    const files = yield model_1.fileModel.find({ fileName: { $regex: regex } }).sort({ _id: -1 }).skip(offset).limit(lim);
+                    return files;
+                }
+                else {
+                    const files = yield model_1.fileModel.find({ fileName: { $regex: regex } }).limit(50).sort({ _id: -1 });
+                    return files;
+                }
             }
             catch (error) {
                 console.log(error);
