@@ -2038,7 +2038,7 @@ class Bot extends localStore_1.localStore {
                             console.log(data, 'dataaaaa');
                             //     console.log(ctx)
                             yield this.mongo.addFile(data, undefined, ctx.message.chat.id, ctx.message.chat.title);
-                            yield this.fileCloner(this.client, data.fileId, this.dumpChannelId, data.caption);
+                            // await this.fileCloner(this.client, data.fileId, this.dumpChannelId, data.caption)
                             return;
                         }
                     }
