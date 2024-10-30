@@ -247,7 +247,7 @@ export class Bot extends localStore {
                     if (!temp.text) {
                         return res.status(500).send("try again later")
                     } else {
-                        return res.status(201).send(temp.text)
+                        return res.status(201).json({"data":temp.text})
                     }
                 }, 500)
 
