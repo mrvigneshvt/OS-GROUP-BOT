@@ -330,7 +330,7 @@ export class DataBase {
 
             // Perform the search with the compiled regex
             if (lim && offset) {
-                const files = await fileModel.find({ fileName: { $regex: regex } }).sort({ _id: -1 }).skip(offset).limit(lim);
+                const files = await fileModel.find({ fileName: { $regex: regex } }).sort({ _id: -1 }).skip(offset*5).limit(lim);
                 return files;
 
 
