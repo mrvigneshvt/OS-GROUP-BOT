@@ -57,7 +57,16 @@ function setUpServer() {
                     yield bot.ApiRequest(filename, req, res, 5, offset);
                 }
                 catch (error) {
-                    console.log('error in setUP Server::: ', error);
+                    console.log('error in query Server::: ', error);
+                }
+            }));
+            app.post('/api/uniqueHash/:uniqueId', (req, res) => __awaiter(this, void 0, void 0, function* () {
+                try {
+                    let { uniqueId } = req.params;
+                    yield bot.ApiStream(uniqueId, req, res);
+                }
+                catch (error) {
+                    console.log('error in uniqueHash Server:::', error);
                 }
             }));
         }

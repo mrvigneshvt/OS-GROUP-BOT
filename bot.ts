@@ -7,7 +7,7 @@ import { toZonedTime } from 'date-fns-tz';
 import { Request, Response } from 'express';
 import { localStore } from './localStore'
 import axios from 'axios'
-import { groupModel, userModel } from './model'
+import { fileModel, groupModel, userModel } from './model'
 import { Markup } from './markup';
 import { resolveSoa } from 'dns';
 
@@ -174,7 +174,6 @@ export class Bot extends localStore {
     /*
     public async ApiRequest(query: string, req: Request, res: Response, limit: number, offset: number) {
         try {
-            const streamWebHook = '-1001838739662';
             const resArr: number[] = [];
             const response: { fileName: string, link?: string }[] = [];
 
@@ -226,53 +225,63 @@ export class Bot extends localStore {
         }
     }*/
 
+    public async ApiStream(uniqueHash: string, req: Request, res: Response) {
+        try {
+            const streamWebHook = '-1001838739662';
+
+            const fileData = await fileModel.findOne({ fileUniqueId: uniqueHash });
+
+            if (!fileData) {
+                return res.status(500).send("Internal Server Error")
+            }
+
+            let temp: any;
+            try {
+                temp = await this.client.sendDocument(streamWebHook, fileData.fileId)
+            } catch (error) {
+                temp = await this.client.sendDocument(streamWebHook, fileData.fileId)
+            } finally {
+                setTimeout(async () => {
+                    temp = await this.client.getMessage(streamWebHook, Number(temp.id) + 1)
+                    console.log(temp.text)
+                    if (!temp.text) {
+                        return res.status(500).send("try again later")
+                    } else {
+                        return res.status(201).send(temp.text)
+                    }
+                }, 500)
+
+
+            }
+        } catch (error) {
+            console.log('error in APISTREAM:::', error)
+        }
+    }
+
 
 
     public async ApiRequest(query: string, req: Request, res: Response, limit: number, offset: number) {
         try {
 
-            const streamWebHook = '-1001838739662'
-            const resArr: number[] = [];
-            const responseArr: number[] = [];
-            const response: any[] = []
+            /* const streamWebHook = '-1001838739662'
+             const resArr: number[] = [];
+             const responseArr: number[] = [];
+             const response: any[] = []*/
 
             const getFile: any = await this.mongo.isFileExist(query, limit, offset);
 
+            const response = getFile.map((m: any) => ({
+                "fileName": m.fileName,
+                "fileSize": m.fileSize,
+                "uniqueId": m.fileUniqueId,
+            }))
+
             if (getFile.length < 1) {
                 return res.status(404).json({ message: "No Files FOUND" })
+            } else {
+                return res.status(201).json(response)
             }
 
-
-            const sendPromises = getFile.map(async (data: any) => {
-                try {
-                    const temp = await this.client.sendDocument(streamWebHook, data.fileId);
-                } catch (error) {
-                    console.log(error);
-                    // Optionally handle error: you could send a video as a fallback, etc.
-                    const temp = await this.client.sendVideo(streamWebHook, data.fileId);
-                }
-            });
-
-            // Wait for all send requests to complete
-            await Promise.all(sendPromises);
-
-
-
-            for (let i = resArr[0]; i <= resArr[0] + 10; i++) {
-                if (!resArr.includes(i)) {
-                    responseArr.push(i);
-                }
-            }
-
-            setTimeout(async () => {
-                const fetchLinks: any = await this.client.getMessages(streamWebHook, responseArr);
-                console.log(fetchLinks)
-                const mapLinks = fetchLinks.forEach((m: any, i: number) => response[i].push(m.text));
-                console.log(response);
-
-                return res.status(200).json(response)
-
-            }, 1500)
 
         } catch (error) {
             console.log('error on apiRequest:::', error)

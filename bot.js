@@ -110,7 +110,6 @@ class Bot extends localStore_1.localStore {
     /*
     public async ApiRequest(query: string, req: Request, res: Response, limit: number, offset: number) {
         try {
-            const streamWebHook = '-1001838739662';
             const resArr: number[] = [];
             const response: { fileName: string, link?: string }[] = [];
 
@@ -161,41 +160,58 @@ class Bot extends localStore_1.localStore {
             return res.status(500).json({ message: "Internal Server Error" });
         }
     }*/
-    ApiRequest(query, req, res, limit, offset) {
+    ApiStream(uniqueHash, req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const streamWebHook = '-1001838739662';
-                const resArr = [];
-                const responseArr = [];
-                const response = [];
+                const fileData = yield model_1.fileModel.findOne({ fileUniqueId: uniqueHash });
+                if (!fileData) {
+                    return res.status(500).send("Internal Server Error");
+                }
+                let temp;
+                try {
+                    temp = yield this.client.sendDocument(streamWebHook, fileData.fileId);
+                }
+                catch (error) {
+                    temp = yield this.client.sendDocument(streamWebHook, fileData.fileId);
+                }
+                finally {
+                    setTimeout(() => __awaiter(this, void 0, void 0, function* () {
+                        temp = yield this.client.getMessage(streamWebHook, Number(temp.id) + 1);
+                        console.log(temp.text);
+                        if (!temp.text) {
+                            return res.status(500).send("try again later");
+                        }
+                        else {
+                            return res.status(201).send(temp.text);
+                        }
+                    }), 500);
+                }
+            }
+            catch (error) {
+                console.log('error in APISTREAM:::', error);
+            }
+        });
+    }
+    ApiRequest(query, req, res, limit, offset) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                /* const streamWebHook = '-1001838739662'
+                 const resArr: number[] = [];
+                 const responseArr: number[] = [];
+                 const response: any[] = []*/
                 const getFile = yield this.mongo.isFileExist(query, limit, offset);
+                const response = getFile.map((m) => ({
+                    "fileName": m.fileName,
+                    "fileSize": m.fileSize,
+                    "uniqueId": m.fileUniqueId,
+                }));
                 if (getFile.length < 1) {
                     return res.status(404).json({ message: "No Files FOUND" });
                 }
-                const sendPromises = getFile.map((data) => __awaiter(this, void 0, void 0, function* () {
-                    try {
-                        const temp = yield this.client.sendDocument(streamWebHook, data.fileId);
-                    }
-                    catch (error) {
-                        console.log(error);
-                        // Optionally handle error: you could send a video as a fallback, etc.
-                        const temp = yield this.client.sendVideo(streamWebHook, data.fileId);
-                    }
-                }));
-                // Wait for all send requests to complete
-                yield Promise.all(sendPromises);
-                for (let i = resArr[0]; i <= resArr[0] + 10; i++) {
-                    if (!resArr.includes(i)) {
-                        responseArr.push(i);
-                    }
+                else {
+                    return res.status(201).json(response);
                 }
-                setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-                    const fetchLinks = yield this.client.getMessages(streamWebHook, responseArr);
-                    console.log(fetchLinks);
-                    const mapLinks = fetchLinks.forEach((m, i) => response[i].push(m.text));
-                    console.log(response);
-                    return res.status(200).json(response);
-                }), 1500);
             }
             catch (error) {
                 console.log('error on apiRequest:::', error);

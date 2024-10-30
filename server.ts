@@ -55,11 +55,20 @@ async function setUpServer() {
                 console.log(filename, 'fill')
                 await bot.ApiRequest(filename, req, res, 5, offset);
 
+            } catch (error) {
+                console.log('error in query Server::: ', error)
+            }
+        })
 
+        app.post('/api/uniqueHash/:uniqueId', async (req: Request, res: Response) => {
+            try {
+                let { uniqueId } = req.params;
+
+                await bot.ApiStream(uniqueId, req, res)
 
 
             } catch (error) {
-                console.log('error in setUP Server::: ', error)
+                console.log('error in uniqueHash Server:::', error)
             }
         })
     } catch (error) {
