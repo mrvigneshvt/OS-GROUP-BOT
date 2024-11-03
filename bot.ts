@@ -79,6 +79,7 @@ export class Bot extends localStore {
     private supportMessage;
     private supportChatLink
     private dumpChannelId;
+    private postingChannel;
 
 
 
@@ -89,6 +90,8 @@ export class Bot extends localStore {
         this.dumpChannelId = '-1002380108081'
         this.supportMessage = `<b>This Bot is Under C0pyR1ght and Can be Deleted </b>Join Backups @SingleMachiOffll\n\nOther Channels (files):\n\nTamil -> @SingleMachiCinemas\nMalayalam -> @SingleMachiMallu\nTelugu -> @SingleMachiTelugu\nWebSeries -> @SingleMachiSerie\nHindi -> @SingleMachiBollyWood\nHollywood -> @SingleXMachi\nAnime -> @SingleMachiAnime\n\n<pre>Click This Below Link to JOIN ALL..</pre>`
         this.supportChatLink = 'https://t.me/addlist/vrbL9O0lkGlmNTg0'
+
+        this.postingChannel = '-1001897524951'
 
 
         this.posterChannelId = '-1001897524951'
@@ -652,6 +655,24 @@ export class Bot extends localStore {
             const chatTitle = ctx.callbackQuery.message.chat.title
             console.log(callBackData);
 
+            if (callBackData.startsWith('POST')) {
+                try {
+                    const data = callBackData.split('-');
+
+                    const url = data[1];
+                    const num: string = data[2]
+
+                    const imdbDetails = await getTitleDetailsByIMDBId(url);
+
+                    const genre = imdbDetails.genres
+                        .map((g: string) => g.charAt(0).toUpperCase() + g.slice(1).toLowerCase())
+                        .join(' - ') || 'NA';
+
+                    
+                } catch (error) {
+                    
+                }
+            }
 
             if (callBackData.startsWith('imdb')) {
                 try {
@@ -1399,6 +1420,53 @@ export class Bot extends localStore {
 
     public async commands() {
 
+        this.client.command('post',async(ctx)=>{
+            try {
+                const userID = ctx.message.from?.id
+
+                if (!this.admin.includes(String(userID))) {
+                    return
+                }
+
+                const data = ctx.message.text.split('-');
+
+                if(data.length!==3){
+                    return await ctx.reply("invalid Format")
+                }
+
+                let imdb = await searchTitleByName(data[1]);
+
+                if(!imdb){
+                   return await ctx.reply("NO RESULTS FOUND !!")
+                }
+
+                imdb = imdb.splice(0, 7);
+
+
+
+             let format = imdb.map((c, index) => {
+                        // If item directly contains link, fileName, and fileSizen
+                        return [{ text: `${c.name} ${c.titleYear}`, callbackData: `POST-${c.url}-${Number}` }]
+                    })
+
+
+                    await ctx.reply(`Your Results for ${data[1]}`, {
+                        replyMarkup: {
+                            inlineKeyboard: format
+                        }
+                    })
+
+
+
+
+
+                
+                
+            } catch (error) {
+                
+            }
+        })
+
         this.client.command('imdb', async (ctx) => {
             try {
                 const userID = ctx.message.from?.id
@@ -1410,11 +1478,7 @@ export class Bot extends localStore {
                 const data = ctx.message.text.split('/');
                 console.log(data, 'dataaaaaa')
 
-                if (data.length > 4) {
-                    return await ctx.reply('Send In this Format\n\n/imdb/fileName/0')
-                }
-
-                else if (data.length == 4) {
+                if (data.length == 4) {
 
                     const fileName = data[2];
                     const Number = data[3];
@@ -1441,9 +1505,10 @@ export class Bot extends localStore {
                             inlineKeyboard: format
                         }
                     })
-
-
-                }
+                }else {
+                        return await ctx.reply('Send In this Format\n\n/imdb/fileName/0')
+                    }
+                
             } catch (error) {
                 console.log('ERROR in IMDB:::', error)
             }
