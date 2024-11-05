@@ -311,7 +311,7 @@ class DataBase {
                 const regex = new RegExp(raw_pattern, 'i');
                 // Perform the search with the compiled regex
                 if (lim && offset) {
-                    const files = yield model_1.fileModel.find({ fileName: { $regex: regex } }).sort({ _id: -1 }).skip(offset).limit(lim);
+                    const files = yield model_1.fileModel.find({ fileName: { $regex: regex } }).sort({ _id: -1 }).skip(offset * 5).limit(lim);
                     return files;
                 }
                 else {

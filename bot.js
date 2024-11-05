@@ -52,9 +52,10 @@ class Bot extends localStore_1.localStore {
         this.dumpChannelId = '-1002380108081';
         this.supportMessage = `<b>This Bot is Under C0pyR1ght and Can be Deleted </b>Join Backups @SingleMachiOffll\n\nOther Channels (files):\n\nTamil -> @SingleMachiCinemas\nMalayalam -> @SingleMachiMallu\nTelugu -> @SingleMachiTelugu\nWebSeries -> @SingleMachiSerie\nHindi -> @SingleMachiBollyWood\nHollywood -> @SingleXMachi\nAnime -> @SingleMachiAnime\n\n<pre>Click This Below Link to JOIN ALL..</pre>`;
         this.supportChatLink = 'https://t.me/addlist/vrbL9O0lkGlmNTg0';
+        this.postingChannel = '-1001897524951';
         this.posterChannelId = '-1001897524951';
         this.inlineBot = `Machi_x_bot`;
-        this.sendLogs = '-1002462166410';
+        this.sendLogs = '-1002280370011';
         this.botUrl = 'https://t.me/';
         this.percentageAds = 20;
         this.publicChannelUname = 'MachiXupdates';
@@ -64,9 +65,9 @@ class Bot extends localStore_1.localStore {
         this.paymentScreenshotId = `${this.botUrl}MachiXsupportBot`;
         this.admin = ['1767901454', '7822087230'];
         this.supportLog = '-1002404917291';
-        this.indexLog = '-1002473253639'; // - 1002279938392';
+        this.indexLog = '-1002395054296'; // - 1002279938392';
         this.poweringGroupLog = '-1002363091043'; //channel id of groupChat !
-        this.fileLog = ['-1002094214421'];
+        this.fileLog = ['-1002280370011'];
         this.botUserName = '@';
         this.botUname = undefined;
         this.tutorialUrl = undefined;
@@ -183,7 +184,7 @@ class Bot extends localStore_1.localStore {
                             return res.status(500).send("try again later");
                         }
                         else {
-                            return res.status(201).send(temp.text);
+                            return res.status(201).json({ "data": temp.text });
                         }
                     }), 500);
                 }
@@ -510,7 +511,7 @@ class Bot extends localStore_1.localStore {
     listener() {
         return __awaiter(this, void 0, void 0, function* () {
             this.client.on('callbackQuery:data', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _a, _b, _c, _d;
+                var _a, _b, _c, _d, _e;
                 const userId = ctx.callbackQuery.from.id;
                 const callBackData = ctx.callbackQuery.data;
                 const callBackDataId = ctx.callbackQuery.id;
@@ -518,6 +519,56 @@ class Bot extends localStore_1.localStore {
                 const chatId = Number((_b = ctx.callbackQuery.message) === null || _b === void 0 ? void 0 : _b.chat.id);
                 const chatTitle = ctx.callbackQuery.message.chat.title;
                 console.log(callBackData);
+                if (callBackData.startsWith('POST')) {
+                    try {
+                        const data = callBackData.split('-');
+                        console.log(ctx);
+                        const url = data[1];
+                        const msgId = Number(data[2]);
+                        const Data = yield this.client.getMessage(chatId, msgId);
+                        // const num: string = data[2]
+                        console.log(Data);
+                        const aud = (_c = Data.text) !== null && _c !== void 0 ? _c : undefined;
+                        const audio = aud.split('/')[3];
+                        const imdbDetails = yield (0, movier_1.getTitleDetailsByIMDBId)(url);
+                        const genre = imdbDetails.genres
+                            .map((g) => g.charAt(0).toUpperCase() + g.slice(1).toLowerCase())
+                            .join(' - ') || 'NA';
+                        //  console.log(genre)
+                        //  console.log(ctx)
+                        // console.log(imdbDetails)
+                        const dataNameLink = imdbDetails.name
+                            .replace(/\s+/g, '_') // Replace spaces with underscores
+                            .replace(/[^a-zA-Z0-9_]/g, '');
+                        if (!imdbDetails.posterImage.url) {
+                            yield this.client.sendPhoto(this.postingChannel, this.upiImage, {
+                                caption: `🎬 <b>Title :</b>  ${imdbDetails.name}\n\n🌟 <b>Ratings :</b>  ${imdbDetails.allRates[0].rate}\n\n🎭 <b>Genre :</b>  ${genre}\n\n📆 <b>Release :</b>${imdbDetails.titleYear}\n\n🔘 <b>Bot : @${this.botUname}</b> \n\n🎙️ <b>Language : ${audio}</b>\n\n ★ 𝓟𝓸𝔀𝓮𝓻𝓮𝓭 𝓫𝔂 : <a href="https://t.me/+0CIJvlEC4YQwODg0">MachiX Networks</a> \n\n👉 <b>Button Unlock 🔓: </b><a href="https://t.me/HowToUseMachiXbot">Tutorial</a>`,
+                                parseMode: "HTML",
+                                replyMarkup: {
+                                    inlineKeyboard: [
+                                        [{ text: "Download", url: `${this.botUrl}${this.botUname}?start=send-${dataNameLink}` }]
+                                    ]
+                                }
+                            });
+                            return;
+                        }
+                        else {
+                            yield this.client.sendPhoto(this.postingChannel, imdbDetails.posterImage.url, {
+                                caption: `🎬 <b>Title :</b>  ${imdbDetails.name}\n\n🌟 <b>Ratings :</b>  ${imdbDetails.allRates[0].rate}\n\n🎭 <b>Genre :</b>  ${genre}\n\n📆 <b>Release :</b>${imdbDetails.titleYear}\n\n🔘 <b>Bot : @${this.botUname}</b> \n\n🎙️ <b>Language : ${audio}</b>\n\n ★ 𝓟𝓸𝔀𝓮𝓻𝓮𝓭 𝓫𝔂 : <a href="https://t.me/+0CIJvlEC4YQwODg0">MachiX Networks</a> \n\n👉 <b>Button Unlock 🔓: </b><a href="https://t.me/HowToUseMachiXbot">Tutorial</a>`,
+                                parseMode: "HTML",
+                                replyMarkup: {
+                                    inlineKeyboard: [
+                                        [{ text: "Download", url: `${this.botUrl}${this.botUname}?start=send-${dataNameLink}` }]
+                                    ]
+                                }
+                            });
+                            return;
+                        }
+                    }
+                    catch (error) {
+                        console.log('error in callbackPOST:::', error);
+                    }
+                }
                 if (callBackData.startsWith('imdb')) {
                     try {
                         const data = callBackData.split('-');
@@ -616,7 +667,7 @@ class Bot extends localStore_1.localStore {
                     try {
                         let query = callBackData.split('/');
                         query = query[1];
-                        const msgId = ((_c = ctx.msg) === null || _c === void 0 ? void 0 : _c.id) || undefined;
+                        const msgId = ((_d = ctx.msg) === null || _d === void 0 ? void 0 : _d.id) || undefined;
                         //  console.log(query, msgId)
                         if (query && msgId) {
                             const msgID = yield ctx.editMessageText(msgId, 'Choose The Season You Need !', {
@@ -668,7 +719,7 @@ class Bot extends localStore_1.localStore {
                 }
                 if (callBackData.startsWith('Quality')) {
                     try {
-                        const msgId = ((_d = ctx.msg) === null || _d === void 0 ? void 0 : _d.id) || undefined;
+                        const msgId = ((_e = ctx.msg) === null || _e === void 0 ? void 0 : _e.id) || undefined;
                         const data = callBackData.split('/');
                         if (!msgId) {
                             yield ctx.answerCallbackQuery({
@@ -699,18 +750,18 @@ class Bot extends localStore_1.localStore {
                     try {
                         const senderId = ctx.callbackQuery.from.id;
                         const data = callBackData.split('/');
-                        // console.log(data[3], 'dataaaaaaaaaa')
+                        if (Number(data[3]) === 0) {
+                            yield ctx.answerCallbackQuery({
+                                text: `You ARE IN THE FIRST PAGE !!`,
+                                alert: true,
+                            });
+                            return;
+                        }
+                        console.log(data[3], 'dataaaaaaaaaa');
                         if (ctx.callbackQuery.from.id !== ctx.msg.replyToMessage.from.id) {
                             yield ctx.answerCallbackQuery({
                                 text: 'Search for YOUrself Dont Distrub others Chat',
                                 alert: true
-                            });
-                            return;
-                        }
-                        if (Number(data[3]) < 1) {
-                            yield ctx.answerCallbackQuery({
-                                text: `You ARE IN THE FIRST PAGE !!`,
-                                alert: true,
                             });
                             return;
                         }
@@ -1101,6 +1152,41 @@ class Bot extends localStore_1.localStore {
     }
     commands() {
         return __awaiter(this, void 0, void 0, function* () {
+            this.client.command('post', (ctx) => __awaiter(this, void 0, void 0, function* () {
+                var _a;
+                try {
+                    const userID = (_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id;
+                    console.log('25k');
+                    if (!this.admin.includes(String(userID))) {
+                        return;
+                    }
+                    const data = ctx.message.text.split('/');
+                    console.log(data);
+                    if (data.length !== 4) {
+                        return yield ctx.reply("invalid Format");
+                    }
+                    let imdb = yield (0, movier_1.searchTitleByName)(data[2]);
+                    if (!imdb) {
+                        return yield ctx.reply("NO RESULTS FOUND !!");
+                    }
+                    imdb = imdb.splice(0, 7);
+                    console.log('2k');
+                    console.log(imdb);
+                    let format = imdb.map((c, index) => {
+                        // If item directly contains link, fileName, and fileSizen
+                        return [{ text: `${c.name} ${c.titleYear}`, callbackData: `POST-${c.url}-${ctx.message.id}` }];
+                    });
+                    console.log(format);
+                    yield ctx.reply(`Your Results for ${data[2]}`, {
+                        replyMarkup: {
+                            inlineKeyboard: format
+                        }
+                    });
+                }
+                catch (error) {
+                    console.log('error', error);
+                }
+            }));
             this.client.command('imdb', (ctx) => __awaiter(this, void 0, void 0, function* () {
                 var _a;
                 try {
@@ -1110,10 +1196,7 @@ class Bot extends localStore_1.localStore {
                     }
                     const data = ctx.message.text.split('/');
                     console.log(data, 'dataaaaaa');
-                    if (data.length > 4) {
-                        return yield ctx.reply('Send In this Format\n\n/imdb/fileName/0');
-                    }
-                    else if (data.length == 4) {
+                    if (data.length == 4) {
                         const fileName = data[2];
                         const Number = data[3];
                         let imdb = yield (0, movier_1.searchTitleByName)(fileName);
@@ -1132,6 +1215,9 @@ class Bot extends localStore_1.localStore {
                                 inlineKeyboard: format
                             }
                         });
+                    }
+                    else {
+                        return yield ctx.reply('Send In this Format\n\n/imdb/fileName/0');
                     }
                 }
                 catch (error) {
@@ -1774,16 +1860,28 @@ class Bot extends localStore_1.localStore {
                 }
             }));
             this.client.command('start', (ctx, next) => __awaiter(this, void 0, void 0, function* () {
-                var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+                var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
                 try {
                     const userId = String((_a = ctx.message.from) === null || _a === void 0 ? void 0 : _a.id);
                     const chatId = String(ctx.message.chat.id);
                     const isExist = yield this.mongo.isExist(userId);
                     const vals = ctx.message.text;
-                    //console.log(ctx.message.text)
+                    console.log(ctx.message.text);
                     if (vals.startsWith(`/start@${this.botUname}`)) {
                         console.log("Added to Group");
                         next();
+                    }
+                    if (vals.startsWith('/start send')) {
+                        try {
+                            const fileName = vals.split('-')[1];
+                            console.log(fileName);
+                            const destructureFileName = fileName.split("_").join(' ');
+                            yield this.queryManager(ctx, Number((_b = ctx.message.from) === null || _b === void 0 ? void 0 : _b.id), { query: destructureFileName }, ctx.message.chat.id, (((_c = ctx.message.from) === null || _c === void 0 ? void 0 : _c.firstName) || 'USER'), "SINGLE X MACHI");
+                            console.log(destructureFileName);
+                        }
+                        catch (error) {
+                            console.log('error in startSend:::', error);
+                        }
                     }
                     if (vals.startsWith('/start hash_')) {
                         let data = vals.split('_');
@@ -1822,7 +1920,7 @@ class Bot extends localStore_1.localStore {
                             });
                             yield this.fileLogs(this.client, {
                                 userId,
-                                userName: ((_b = ctx.message.from) === null || _b === void 0 ? void 0 : _b.firstName) || 'USER',
+                                userName: ((_d = ctx.message.from) === null || _d === void 0 ? void 0 : _d.firstName) || 'USER',
                                 fileName: pool.fileName,
                                 fileSize: del1.document.fileSize || del1.video.fileSize,
                             });
@@ -1884,10 +1982,10 @@ class Bot extends localStore_1.localStore {
                             if (isVerified == 'notVerified' && fileData && shortenedUrl.length > 0 && this.isAdsOn) {
                                 const shortUrl = String(shortenedUrl[0]);
                                 if (tutorialUrl) {
-                                    let pool = this.addPool(String((_c = ctx.message.from) === null || _c === void 0 ? void 0 : _c.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl, fileData.fileName);
+                                    let pool = this.addPool(String((_e = ctx.message.from) === null || _e === void 0 ? void 0 : _e.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl, fileData.fileName);
                                     console.log(pool, 'pool');
                                     if (this.admin.includes(userId)) {
-                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_d = ctx.message.from) === null || _d === void 0 ? void 0 : _d.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}\n\n\n<pre>This is a One Day Unlock Link. Once Unlocked 1 Day Unlimited Files Can be Taken For FREE!</pre>`, {
+                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_f = ctx.message.from) === null || _f === void 0 ? void 0 : _f.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}\n\n\n<pre>This is a One Day Unlock Link. Once Unlocked 1 Day Unlimited Files Can be Taken For FREE!</pre>`, {
                                             replyMarkup: {
                                                 inlineKeyboard: [
                                                     [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
@@ -1900,7 +1998,7 @@ class Bot extends localStore_1.localStore {
                                         });
                                     }
                                     else {
-                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_e = ctx.message.from) === null || _e === void 0 ? void 0 : _e.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_g = ctx.message.from) === null || _g === void 0 ? void 0 : _g.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
                                             replyMarkup: {
                                                 inlineKeyboard: [
                                                     [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
@@ -1914,9 +2012,9 @@ class Bot extends localStore_1.localStore {
                                     return;
                                 }
                                 else {
-                                    let pool = this.addPool(String((_f = ctx.message.from) === null || _f === void 0 ? void 0 : _f.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl, fileData.fileName);
+                                    let pool = this.addPool(String((_h = ctx.message.from) === null || _h === void 0 ? void 0 : _h.id), hash, endPoint, shortUrl, fileData.fileId, tutorialUrl, fileData.fileName);
                                     if (this.admin.includes(userId)) {
-                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_g = ctx.message.from) === null || _g === void 0 ? void 0 : _g.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_j = ctx.message.from) === null || _j === void 0 ? void 0 : _j.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
                                             replyMarkup: {
                                                 inlineKeyboard: [
                                                     [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
@@ -1928,7 +2026,7 @@ class Bot extends localStore_1.localStore {
                                         });
                                     }
                                     else {
-                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_h = ctx.message.from) === null || _h === void 0 ? void 0 : _h.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
+                                        yield ctx.reply(`🫂 ʜᴇʏ.. ${((_k = ctx.message.from) === null || _k === void 0 ? void 0 : _k.firstName) || 'user'}\n\n✅ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴅᴏᴡɴʟᴏᴀᴅ ʙᴜᴛᴛᴏɴ.\n\n⚠️ ꜰɪʟᴇ ɴᴀᴍᴇ : ${fileData.fileName}\n\n📥 ꜰɪʟᴇ ꜱɪᴢᴇ : ${fileData.fileSize}`, {
                                             replyMarkup: {
                                                 inlineKeyboard: [
                                                     [{ text: 'Unlock Now & Download!', url: pool.shortUrl }],
@@ -1971,7 +2069,7 @@ class Bot extends localStore_1.localStore {
                                     console.log(del, 'deeeeeellllll');
                                     yield this.fileLogs(this.client, {
                                         userId,
-                                        userName: ((_j = ctx.message.from) === null || _j === void 0 ? void 0 : _j.firstName) || 'USER',
+                                        userName: ((_l = ctx.message.from) === null || _l === void 0 ? void 0 : _l.firstName) || 'USER',
                                         fileName: del.document.fileName || del.video.fileName,
                                         fileSize: del.document.fileSize || del.document.fileSize
                                     });
@@ -1993,7 +2091,7 @@ class Bot extends localStore_1.localStore {
                         }
                     }
                     if (vals == '/start') {
-                        const name = ((_k = ctx.message.from) === null || _k === void 0 ? void 0 : _k.firstName) || 'User';
+                        const name = ((_m = ctx.message.from) === null || _m === void 0 ? void 0 : _m.firstName) || 'User';
                         console.log('comes under start');
                         yield ctx.reply(this.startCaption(name), {
                             parseMode: 'HTML',
@@ -2081,7 +2179,7 @@ class Bot extends localStore_1.localStore {
     }
     groupManager() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.client.on('message:text', (ctx) => __awaiter(this, void 0, void 0, function* () {
+            this.client.on('message:text', (ctx, next) => __awaiter(this, void 0, void 0, function* () {
                 var _a, _b, _c;
                 try {
                     console.log('msg comes under groupManager');
@@ -2100,7 +2198,6 @@ class Bot extends localStore_1.localStore {
                             addOn: ''
                         };
                         yield this.queryManager(ctx, Number(userId), query, chatId, firstName, ctx.message.chat.title);
-                        return;
                     }
                     else if (typeMedium == 'private') {
                         yield ctx.reply(this.startCaption(((_c = ctx.message.from) === null || _c === void 0 ? void 0 : _c.firstName) || 'USER'), {
@@ -2121,7 +2218,7 @@ class Bot extends localStore_1.localStore {
     queryManager(ctx, userId, Query, chatId, firstName, chatTitle) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let query = `${Query.query} ${Query.addOn}`;
+                let query = (Query.addOn) ? `${Query.query} ${Query.addOn}` : Query.query;
                 let exist;
                 if (this.forceSubChatId) {
                     exist = yield this.isForceSub(this.forceSubChatId, userId);

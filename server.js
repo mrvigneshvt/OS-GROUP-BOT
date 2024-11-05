@@ -20,7 +20,7 @@ app.listen(4000, '0.0.0.0', () => console.log('port opned 4000'));
 app.use((0, cors_1.default)());
 const apiId = 23383641;
 const apiHash = 'bc082e6638c170d35479798f8c8eaa6f';
-const botToken = '7503916985:AAG9h6PjaiVVDj2Gl7sZI-OhfG_Gpa0poXA';
+const botToken = '7910305056:AAHCSyoS9lMMoxgfYaBqMBJVEWWCNWbpif0';
 //'6843349739:AAF6Ymf-7_WsyNQ7uAgOSeN9E50Dk6lfHnE'
 const mongoUri = 'mongodb+srv://admin:admin@cluster0.8xj6euc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 let bot = new bot_1.Bot({

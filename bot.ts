@@ -96,7 +96,7 @@ export class Bot extends localStore {
 
         this.posterChannelId = '-1001897524951'
         this.inlineBot = `Machi_x_bot`
-        this.sendLogs = '-1002462166410'
+        this.sendLogs = '-1002280370011'
         this.botUrl = 'https://t.me/'
         this.percentageAds = 20;
         this.publicChannelUname = 'MachiXupdates';
@@ -110,10 +110,10 @@ export class Bot extends localStore {
         this.admin = ['1767901454', '7822087230'];
         this.supportLog = '-1002404917291';
 
-        this.indexLog = '-1002473253639'// - 1002279938392';
+        this.indexLog = '-1002395054296'// - 1002279938392';
 
         this.poweringGroupLog = '-1002363091043'; //channel id of groupChat !
-        this.fileLog = ['-1002094214421']
+        this.fileLog = ['-1002280370011']
 
 
         this.botUserName = '@';
@@ -250,7 +250,7 @@ export class Bot extends localStore {
                     if (!temp.text) {
                         return res.status(500).send("try again later")
                     } else {
-                        return res.status(201).json({"data":temp.text})
+                        return res.status(201).json({ "data": temp.text })
                     }
                 }, 500)
 
@@ -658,9 +658,19 @@ export class Bot extends localStore {
             if (callBackData.startsWith('POST')) {
                 try {
                     const data = callBackData.split('-');
+                    console.log(ctx)
 
                     const url = data[1];
-                    const num: string = data[2]
+                    const msgId = Number(data[2]);
+
+                    const Data: any = await this.client.getMessage(chatId, msgId)
+                    // const num: string = data[2]
+
+                    console.log(Data)
+
+                    const aud = Data.text ?? undefined
+
+                    const audio = aud.split('/')[3]
 
                     const imdbDetails = await getTitleDetailsByIMDBId(url);
 
@@ -668,9 +678,42 @@ export class Bot extends localStore {
                         .map((g: string) => g.charAt(0).toUpperCase() + g.slice(1).toLowerCase())
                         .join(' - ') || 'NA';
 
-                    
+                    //  console.log(genre)
+                    //  console.log(ctx)
+                    // console.log(imdbDetails)
+
+                    const dataNameLink = imdbDetails.name
+                        .replace(/\s+/g, '_')           // Replace spaces with underscores
+                        .replace(/[^a-zA-Z0-9_]/g, '');
+
+                    if (!imdbDetails.posterImage.url) {
+                        await this.client.sendPhoto(this.postingChannel, this.upiImage, {
+                            caption: `🎬 <b>Title :</b>  ${imdbDetails.name}\n\n🌟 <b>Ratings :</b>  ${imdbDetails.allRates[0].rate}\n\n🎭 <b>Genre :</b>  ${genre}\n\n📆 <b>Release :</b>${imdbDetails.titleYear}\n\n🔘 <b>Bot : @${this.botUname}</b> \n\n🎙️ <b>Language : ${audio}</b>\n\n ★ 𝓟𝓸𝔀𝓮𝓻𝓮𝓭 𝓫𝔂 : <a href="https://t.me/+0CIJvlEC4YQwODg0">MachiX Networks</a> \n\n👉 <b>Button Unlock 🔓: </b><a href="https://t.me/HowToUseMachiXbot">Tutorial</a>`,
+                            parseMode: "HTML",
+                            replyMarkup: {
+                                inlineKeyboard: [
+                                    [{ text: "Download", url: `${this.botUrl}${this.botUname}?start=send-${dataNameLink}` }]
+                                ]
+                            }
+                        })
+
+                        return
+                    } else {
+                        await this.client.sendPhoto(this.postingChannel, imdbDetails.posterImage.url, {
+                            caption: `🎬 <b>Title :</b>  ${imdbDetails.name}\n\n🌟 <b>Ratings :</b>  ${imdbDetails.allRates[0].rate}\n\n🎭 <b>Genre :</b>  ${genre}\n\n📆 <b>Release :</b>${imdbDetails.titleYear}\n\n🔘 <b>Bot : @${this.botUname}</b> \n\n🎙️ <b>Language : ${audio}</b>\n\n ★ 𝓟𝓸𝔀𝓮𝓻𝓮𝓭 𝓫𝔂 : <a href="https://t.me/+0CIJvlEC4YQwODg0">MachiX Networks</a> \n\n👉 <b>Button Unlock 🔓: </b><a href="https://t.me/HowToUseMachiXbot">Tutorial</a>`,
+                            parseMode: "HTML",
+                            replyMarkup: {
+                                inlineKeyboard: [
+                                    [{ text: "Download", url: `${this.botUrl}${this.botUname}?start=send-${dataNameLink}` }]
+                                ]
+                            }
+                        })
+
+                        return
+                    }
+
                 } catch (error) {
-                    
+                    console.log('error in callbackPOST:::', error)
                 }
             }
 
@@ -915,20 +958,22 @@ export class Bot extends localStore {
                     const senderId = ctx.callbackQuery.from.id;
                     const data = callBackData.split('/');
 
-                    // console.log(data[3], 'dataaaaaaaaaa')
+                    if (Number(data[3]) === 0) {
+                        await ctx.answerCallbackQuery({
+                            text: `You ARE IN THE FIRST PAGE !!`,
+                            alert: true,
+                        })
+                        return
+                    }
+
+
+                    console.log(data[3], 'dataaaaaaaaaa')
                     if (ctx.callbackQuery.from.id !== ctx.msg.replyToMessage.from.id) {
                         await ctx.answerCallbackQuery({
                             text: 'Search for YOUrself Dont Distrub others Chat',
                             alert: true
                         })
 
-                        return
-                    }
-                    if (Number(data[3]) < 1) {
-                        await ctx.answerCallbackQuery({
-                            text: `You ARE IN THE FIRST PAGE !!`,
-                            alert: true,
-                        })
                         return
                     }
 
@@ -1420,50 +1465,60 @@ export class Bot extends localStore {
 
     public async commands() {
 
-        this.client.command('post',async(ctx)=>{
+        this.client.command('post', async (ctx) => {
             try {
                 const userID = ctx.message.from?.id
+
+
+                console.log('25k')
 
                 if (!this.admin.includes(String(userID))) {
                     return
                 }
 
-                const data = ctx.message.text.split('-');
+                const data = ctx.message.text.split('/');
 
-                if(data.length!==3){
+                console.log(data)
+
+                if (data.length !== 4) {
                     return await ctx.reply("invalid Format")
                 }
 
-                let imdb = await searchTitleByName(data[1]);
+                let imdb = await searchTitleByName(data[2]);
 
-                if(!imdb){
-                   return await ctx.reply("NO RESULTS FOUND !!")
+                if (!imdb) {
+                    return await ctx.reply("NO RESULTS FOUND !!")
                 }
 
                 imdb = imdb.splice(0, 7);
 
 
 
-             let format = imdb.map((c, index) => {
-                        // If item directly contains link, fileName, and fileSizen
-                        return [{ text: `${c.name} ${c.titleYear}`, callbackData: `POST-${c.url}-${Number}` }]
-                    })
+                console.log('2k')
+
+                console.log(imdb)
+                let format = imdb.map((c, index) => {
+                    // If item directly contains link, fileName, and fileSizen
+                    return [{ text: `${c.name} ${c.titleYear}`, callbackData: `POST-${c.url}-${ctx.message.id}` }]
+                })
+
+                console.log(format)
 
 
-                    await ctx.reply(`Your Results for ${data[1]}`, {
-                        replyMarkup: {
-                            inlineKeyboard: format
-                        }
-                    })
+                await ctx.reply(`Your Results for ${data[2]}`, {
+                    replyMarkup: {
+                        inlineKeyboard: format
+                    }
+                })
 
 
 
 
 
-                
-                
+
+
             } catch (error) {
-                
+                console.log('error', error)
             }
         })
 
@@ -1505,10 +1560,10 @@ export class Bot extends localStore {
                             inlineKeyboard: format
                         }
                     })
-                }else {
-                        return await ctx.reply('Send In this Format\n\n/imdb/fileName/0')
-                    }
-                
+                } else {
+                    return await ctx.reply('Send In this Format\n\n/imdb/fileName/0')
+                }
+
             } catch (error) {
                 console.log('ERROR in IMDB:::', error)
             }
@@ -2324,13 +2379,30 @@ export class Bot extends localStore {
                 const chatId = String(ctx.message.chat.id)
                 const isExist = await this.mongo.isExist(userId);
                 const vals = ctx.message.text;
-                //console.log(ctx.message.text)
+                console.log(ctx.message.text)
 
 
                 if (vals.startsWith(`/start@${this.botUname}`)) {
                     console.log("Added to Group");
                     next()
                 }
+
+                if (vals.startsWith('/start send')) {
+                    try {
+                        const fileName = vals.split('-')[1]
+
+                        console.log(fileName)
+
+                        const destructureFileName = fileName.split("_").join(' ')
+
+                        await this.queryManager(ctx, Number(ctx.message.from?.id), { query: destructureFileName }, ctx.message.chat.id, (ctx.message.from?.firstName || 'USER'), "SINGLE X MACHI")
+
+                        console.log(destructureFileName)
+                    } catch (error) {
+                        console.log('error in startSend:::', error)
+                    }
+                }
+
 
                 if (vals.startsWith('/start hash_')) {
                     let data = vals.split('_');
@@ -2715,7 +2787,7 @@ export class Bot extends localStore {
 
     public async groupManager() {
 
-        this.client.on('message:text', async (ctx) => {
+        this.client.on('message:text', async (ctx, next) => {
 
             try {
                 console.log('msg comes under groupManager')
@@ -2736,7 +2808,7 @@ export class Bot extends localStore {
                     }
                     await this.queryManager(ctx, Number(userId), query, chatId, firstName, ctx.message.chat.title)
 
-                    return
+
                 } else if (typeMedium == 'private') {
 
                     await ctx.reply(this.startCaption(ctx.message.from?.firstName || 'USER'), {
@@ -2758,10 +2830,10 @@ export class Bot extends localStore {
 
     }
 
-    private async queryManager(ctx: any, userId: number, Query: { query: string, addOn: String }, chatId: number, firstName: string, chatTitle: string) {
+    private async queryManager(ctx: any, userId: number, Query: { query: string, addOn?: String }, chatId: number, firstName: string, chatTitle: string) {
         try {
 
-            let query = `${Query.query} ${Query.addOn}`
+            let query = (Query.addOn) ? `${Query.query} ${Query.addOn}` : Query.query
             let exist
 
             if (this.forceSubChatId) {
