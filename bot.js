@@ -511,7 +511,7 @@ class Bot extends localStore_1.localStore {
     listener() {
         return __awaiter(this, void 0, void 0, function* () {
             this.client.on('callbackQuery:data', (ctx) => __awaiter(this, void 0, void 0, function* () {
-                var _a, _b, _c, _d, _e;
+                var _a, _b, _c, _d, _e, _f, _g, _h;
                 const userId = ctx.callbackQuery.from.id;
                 const callBackData = ctx.callbackQuery.data;
                 const callBackDataId = ctx.callbackQuery.id;
@@ -748,7 +748,7 @@ class Bot extends localStore_1.localStore {
                 }
                 if (callBackData.startsWith('page')) {
                     try {
-                        const senderId = ctx.callbackQuery.from.id;
+                        //const senderId = ctx.callbackQuery.from.id;
                         const data = callBackData.split('/');
                         if (Number(data[3]) === 0) {
                             yield ctx.answerCallbackQuery({
@@ -758,13 +758,16 @@ class Bot extends localStore_1.localStore {
                             return;
                         }
                         console.log(data[3], 'dataaaaaaaaaa');
-                        if (ctx.callbackQuery.from.id !== ctx.msg.replyToMessage.from.id) {
-                            yield ctx.answerCallbackQuery({
-                                text: 'Search for YOUrself Dont Distrub others Chat',
-                                alert: true
-                            });
-                            return;
+                        if ((_h = (_g = (_f = ctx === null || ctx === void 0 ? void 0 : ctx.msg) === null || _f === void 0 ? void 0 : _f.replyToMessage) === null || _g === void 0 ? void 0 : _g.from) === null || _h === void 0 ? void 0 : _h.id) {
+                            if (ctx.callbackQuery.from.id !== ctx.msg.replyToMessage.from.id) {
+                                yield ctx.answerCallbackQuery({
+                                    text: 'Search for YOUrself Dont Distrub others Chat',
+                                    alert: true
+                                });
+                                return;
+                            }
                         }
+                        console.log(ctx.callbackQuery.from, '/', ctx.msg);
                         let markup = this.getResult(data[1], Number(data[2]), userId);
                         if (data[3] > markup.length) {
                             yield ctx.answerCallbackQuery({
@@ -774,6 +777,8 @@ class Bot extends localStore_1.localStore {
                             return;
                         }
                         // console.log(await ctx.getMessage(Number(data[2])), 'msgREFF');
+                        console.log(data, '////dataaaaaaaaaaa');
+                        console.log(ctx.callbackQuery);
                         const del = yield this.client.editMessageText(data[1], Number(data[2]), `< b > RESULTS: \n\nCurrent Page: ${(Number(data[3]) + 1)}\n\nThis Message Will be Deleted Automatically in 1 Minute </b>`, {
                             replyMarkup: {
                                 inlineKeyboard: markup[Number(data[3])]

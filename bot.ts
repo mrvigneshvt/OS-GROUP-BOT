@@ -955,7 +955,7 @@ export class Bot extends localStore {
             if (callBackData.startsWith('page')) {
 
                 try {
-                    const senderId = ctx.callbackQuery.from.id;
+                    //const senderId = ctx.callbackQuery.from.id;
                     const data = callBackData.split('/');
 
                     if (Number(data[3]) === 0) {
@@ -968,15 +968,17 @@ export class Bot extends localStore {
 
 
                     console.log(data[3], 'dataaaaaaaaaa')
-                    if (ctx.callbackQuery.from.id !== ctx.msg.replyToMessage.from.id) {
-                        await ctx.answerCallbackQuery({
-                            text: 'Search for YOUrself Dont Distrub others Chat',
-                            alert: true
-                        })
+                    if (ctx?.msg?.replyToMessage?.from?.id) {
+                        if (ctx.callbackQuery.from.id !== ctx.msg.replyToMessage.from.id) {
+                            await ctx.answerCallbackQuery({
+                                text: 'Search for YOUrself Dont Distrub others Chat',
+                                alert: true
+                            })
 
-                        return
+                            return
+                        }
                     }
-
+                    console.log(ctx.callbackQuery.from, '/', ctx.msg)
 
                     let markup = this.getResult(data[1], Number(data[2]), userId);
 
@@ -990,8 +992,7 @@ export class Bot extends localStore {
                         return
                     }
 
-                    // console.log(await ctx.getMessage(Number(data[2])), 'msgREFF');
-
+                    // console.log(await ctx.getMessage(Number(data[2])), 'msgREFF');   
 
                     const del = await this.client.editMessageText(data[1], Number(data[2]), `< b > RESULTS: \n\nCurrent Page: ${(Number(data[3]) + 1)}\n\nThis Message Will be Deleted Automatically in 1 Minute </b>`, {
                         replyMarkup: {
