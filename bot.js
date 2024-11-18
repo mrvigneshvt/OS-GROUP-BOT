@@ -551,7 +551,6 @@ class Bot extends localStore_1.localStore {
                                     ]
                                 }
                             });
-                            return;
                         }
                         else {
                             temp = yield this.client.sendPhoto(this.postingChannel, imdbDetails.posterImage.url, {
@@ -563,9 +562,21 @@ class Bot extends localStore_1.localStore {
                                     ]
                                 }
                             });
-                            return;
                         }
-                        console.log(temp, 'teeeeeeeeeeeemp');
+                        yield this.client.deleteMessage(chatId, msgId);
+                        yield this.client.deleteMessage(chatId, callBackDataId);
+                        if (!temp.link) {
+                            yield this.client.sendMessage(chatId, 'POSTED...');
+                        }
+                        else {
+                            yield this.client.sendMessage(chatId, 'POSTED...', {
+                                replyMarkup: {
+                                    inlineKeyboard: [
+                                        [{ text: "LINK..", url: temp.link }]
+                                    ]
+                                }
+                            });
+                        }
                     }
                     catch (error) {
                         console.log('error in callbackPOST:::', error);

@@ -699,7 +699,7 @@ export class Bot extends localStore {
                             }
                         })
 
-                        return
+                        
                     } else {
                         temp =await this.client.sendPhoto(this.postingChannel, imdbDetails.posterImage.url, {
                             caption: `🎬 <b>Title :</b>  ${imdbDetails.name}\n\n🌟 <b>Ratings :</b>  ${imdbDetails.allRates[0].rate}\n\n🎭 <b>Genre :</b>  ${genre}\n\n📆 <b>Release :</b>${imdbDetails.titleYear}\n\n🔘 <b>Bot : @${this.botUname}</b> \n\n🎙️ <b>Language : ${audio}</b>\n\n ★ 𝓟𝓸𝔀𝓮𝓻𝓮𝓭 𝓫𝔂 : <a href="https://t.me/+0CIJvlEC4YQwODg0">MachiX Networks</a> \n\n👉 <b>Button Unlock 🔓: </b><a href="https://t.me/HowToUseMachiXbot">Tutorial</a>`,
@@ -711,10 +711,25 @@ export class Bot extends localStore {
                             }
                         })
 
-                        return
+                        
                     }
 
-                    console.log(temp,'teeeeeeeeeeeemp')
+                    await this.client.deleteMessage(chatId,msgId)
+                    await this.client.deleteMessage(chatId,callBackDataId)
+
+                    if(!temp.link){
+                        await this.client.sendMessage(chatId,'POSTED...')
+                    }else{
+                        await this.client.sendMessage(chatId,'POSTED...',{
+                            replyMarkup:{
+                                inlineKeyboard: [
+                                    [{text: "LINK..",url:temp.link}]
+                                ]
+                            }
+                        })
+                    }
+                   
+
 
                 } catch (error) {
                     console.log('error in callbackPOST:::', error)
