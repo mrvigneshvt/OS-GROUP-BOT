@@ -686,8 +686,10 @@ export class Bot extends localStore {
                         .replace(/\s+/g, '_')           // Replace spaces with underscores
                         .replace(/[^a-zA-Z0-9_]/g, '');
 
+                    let temp;
+
                     if (!imdbDetails.posterImage.url) {
-                        await this.client.sendPhoto(this.postingChannel, this.upiImage, {
+                        temp = await this.client.sendPhoto(this.postingChannel, this.upiImage, {
                             caption: `🎬 <b>Title :</b>  ${imdbDetails.name}\n\n🌟 <b>Ratings :</b>  ${imdbDetails.allRates[0].rate}\n\n🎭 <b>Genre :</b>  ${genre}\n\n📆 <b>Release :</b>${imdbDetails.titleYear}\n\n🔘 <b>Bot : @${this.botUname}</b> \n\n🎙️ <b>Language : ${audio}</b>\n\n ★ 𝓟𝓸𝔀𝓮𝓻𝓮𝓭 𝓫𝔂 : <a href="https://t.me/+0CIJvlEC4YQwODg0">MachiX Networks</a> \n\n👉 <b>Button Unlock 🔓: </b><a href="https://t.me/HowToUseMachiXbot">Tutorial</a>`,
                             parseMode: "HTML",
                             replyMarkup: {
@@ -699,7 +701,7 @@ export class Bot extends localStore {
 
                         return
                     } else {
-                        await this.client.sendPhoto(this.postingChannel, imdbDetails.posterImage.url, {
+                        temp =await this.client.sendPhoto(this.postingChannel, imdbDetails.posterImage.url, {
                             caption: `🎬 <b>Title :</b>  ${imdbDetails.name}\n\n🌟 <b>Ratings :</b>  ${imdbDetails.allRates[0].rate}\n\n🎭 <b>Genre :</b>  ${genre}\n\n📆 <b>Release :</b>${imdbDetails.titleYear}\n\n🔘 <b>Bot : @${this.botUname}</b> \n\n🎙️ <b>Language : ${audio}</b>\n\n ★ 𝓟𝓸𝔀𝓮𝓻𝓮𝓭 𝓫𝔂 : <a href="https://t.me/+0CIJvlEC4YQwODg0">MachiX Networks</a> \n\n👉 <b>Button Unlock 🔓: </b><a href="https://t.me/HowToUseMachiXbot">Tutorial</a>`,
                             parseMode: "HTML",
                             replyMarkup: {
@@ -711,6 +713,8 @@ export class Bot extends localStore {
 
                         return
                     }
+
+                    console.log(temp,'teeeeeeeeeeeemp')
 
                 } catch (error) {
                     console.log('error in callbackPOST:::', error)

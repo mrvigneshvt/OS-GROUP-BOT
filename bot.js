@@ -540,8 +540,9 @@ class Bot extends localStore_1.localStore {
                         const dataNameLink = imdbDetails.name
                             .replace(/\s+/g, '_') // Replace spaces with underscores
                             .replace(/[^a-zA-Z0-9_]/g, '');
+                        let temp;
                         if (!imdbDetails.posterImage.url) {
-                            yield this.client.sendPhoto(this.postingChannel, this.upiImage, {
+                            temp = yield this.client.sendPhoto(this.postingChannel, this.upiImage, {
                                 caption: `🎬 <b>Title :</b>  ${imdbDetails.name}\n\n🌟 <b>Ratings :</b>  ${imdbDetails.allRates[0].rate}\n\n🎭 <b>Genre :</b>  ${genre}\n\n📆 <b>Release :</b>${imdbDetails.titleYear}\n\n🔘 <b>Bot : @${this.botUname}</b> \n\n🎙️ <b>Language : ${audio}</b>\n\n ★ 𝓟𝓸𝔀𝓮𝓻𝓮𝓭 𝓫𝔂 : <a href="https://t.me/+0CIJvlEC4YQwODg0">MachiX Networks</a> \n\n👉 <b>Button Unlock 🔓: </b><a href="https://t.me/HowToUseMachiXbot">Tutorial</a>`,
                                 parseMode: "HTML",
                                 replyMarkup: {
@@ -553,7 +554,7 @@ class Bot extends localStore_1.localStore {
                             return;
                         }
                         else {
-                            yield this.client.sendPhoto(this.postingChannel, imdbDetails.posterImage.url, {
+                            temp = yield this.client.sendPhoto(this.postingChannel, imdbDetails.posterImage.url, {
                                 caption: `🎬 <b>Title :</b>  ${imdbDetails.name}\n\n🌟 <b>Ratings :</b>  ${imdbDetails.allRates[0].rate}\n\n🎭 <b>Genre :</b>  ${genre}\n\n📆 <b>Release :</b>${imdbDetails.titleYear}\n\n🔘 <b>Bot : @${this.botUname}</b> \n\n🎙️ <b>Language : ${audio}</b>\n\n ★ 𝓟𝓸𝔀𝓮𝓻𝓮𝓭 𝓫𝔂 : <a href="https://t.me/+0CIJvlEC4YQwODg0">MachiX Networks</a> \n\n👉 <b>Button Unlock 🔓: </b><a href="https://t.me/HowToUseMachiXbot">Tutorial</a>`,
                                 parseMode: "HTML",
                                 replyMarkup: {
@@ -564,6 +565,7 @@ class Bot extends localStore_1.localStore {
                             });
                             return;
                         }
+                        console.log(temp, 'teeeeeeeeeeeemp');
                     }
                     catch (error) {
                         console.log('error in callbackPOST:::', error);
@@ -776,9 +778,7 @@ class Bot extends localStore_1.localStore {
                             });
                             return;
                         }
-                        // console.log(await ctx.getMessage(Number(data[2])), 'msgREFF');
-                        console.log(data, '////dataaaaaaaaaaa');
-                        console.log(ctx.callbackQuery);
+                        // console.log(await ctx.getMessage(Number(data[2])), 'msgREFF');   
                         const del = yield this.client.editMessageText(data[1], Number(data[2]), `< b > RESULTS: \n\nCurrent Page: ${(Number(data[3]) + 1)}\n\nThis Message Will be Deleted Automatically in 1 Minute </b>`, {
                             replyMarkup: {
                                 inlineKeyboard: markup[Number(data[3])]
