@@ -564,7 +564,7 @@ class Bot extends localStore_1.localStore {
                             });
                         }
                         yield this.client.deleteMessage(chatId, msgId);
-                        yield this.client.deleteMessage(chatId, callBackDataId);
+                        yield this.client.deleteMessage(chatId, msgId + 1);
                         if (!temp.link) {
                             yield this.client.sendMessage(chatId, 'POSTED...');
                         }

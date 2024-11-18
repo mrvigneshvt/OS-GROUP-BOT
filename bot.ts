@@ -715,7 +715,7 @@ export class Bot extends localStore {
                     }
 
                     await this.client.deleteMessage(chatId,msgId)
-                    await this.client.deleteMessage(chatId,callBackDataId)
+                    await this.client.deleteMessage(chatId,msgId + 1)
 
                     if(!temp.link){
                         await this.client.sendMessage(chatId,'POSTED...')
