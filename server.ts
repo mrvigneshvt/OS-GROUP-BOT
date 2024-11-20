@@ -13,7 +13,7 @@ const apiHash = 'bc082e6638c170d35479798f8c8eaa6f'
 const botToken = '7910305056:AAHCSyoS9lMMoxgfYaBqMBJVEWWCNWbpif0';
 //'6843349739:AAF6Ymf-7_WsyNQ7uAgOSeN9E50Dk6lfHnE'
 
-const mongoUri = 'mongodb+srv://admin:admiAn@cluster0.8xj6euc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+const mongoUri = 'mongodb+srv://admin:admin@cluster0.8xj6euc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 
 
 export let bot = new Bot({
