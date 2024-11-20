@@ -11,7 +11,6 @@ import { fileModel, groupModel, userModel } from './model'
 import { Markup } from './markup';
 import {setupCaches} from './server'
 import { resolveSoa } from 'dns';
-import {setupCache}
 import { sendFile } from './plugins/sendFile';
 
 
