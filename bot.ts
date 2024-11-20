@@ -233,11 +233,12 @@ export class Bot extends localStore {
         try {
             const streamWebHook = '-1001838739662';
 
+
             if(forBot){
                 try {
                     temp = await this.client.sendDocument(streamWebHook, uniqueHash)
                 } catch (error) {
-                    temp = await this.client.sendDocument(streamWebHook, uniqueHash)
+                    temp = await this.client.sendVideo(streamWebHook, uniqueHash)
                 } finally {
                     setTimeout(async () => {
                         temp = await this.client.getMessage(streamWebHook, Number(temp.id) + 1)
@@ -249,6 +250,7 @@ export class Bot extends localStore {
                         }
                     }, 500)
     
+                    return
 
                     
                 }
@@ -264,7 +266,7 @@ export class Bot extends localStore {
             try {
                 temp = await this.client.sendDocument(streamWebHook, fileData.fileId)
             } catch (error) {
-                temp = await this.client.sendDocument(streamWebHook, fileData.fileId)
+                temp = await this.client.sendVideo(streamWebHook, fileData.fileId)
             } finally {
                 setTimeout(async () => {
                     temp = await this.client.getMessage(streamWebHook, Number(temp.id) + 1)
