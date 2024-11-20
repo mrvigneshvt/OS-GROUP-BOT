@@ -244,13 +244,20 @@ export class Bot extends localStore {
                 } finally {
                     console.log(temp,'teemp')
                     setTimeout(async () => {
-                        temp = await this.client.getMessage(streamWebHook, Number(temp.id) + 1)
-                        console.log(temp.text)
-                        if (!temp.text) {
-                            return false
-                        } else {
-                            return temp.text
+                        try{
+                            temp = await this.client.getMessage(streamWebHook, Number(temp.id) + 1)
+                            if (!temp.text) {
+                                console.log(temp,'unavltempppp')
+                                return false
+                            } else {
+                                console.log(temp.text)
+
+                                return temp.text
+                            }
+                        }catch(error){
+                            console.log('error in apiSREAM INT::',error)
                         }
+                       
                     }, 500)
     
                     return
