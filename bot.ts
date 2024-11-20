@@ -699,9 +699,11 @@ export class Bot extends localStore {
                         return
                     }
 
+                    console.log(streamUrl,'streammm')
+
                     const hash = String(crypto.randomUUID().replace(/-/g, "_"));
 
-                        await setupCaches(hash, streamUrl);
+                       // await setupCaches(hash, streamUrl);
                     
                         await ctx.reply('YOUR STREAMING LINK !', {
                             replyMarkup: {
