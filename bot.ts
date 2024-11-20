@@ -245,7 +245,7 @@ export class Bot extends localStore {
                     console.log(temp,'teemp')
                     setTimeout(async () => {
                         try{
-                            temp1 = await this.client.getMessage(streamWebHook, Number(temp.id) + 1)
+                            let temp1 = await this.client.getMessage(streamWebHook, Number(temp.id) + 1)
                             if (!temp.text) {
                                 console.log(temp1,'unavltempppp')
                                 return false
