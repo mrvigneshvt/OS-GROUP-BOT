@@ -658,6 +658,7 @@ export class Bot extends localStore {
 
             if (callBackData.startsWith('STREAM')) {
                 try{
+                    fs.writeFileSync('notes.txt',ctx)
                     console.log(ctx);
 
                     return

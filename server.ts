@@ -60,6 +60,14 @@ async function setUpServer() {
             }
         })
 
+        app.get("/stream/public/:hashValue",async(req,res)=>{
+            try{
+
+            }catch(error){
+                console.log('error in streamServer')
+            }
+        })
+
         app.post('/api/uniqueHash/:uniqueId', async (req: Request, res: Response) => {
             try {
                 let { uniqueId } = req.params;
