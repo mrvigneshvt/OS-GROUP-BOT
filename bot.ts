@@ -10,6 +10,7 @@ import axios from 'axios'
 import { fileModel, groupModel, userModel } from './model'
 import { Markup } from './markup';
 import { resolveSoa } from 'dns';
+import { sendFile } from './plugins/sendFile';
 
 
 
@@ -655,7 +656,19 @@ export class Bot extends localStore {
             const chatTitle = ctx.callbackQuery.message.chat.title
             console.log(callBackData);
 
-            if (callBackData.startsWith('POST')) {
+            if (callBackData.startsWith('STREAM')) {
+                try{
+                    console.log(ctx);
+
+                    return
+                }catch(error){
+                    console.log('error in callbackSTREAN:::',error)
+                }
+
+            }
+
+
+                if (callBackData.startsWith('POST')) {
                 try {
                     const data = callBackData.split('-');
                     console.log(ctx)
@@ -2446,17 +2459,15 @@ export class Bot extends localStore {
                     let del1: undefined | any
 
                     try {
-                        del1 = await ctx.replyDocument(pool.fileId, {
-                            caption: '💬   🗨️   ➤   💬\n\nThis File WIll be Deleted in 1 Min to keep it permanent forward the file to Other Chat'
-                        })
-                    } catch (error: any) {
-                        if (error.message.startsWith('Unreachable')) {
-                            del1 = await ctx.replyVideo(pool.fileId, {
-                                caption: '💬   🗨️   ➤   💬\n\nThis File WIll be Deleted in 1 Min to keep it permanent forward the file to Other Chat'
-                            });
 
-                            return
-                        }
+                        let capt =  '💬   🗨️   ➤   💬\n\nThis File WIll be Deleted in 1 Min to keep it permanent forward the file to Other Chat';
+
+                        await sendFile(ctx,this.client,pool.this.isAdsOn,pool.fileId,capt)
+                       
+                        
+                    } catch (error: any) {
+                        
+                        console.log('error in startHash::', error)
 
                     } finally {
 
@@ -2643,24 +2654,14 @@ export class Bot extends localStore {
                             let del: undefined | any
 
                             try {
-                                del = await ctx.replyVideo(fileData.fileId, {
-                                    caption,
-                                    parseMode: 'HTML',
-                                });
 
-                                setTimeout(async () => {
-                                    await ctx.deleteMessage(del.id)
-                                }, 59000);
+
+                                await sendFile(ctx,this.client,this.isAdsOn,fileData.fileId,caption)
 
                                 return
                             } catch (error: any) {
-                                console.log('error when sendinf as video')
-                                if (error.message.startsWith('Unreachable')) {
-                                    del = await ctx.replyDocument(fileData.fileId, {
-                                        caption,
-                                        parseMode: 'HTML',
-                                    });
-                                }
+                                console.log('error when sendinf as video',error)
+                               
                             } finally {
                                 console.log(del, 'deeeeeellllll')
                                 await this.fileLogs(this.client, {
