@@ -3,9 +3,9 @@ import { Client , Context} from "@mtkruto/node"
 export async function sendFile(ctx: any,client:Client , ads: boolean, fileId: String,cap:String){
     try {
         if(!ads){
-            let temp ;
+            let temp:any 
             try{
-                temp = await ctx.replyDocument(fileId,{
+                temp = await ctx.replyDocument(String(fileId),{
                     caption: cap,
                     parseMode: 'HTML',
                 })
@@ -22,14 +22,15 @@ export async function sendFile(ctx: any,client:Client , ads: boolean, fileId: St
             }finally{
                 console.log(temp);
 
-                await ctx.deleteMessage(temp.id)
-               // await client.deleteMessage()
+                setTimeout(async()=>{
+                    await ctx.deleteMessage(temp1.id)
+                },59000)               // await client.deleteMessage()
                return
             }
            
         }
 
-        let temp1;
+        let temp1:any
 
         try {
 
@@ -56,7 +57,9 @@ export async function sendFile(ctx: any,client:Client , ads: boolean, fileId: St
             })
         }finally{
             console.log(temp1)
-            await ctx.deleteMessage(temp1.id)
+            setTimeout(async()=>{
+                await ctx.deleteMessage(temp1.id)
+            },59000)
 
            // await client.deleteMessage()
         }
