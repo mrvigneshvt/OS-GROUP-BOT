@@ -249,7 +249,7 @@ export class Bot extends localStore {
                             if (!temp.text) {
                                 console.log(temp1,'unavltempppp')
                                 return false
-                            } else if(temp1.text) {
+                            } else if(temp1?.text) {
                                 console.log(temp1.text)
 
                                 return temp1.text
