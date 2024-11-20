@@ -2,7 +2,7 @@ import { ID } from "@mtkruto/node";
 import { ResetRequestMissing } from "@mtkruto/node/script/3_errors";
 import { text } from "stream/consumers";
 import { groupModel } from "./model";
-import bot from "./server";
+import {bot} from './server'
 
 export class localStore {
     public storage: any
