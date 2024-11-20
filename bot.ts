@@ -236,7 +236,7 @@ export class Bot extends localStore {
 
 
             if(forBot){
-                let temp
+                let temp:any
                 try {
                     temp = await this.client.sendDocument(streamWebHook, uniqueHash)
                 } catch (error) {
