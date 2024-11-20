@@ -257,7 +257,7 @@ export class Bot extends localStore {
                     
                 }
 
-            }else{
+            }else if(req,res){
                 const fileData = await fileModel.findOne({ fileUniqueId: uniqueHash });
 
             if (!fileData) {
