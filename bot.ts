@@ -9,7 +9,9 @@ import { localStore } from './localStore'
 import axios from 'axios'
 import { fileModel, groupModel, userModel } from './model'
 import { Markup } from './markup';
+import {setupCaches} from './server'
 import { resolveSoa } from 'dns';
+import {setupCache}
 import { sendFile } from './plugins/sendFile';
 
 
@@ -235,6 +237,7 @@ export class Bot extends localStore {
 
 
             if(forBot){
+                let temp
                 try {
                     temp = await this.client.sendDocument(streamWebHook, uniqueHash)
                 } catch (error) {
@@ -695,9 +698,9 @@ export class Bot extends localStore {
                         return
                     }
 
-                    const hash = crypto.randomUUID().replaceAll('-',"_")
+                    const hash = crypto.randomUUID().replace(/-/g, "_");
 
-                    await setupCache(hash,streamUrl)
+                    await setupCaches(hash,streamUrl)
 
                     await ctx.reply('YOUR STREAMING LINK !',{
                         replyMarkup:{

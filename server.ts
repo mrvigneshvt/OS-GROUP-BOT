@@ -16,7 +16,7 @@ const botToken = '7910305056:AAHCSyoS9lMMoxgfYaBqMBJVEWWCNWbpif0';
 const mongoUri = 'mongodb+srv://admin:admin@cluster0.8xj6euc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 
 
-let bot = new Bot({
+export let bot = new Bot({
     apiId,
     apiHash,
     mongoUri,
@@ -47,7 +47,7 @@ let bot = new Bot({
 
 let localCache: { [key: string]: string } = {};  // Type definition for the cache
 
-async function setupCache(hash: string, url: string) {
+export async function setupCaches(hash: string, url: string) {
     try {
         // Correctly assigning the url value to the cache object
         localCache[hash] = url;
@@ -103,6 +103,4 @@ async function setUpServer() {
     }
 }
 
-
-export default bot
 
