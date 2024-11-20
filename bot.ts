@@ -229,11 +229,32 @@ export class Bot extends localStore {
         }
     }*/
 
-    public async ApiStream(uniqueHash: string, req: Request, res: Response) {
+    public async ApiStream(uniqueHash: string, req?: Request, res?: Response,forBot?:boolean) {
         try {
             const streamWebHook = '-1001838739662';
 
-            const fileData = await fileModel.findOne({ fileUniqueId: uniqueHash });
+            if(forBot){
+                try {
+                    temp = await this.client.sendDocument(streamWebHook, uniqueHash)
+                } catch (error) {
+                    temp = await this.client.sendDocument(streamWebHook, uniqueHash)
+                } finally {
+                    setTimeout(async () => {
+                        temp = await this.client.getMessage(streamWebHook, Number(temp.id) + 1)
+                        console.log(temp.text)
+                        if (!temp.text) {
+                            return false
+                        } else {
+                            return temp.text
+                        }
+                    }, 500)
+    
+
+                    
+                }
+
+            }else{
+                const fileData = await fileModel.findOne({ fileUniqueId: uniqueHash });
 
             if (!fileData) {
                 return res.status(500).send("Internal Server Error")
@@ -257,6 +278,8 @@ export class Bot extends localStore {
 
 
             }
+            }
+            
         } catch (error) {
             console.log('error in APISTREAM:::', error)
         }
@@ -658,7 +681,39 @@ export class Bot extends localStore {
 
             if (callBackData.startsWith('STREAM')) {
                 try{
-                    fs.writeFileSync('notes.txt',ctx)
+                    const file = ctx.msg.document;
+
+                    const streamUrl = await this.ApiStream(file.fileId,undefined,undefined,true);
+
+                    if(!streamUrl){
+                        await ctx.answerCallbackQuery('STREAM UNDER MAINTAINANCE', {
+                            alert: true,
+                        })
+
+                        return
+                    }
+
+                    const hash = crypto.randomUUID().replaceAll('-',"_")
+
+                    await setupCache(hash,streamUrl)
+
+                    await ctx.reply('YOUR STREAMING LINK !',{
+                        replyMarkup:{
+                            inlineKeyboard:[
+                                [{text: 'Click Here to WACTH',url: `http://109.123.237.36:4000/stream/public/${hash}`}]
+                            ]
+                        }
+                    })
+
+                    return
+
+
+
+
+
+
+
+                   // fs.writeFileSync('notes.txt',ctx)
                     console.log(ctx);
 
                     return

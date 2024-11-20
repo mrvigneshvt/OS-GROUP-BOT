@@ -14,6 +14,9 @@ const botToken = '7910305056:AAHCSyoS9lMMoxgfYaBqMBJVEWWCNWbpif0';
 //'6843349739:AAF6Ymf-7_WsyNQ7uAgOSeN9E50Dk6lfHnE'
 
 const mongoUri = 'mongodb+srv://admin:admin@cluster0.8xj6euc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+let localCache = {
+
+};
 
 let bot = new Bot({
     apiId,
@@ -44,6 +47,14 @@ let bot = new Bot({
 
 )()
 
+async function setupCache(hash:string,url:string){
+    try[
+        localCache[hash] = string
+        console.log(localCache)
+    ]catch(error){
+        console.log('error in setupCahce::',error)
+    }
+}
 async function setUpServer() {
     try {
         app.post('/api/query/:filename/:offset', async (req: Request, res: Response) => {
@@ -62,7 +73,13 @@ async function setUpServer() {
 
         app.get("/stream/public/:hashValue",async(req,res)=>{
             try{
-
+                const hash = req.params.hashValue
+                if(localCache[hash]){
+                    console.log('cache availavle')
+                    console.log(localCache)
+                }else{
+                    console.log('no cache found')
+                }
             }catch(error){
                 console.log('error in streamServer')
             }
