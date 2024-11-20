@@ -699,9 +699,8 @@ export class Bot extends localStore {
                         return
                     }
 
-                    const hash = crypto.randomUUID().replace(/-/g, "_");
+                    const hash = String(crypto.randomUUID().replace(/-/g, "_"));
 
-                    if (typeof streamUrl === 'string') {
                         await setupCaches(hash, streamUrl);
                     
                         await ctx.reply('YOUR STREAMING LINK !', {
@@ -711,7 +710,7 @@ export class Bot extends localStore {
                                 ]
                             }
                         });
-                    }
+                    
                     
                     await ctx.answerCallbackQuery('STREAM MAINTAINANCE', {
                         alert: true,
