@@ -233,7 +233,7 @@ export class Bot extends localStore {
     public async ApiStream (uniqueHash: string, req?: Request, res?: Response,forBot?:boolean) {
         try {
             const streamWebHook = '-1001838739662';
-
+/*
 
             if(forBot){
                 let temp:any
@@ -294,7 +294,7 @@ export class Bot extends localStore {
             
         } catch (error) {
             console.log('error in APISTREAM:::', error)
-        }
+        }*/
     }
 
 
