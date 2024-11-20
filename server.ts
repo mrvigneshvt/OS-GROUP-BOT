@@ -48,10 +48,10 @@ let bot = new Bot({
 )()
 
 async function setupCache(hash:string,url:string){
-    try[
+    try{
         localCache[hash] = string
         console.log(localCache)
-    ]catch(error){
+    }catch(error){
         console.log('error in setupCahce::',error)
     }
 }
