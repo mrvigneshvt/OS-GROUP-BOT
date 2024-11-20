@@ -257,7 +257,7 @@ export class Bot extends localStore {
                     
                 }
 
-            }else if(req,res){
+            }else if(req && res){
                 const fileData = await fileModel.findOne({ fileUniqueId: uniqueHash });
 
             if (!fileData) {
@@ -699,15 +699,23 @@ export class Bot extends localStore {
 
                     const hash = crypto.randomUUID().replace(/-/g, "_");
 
-                    await setupCaches(hash,streamUrl)
-
-                    await ctx.reply('YOUR STREAMING LINK !',{
-                        replyMarkup:{
-                            inlineKeyboard:[
-                                [{text: 'Click Here to WACTH',url: `http://109.123.237.36:4000/stream/public/${hash}`}]
-                            ]
-                        }
+                    if (typeof streamUrl === 'string') {
+                        await setupCaches(hash, streamUrl);
+                    
+                        await ctx.reply('YOUR STREAMING LINK !', {
+                            replyMarkup: {
+                                inlineKeyboard: [
+                                    [{ text: 'Click Here to WATCH', url: `http://109.123.237.36:4000/stream/public/${hash}` }]
+                                ]
+                            }
+                        });
+                    }
+                    
+                    await ctx.answerCallbackQuery('STREAM MAINTAINANCE', {
+                        alert: true,
                     })
+
+                   
 
                     return
 
