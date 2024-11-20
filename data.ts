@@ -65,6 +65,7 @@ export class DataBase {
     public async connectDB() {
         try {
             console.log('Connecting to the DB........');
+            console.log(this.mongoUri)
             await mongoose.connect(this.mongoUri);
 
             this.db = mongoose.connection.db;
