@@ -230,7 +230,7 @@ export class Bot extends localStore {
         }
     }*/
 
-    public async ApiStream(uniqueHash: string, req?: Request, res?: Response,forBot?:boolean) {
+    public async    (uniqueHash: string, req?: Request, res?: Response,forBot?:boolean) {
         try {
             const streamWebHook = '-1001838739662';
 
@@ -242,6 +242,7 @@ export class Bot extends localStore {
                 } catch (error) {
                     temp = await this.client.sendVideo(streamWebHook, uniqueHash)
                 } finally {
+                    console.log(temp,'teemp')
                     setTimeout(async () => {
                         temp = await this.client.getMessage(streamWebHook, Number(temp.id) + 1)
                         console.log(temp.text)
