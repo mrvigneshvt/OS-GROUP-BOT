@@ -693,6 +693,7 @@ export class Bot extends localStore {
 
             if (callBackData.startsWith('STREAM')) {
                 try{
+                    /*
                     console.log('coes under callstr')
                     const file = ctx.msg.document;
 
@@ -738,7 +739,7 @@ export class Bot extends localStore {
                    // fs.writeFileSync('notes.txt',ctx)
                     console.log(ctx);
 
-                    return
+                    return*/
                 }catch(error){
                     console.log('error in callbackSTREAN:::',error)
                 }
