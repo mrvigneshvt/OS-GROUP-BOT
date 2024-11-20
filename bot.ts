@@ -685,6 +685,7 @@ export class Bot extends localStore {
 
             if (callBackData.startsWith('STREAM')) {
                 try{
+                    console.log('coes under callstr')
                     const file = ctx.msg.document;
 
                     const streamUrl = await this.ApiStream(file.fileId,undefined,undefined,true);
