@@ -87,62 +87,90 @@ async function setUpServer() {
 
                     const htmlContent = `
                 <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Streaming Landing Page</title>
-                    <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                            text-align: center;
-                            padding: 20px;
-                        }
-                        button {
-                            padding: 10px 20px;
-                            margin: 10px;
-                            font-size: 16px;
-                            cursor: pointer;
-                        }
-                        #copyMessage {
-                            margin-top: 10px;
-                            color: green;
-                            font-size: 14px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <h1>Streaming Landing Page</h1>
-                    <p>Click below to either play the stream in VLC or copy the stream URL.</p>
-                    
-                    <!-- Button to play in VLC -->
-                    <button onclick="playInVLC()">Play in VLC</button>
-                    
-                    <!-- Button to copy stream URL -->
-                    <button onclick="copyStreamURL()">Copy Stream URL</button>
-                    
-                    <p id="copyMessage"></p>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming Landing Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #copyMessage {
+            margin-top: 10px;
+            color: green;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Streaming Page</h1>
+    <p>Click below to either play the stream in VLC, MX Player, or copy the stream URL.</p>
 
-                    <script>
-                        function playInVLC() {
-                            // Open the stream URL in VLC (assuming VLC is installed)
-                            const streamUrl = "${streamUrl}";
-                            window.open("vlc://" + streamUrl);
-                        }
+    <!-- Button to play in VLC -->
+    <button onclick="playInVLC()">Play in VLC</button>
 
-                        function copyStreamURL() {
-                            const streamUrl = "${streamUrl}";
-                            const textarea = document.createElement('textarea');
-                            textarea.value = streamUrl;
-                            document.body.appendChild(textarea);
-                            textarea.select();
-                            document.execCommand('copy');
-                            document.body.removeChild(textarea);
-                            document.getElementById('copyMessage').textContent = 'Stream URL copied to clipboard!';
-                        }
-                    </script>
-                </body>
-                </html>
+    <!-- Button to play in MX Player -->
+    <button onclick="playInMXPlayer()">Play in MX Player</button>
+
+    <!-- Button to copy stream URL -->
+    <button onclick="copyStreamURL()">Copy Stream URL</button>
+
+    <p id="copyMessage"></p>
+
+    <script>
+        // Play the stream in VLC
+        function playInVLC() {
+            const streamUrl = "${streamUrl}";  // stream URL from the server
+
+            // For Android: Use vlc:// protocol
+            if (navigator.userAgent.match(/Android/i)) {
+                window.location.href = "vlc://" + streamUrl;  // Attempt to open VLC on Android devices
+            } else if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+                // For iOS, try to open the stream directly in the browser or app (if applicable)
+                window.open(streamUrl, '_blank');  // Open the stream URL in the browser (user can manually open in VLC)
+            } else {
+                // For desktop (Windows/Mac/Linux), try vlc://
+                window.location.href = "vlc://" + streamUrl;
+            }
+        }
+
+        // Play the stream in MX Player (for Android)
+        function playInMXPlayer() {
+            const streamUrl = "${streamUrl}";  // stream URL from the server
+
+            // For Android, use an Intent URL to open the stream in MX Player
+            if (navigator.userAgent.match(/Android/i)) {
+                window.location.href = "intent://" + streamUrl + "#Intent;package=com.mxtech.videoplayer.ad;scheme=http;end;";
+            } else {
+                // For desktop, open the stream URL directly in MX Player or the browser
+                window.open(streamUrl);
+            }
+        }
+
+        // Copy the stream URL to clipboard
+        function copyStreamURL() {
+            const streamUrl = "${streamUrl}";
+            const textarea = document.createElement('textarea');
+            textarea.value = streamUrl;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            document.getElementById('copyMessage').textContent = 'Stream URL copied to clipboard!';
+        }
+    </script>
+</body>
+</html>
+
             `;
 
             // Send the HTML response
