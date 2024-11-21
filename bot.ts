@@ -1,4 +1,4 @@
-import { Client, Context, ID, StorageLocalStorage, errors } from '@mtkruto/node'
+import { Client, Context, ID, StorageLocalStorage, errors, replyMarkupToTlObject } from '@mtkruto/node'
 import { DataBase } from './data'
 import * as fs from 'fs'
 import { format } from 'date-fns';
@@ -695,51 +695,54 @@ export class Bot extends localStore {
                 try{
                     
                     console.log('coes under callstr')
-                    const file = ctx.msg.document;
+                    const file = (ctx.msg.document || ctx.msg.video) || undefined;
 
-                    const streamUrl = await this.ApiStream(file.fileId,undefined,undefined,true);
-
-                    if(!streamUrl){
-                        await ctx.answerCallbackQuery('STREAM UNDER MAINTAINANCE', {
+                    if(!file){
+                        await ctx.answerCallbackQuery("NOT a PROPER FILE",{
                             alert: true,
                         })
 
                         return
                     }
 
-                    console.log(streamUrl,'streammm')
+                    const streamWebHook = '-1001838739662'
 
-                    const hash = String(crypto.randomUUID().replace(/-/g, "_"));
+                    let temp: any | undefined;
+
+                    try{
+                       temp = await this.client.sendDocument(streamWebHook,file.fileId)
+                    }catch(error){
+                        temp = await this.client.sendVideo(streamWebHook,file.fileId)
+                        console.log('Sending error whem sending file for stream:::',error)
+                    }finally{
+                        setTimeout(async()=>{
+
+                           let url:any = await this.client.getMessage(streamWebHook, Number(temp.id) + 1);
+
+                           if(!url.text){
+                            url = await this.client.getMessage(streamWebHook, Number(temp.id) + 2);
+                           }
+
+                           await ctx.reply('YOUR STREAMING LINK:::',{
+                            replyMarkup:{
+                                inlineKeyboard:[
+                                    [{text: 'Watch ONLINE',url:url.text}]
+                                ]
+                            }
+                           })
+
+                           return
+
+                        },1000)
+                    }
+
+                    
+
+                  //  const hash = String(crypto.randomUUID().replace(/-/g, "_"));
 
                        // await setupCaches(hash, streamUrl);
                     
-                        await ctx.reply('YOUR STREAMING LINK !', {
-                            replyMarkup: {
-                                inlineKeyboard: [
-                                    [{ text: 'Click Here to WATCH', url: `http://109.123.237.36:4000/stream/public/${hash}` }]
-                                ]
-                            }
-                        });
                     
-                    
-                    await ctx.answerCallbackQuery('STREAM MAINTAINANCE', {
-                        alert: true,
-                    })
-
-                   
-
-                    return
-
-
-
-
-
-
-
-                   // fs.writeFileSync('notes.txt',ctx)
-                    console.log(ctx);
-
-                    return
                 }catch(error){
                     console.log('error in callbackSTREAN:::',error)
                 }
