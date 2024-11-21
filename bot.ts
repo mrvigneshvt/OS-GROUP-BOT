@@ -233,7 +233,7 @@ export class Bot extends localStore {
     public async ApiStream (uniqueHash: string, req?: Request, res?: Response,forBot?:boolean) {
         try {
             const streamWebHook = '-1001838739662';
-/*
+
 
             if(forBot){
                 let temp:any
@@ -290,7 +290,7 @@ export class Bot extends localStore {
 
 
             }
-            }*/
+            }
             
         } catch (error) {
             console.log('error in APISTREAM:::', error)
@@ -384,7 +384,7 @@ export class Bot extends localStore {
         }
     }
 
-    /* private async sendFile(data: any) {
+     private async sendFile(data: any) {
          try {
              try {
                  const sendDoc = await await ctx.replyVideo(fileData.fileId, {
@@ -417,7 +417,7 @@ export class Bot extends localStore {
          } catch (error) {
              console.log('error in send FIle:;;;', error)
          }
-     }*/
+     }
     private upiInformation(upiId: string) {
         return `Pay On This Upi Id 👇\nUPI Handle - <code>${upiId}</code>\n\nIMPORTANT - After Payment Send Screenshot Here👇`
     }
@@ -693,7 +693,7 @@ export class Bot extends localStore {
 
             if (callBackData.startsWith('STREAM')) {
                 try{
-                    /*
+                    
                     console.log('coes under callstr')
                     const file = ctx.msg.document;
 
@@ -739,7 +739,7 @@ export class Bot extends localStore {
                    // fs.writeFileSync('notes.txt',ctx)
                     console.log(ctx);
 
-                    return*/
+                    return
                 }catch(error){
                     console.log('error in callbackSTREAN:::',error)
                 }
