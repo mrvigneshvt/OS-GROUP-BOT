@@ -695,6 +695,10 @@ export class Bot extends localStore {
                             url = await this.client.getMessage(streamWebHook, Number(temp.id) + 2);
                            }
 
+                            const hash = String(crypto.randomUUID().replace(/-/g, "_"));
+
+                        await setupCaches(hash, url);
+
                            await ctx.reply('YOUR STREAMING LINK:::',{
                             replyMarkup:{
                                 inlineKeyboard:[
@@ -710,9 +714,7 @@ export class Bot extends localStore {
 
                     
 
-                  //  const hash = String(crypto.randomUUID().replace(/-/g, "_"));
-
-                       // await setupCaches(hash, streamUrl);
+                  
                     
                     
                 }catch(error){
