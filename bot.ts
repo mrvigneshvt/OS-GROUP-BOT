@@ -235,37 +235,7 @@ export class Bot extends localStore {
             const streamWebHook = '-1001838739662';
 
 
-            if(forBot){
-                let temp:any
-                try {
-                    temp = await this.client.sendDocument(streamWebHook, uniqueHash)
-                } catch (error) {
-                    temp = await this.client.sendVideo(streamWebHook, uniqueHash)
-                } finally {
-                    console.log(temp,'teemp')
-                    setTimeout(async () => {
-                        try{
-                            let temp1 = await this.client.getMessage(streamWebHook, Number(temp.id) + 1)
-                            if (!temp.text) {
-                                console.log(temp1,'unavltempppp')
-                                return false
-                            } else if(temp1?.text) {
-                                console.log(temp1.text)
-
-                                return temp1.text
-                            }
-                        }catch(error){
-                            console.log('error in apiSREAM INT::',error)
-                        }
-                       
-                    }, 500)
-    
-                    return
-
-                    
-                }
-
-            }else if(req && res){
+             if(req && res){
                 const fileData = await fileModel.findOne({ fileUniqueId: uniqueHash });
 
             if (!fileData) {
