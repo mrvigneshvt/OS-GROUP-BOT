@@ -83,6 +83,8 @@ async function setUpServer() {
 
                     const streamUrl = localCache[hash]
 
+                    console.log(streamUrl,'//////',localCache)
+
                     const htmlContent = `
                 <!DOCTYPE html>
                 <html lang="en">
