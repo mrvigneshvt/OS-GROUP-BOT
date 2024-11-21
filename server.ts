@@ -81,7 +81,7 @@ async function setUpServer() {
                     console.log('cache availavle')
                     console.log(localCache)
 
-                    const streamUrl = localCache[hash].text
+                    const streamUrl = localCache[hash]
 
                     console.log(streamUrl,'//////',localCache)
 
