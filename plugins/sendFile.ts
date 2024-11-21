@@ -1,6 +1,6 @@
 import { Client , Context} from "@mtkruto/node"
 
-export async function sendFile(ctx: any,client:Client , ads: boolean, fileId: String,cap:String){
+export async function sendContent(ctx: any,client:Client , ads: boolean, fileId: String,cap:String){
     try {
         if(!ads){
             let temp:any 

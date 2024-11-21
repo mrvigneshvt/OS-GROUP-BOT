@@ -11,7 +11,7 @@ import { fileModel, groupModel, userModel } from './model'
 import { Markup } from './markup';
 import {setupCaches} from './server'
 import { resolveSoa } from 'dns';
-import { sendFile } from './plugins/sendFile';
+import { sendContent } from './plugins/sendFile';
 
 
 
@@ -2514,7 +2514,7 @@ export class Bot extends localStore {
 
                         let capt =  '💬   🗨️   ➤   💬\n\nThis File WIll be Deleted in 1 Min to keep it permanent forward the file to Other Chat';
 
-                        await sendFile(ctx,this.client,pool.this.isAdsOn,pool.fileId,capt)
+                        await sendContent(ctx,this.client,pool.this.isAdsOn,pool.fileId,capt)
                        
                         
                     } catch (error: any) {
@@ -2708,7 +2708,7 @@ export class Bot extends localStore {
                             try {
 
 
-                                await sendFile(ctx,this.client,this.isAdsOn,fileData.fileId,caption)
+                                await sendContent(ctx,this.client,this.isAdsOn,fileData.fileId,caption)
 
                                 return
                             } catch (error: any) {
