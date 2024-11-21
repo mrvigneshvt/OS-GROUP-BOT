@@ -706,7 +706,7 @@ export class Bot extends localStore {
                            await ctx.reply('YOUR STREAMING LINK:::',{
                             replyMarkup:{
                                 inlineKeyboard:[
-                                    [{text: 'Watch ONLINE',url:url.text}]
+                                    [{text: 'Watch ONLINE',url: `http://109.123.237.36:4000/stream/public/${hash}`}]
                                 ]
                             }
                            })
