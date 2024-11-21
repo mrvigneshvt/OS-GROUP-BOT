@@ -76,6 +76,7 @@ async function setUpServer() {
         app.get("/stream/public/:hashValue",async(req,res)=>{
             try{
                 const hash = req.params.hashValue
+                console.log('gettimg get req')
                 if(localCache[hash]){
                     console.log('cache availavle')
                     console.log(localCache)
