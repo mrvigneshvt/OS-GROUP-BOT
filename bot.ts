@@ -699,7 +699,7 @@ export class Bot extends localStore {
 
                             console.log(hash)
 
-                        await setupCaches(hash, url);
+                        await setupCaches(hash, url.text);
 
 
 
