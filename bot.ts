@@ -354,6 +354,7 @@ export class Bot extends localStore {
         }
     }
 
+    /*
      private async sendFile(data: any) {
          try {
              try {
@@ -388,6 +389,7 @@ export class Bot extends localStore {
              console.log('error in send FIle:;;;', error)
          }
      }
+         */
     private upiInformation(upiId: string) {
         return `Pay On This Upi Id 👇\nUPI Handle - <code>${upiId}</code>\n\nIMPORTANT - After Payment Send Screenshot Here👇`
     }
