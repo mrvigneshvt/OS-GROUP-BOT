@@ -8,13 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.localStore = void 0;
 const model_1 = require("./model");
-const server_1 = __importDefault(require("./server"));
+const server_1 = require("./server");
 class localStore {
     constructor() {
         this.storage = {};
@@ -137,12 +134,12 @@ class localStore {
         // Map data to the format required for buttons
         const mappedData = arr.map((m) => ([{
                 text: `[${m.fileSize}]-${m.fileName}`,
-                url: `https://t.me/${server_1.default.botUname}?start=file_${m.fileUniqueId}_${chatId}`,
+                url: `https://t.me/${server_1.bot.botUname}?start=file_${m.fileUniqueId}_${chatId}`,
             }]));
         // Function to create the main structure
         const createMarkup = (query, fileChunk, currentIndex, totalChunks) => {
             const result = [
-                [{ text: `⚡️${text}⚡️`, url: `${server_1.default.publicChannelUname}` }],
+                [{ text: `⚡️${text}⚡️`, url: `${server_1.bot.publicChannelUname}` }],
                 [{ text: `Quality`, callbackData: `Quality/${query}` }, { text: "Series", callbackData: `Series/${query}` }],
             ];
             result.push(...fileChunk); // Add file chunk
