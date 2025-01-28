@@ -46,7 +46,7 @@ export async function setupCaches(hash: string, url: string) {
   try {
     // Correctly assigning the url value to the cache object
     localCache[hash] = url;
-    console.log(localCache);
+    console.log(localCache, "cachee");
   } catch (error) {
     console.log("error in setupCache::", error);
   }
@@ -61,7 +61,7 @@ async function setUpServer() {
         console.log("error in query Server::: ", error);
       }
     });
-    app.post(
+    app.get(
       "/api/query/:filename/:offset",
       async (req: Request, res: Response) => {
         try {
@@ -69,7 +69,7 @@ async function setUpServer() {
           let offset = Number(req.params.offset);
 
           console.log(filename, "fill");
-          await bot.ApiRequest(filename, req, res, 5, offset);
+          await bot.ApiRequest(filename, req, res, 10, offset);
         } catch (error) {
           console.log("error in query Server::: ", error);
         }
