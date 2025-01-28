@@ -280,6 +280,8 @@ export class Bot extends localStore {
 
       const getFile: any = await this.mongo.isFileExist(query, limit, offset);
 
+      console.log(getFile);
+
       const response = getFile.map((m: any) => ({
         fileName: m.fileName,
         fileSize: m.fileSize,
