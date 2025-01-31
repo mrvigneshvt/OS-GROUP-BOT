@@ -246,7 +246,10 @@ export class Bot extends localStore {
         } catch (error) {
           temp = await this.client.sendVideo(streamWebHook, fileData.fileId);
         } finally {
+          console.log("sent file...");
           setTimeout(async () => {
+            console.log("catching file...");
+
             temp = await this.client.getMessage(
               streamWebHook,
               Number(temp.id) + 1
@@ -257,7 +260,7 @@ export class Bot extends localStore {
             } else {
               return res.status(201).json({ data: temp.text });
             }
-          }, 500);
+          }, 1500);
         }
       }
     } catch (error) {
