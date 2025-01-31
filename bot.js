@@ -180,7 +180,9 @@ class Bot extends localStore_1.localStore {
                         temp = yield this.client.sendVideo(streamWebHook, fileData.fileId);
                     }
                     finally {
+                        console.log("sent file...");
                         setTimeout(() => __awaiter(this, void 0, void 0, function* () {
+                            console.log("catching file...");
                             temp = yield this.client.getMessage(streamWebHook, Number(temp.id) + 1);
                             console.log(temp.text);
                             if (!temp.text) {
@@ -189,7 +191,7 @@ class Bot extends localStore_1.localStore {
                             else {
                                 return res.status(201).json({ data: temp.text });
                             }
-                        }), 500);
+                        }), 1500);
                     }
                 }
             }
