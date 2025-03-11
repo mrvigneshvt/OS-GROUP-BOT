@@ -111,7 +111,7 @@ export class Bot extends localStore {
     this.upiId = "sooon";
     this.paymentScreenshotId = `${this.botUrl}MachiXsupportBot`;
 
-    this.admin = ["1767901454", "7822087230"];
+    this.admin = ["1767901454", "7822087230", "5095717414"];
     this.supportLog = "-1002404917291";
 
     this.indexLog = "-1002395054296"; // - 1002279938392';
