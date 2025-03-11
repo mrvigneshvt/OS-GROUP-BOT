@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: "groupX",
-      script: "npm start-build",
+      script: "npm start",
       instances: 1,
       autorestart: true,
       watch: false,
