@@ -131,7 +131,7 @@ export class Bot extends localStore {
     this.planImage = "https://ibb.co/3RynpHB";
 
     this.isAdsOn = true;
-    this.apiUrl = "modijiurl.com";
+    this.apiUrl = "api.modijiurl.com";
     this.apiToken = "3290c714693dbd3a812f47289ef8585a802b214c"; //'a80541b1e03491a66635e6b2a1942b5a2af15906';
 
     this.premiumBenefits = `<b>ᴘʀᴇᴍɪᴜᴍ ғᴇᴀᴛᴜʀᴇs ✅\n\n📌 ɴᴏ ɴᴇᴇᴅ ᴛᴏ ᴠᴇʀɪғʏ\n📌 ᴅɪʀᴇᴄᴛ ғɪʟᴇs\n📌 ғᴀsᴛ ᴅᴏᴡɴʟᴏᴀᴅ ᴏᴘᴛɪᴏɴ\n📌 ᴡᴀᴛᴄʜ ᴏɴʟɪɴᴇ ᴏᴘᴛɪᴏɴ\n📌 ᴜɴʟɪᴍɪᴛᴇᴅ ᴍᴏᴠɪᴇs & sᴇʀɪᴇs\n\nThese Benefit You Will Get If You Purchase The Premium Membership 😉</b>${this.publicChannelUserName}\n\n`;
